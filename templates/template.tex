@@ -1,0 +1,205 @@
+%% Template LaTeX pour les documents du cours "Exploitation d'une base de données"
+%% Conçu pour être utilisé avec Pandoc
+\documentclass[a4paper, 11pt]{article}
+
+%% ============================================================================
+%% PACKAGES
+%% ============================================================================
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{calc}
+\usepackage{caption}
+\usepackage{float}
+\usepackage[normalem]{ulem}  % pour le soulignement
+\providecommand{\ul}[1]{\uline{#1}}  % alias pour Pandoc
+\usepackage{etoolbox}
+\usepackage{footmisc}
+
+%% ============================================================================
+%% MISE EN PAGE
+%% ============================================================================
+\geometry{
+  top=2.5cm,
+  bottom=2.5cm,
+  left=2.5cm,
+  right=2.5cm,
+  headheight=14pt
+}
+
+%% ============================================================================
+%% COULEURS
+%% ============================================================================
+\definecolor{linkblue}{HTML}{2B7BB9}
+\definecolor{expectedblue}{HTML}{2B7BB9}
+\definecolor{sectionblue}{HTML}{2B7BB9}
+\definecolor{headerrule}{HTML}{2B7BB9}
+
+%% ============================================================================
+%% HYPERLIENS
+%% ============================================================================
+\hypersetup{
+  colorlinks=true,
+  linkcolor=linkblue,
+  urlcolor=linkblue,
+  citecolor=linkblue,
+  pdftitle={$title$},
+  pdfauthor={$for(authors)$$authors$$sep$, $endfor$}
+}
+
+%% ============================================================================
+%% EN-TÊTE ET PIED DE PAGE
+%% ============================================================================
+\pagestyle{fancy}
+\fancyhf{}
+
+% En-tête
+\fancyhead[L]{\small\textit{$title$ -- $version$}}
+\fancyhead[R]{\raisebox{-2pt}{\includegraphics[height=12pt]{$if(license-badge)$$license-badge$$else$cc-by-nc-sa.png$endif$}}}
+
+% Filet d'en-tête
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{headerrule}\leaders\hrule height \headrulewidth\hfill}}
+
+% Pied de page
+\fancyfoot[C]{\noindent\textcolor{headerrule}{\rule{\textwidth}{0.4pt}}\\[2pt]\small\textit{$course$}\\[-1pt]\small $for(authors)$$authors$$sep$ - $endfor$\hfill $page$/$numpages$}
+
+% Style pour la première page
+\fancypagestyle{firstpage}{
+  \fancyhf{}
+  \fancyfoot[C]{\noindent\textcolor{headerrule}{\rule{\textwidth}{0.4pt}}\\[2pt]\small\textit{$course$}\\[-1pt]\small $for(authors)$$authors$$sep$ - $endfor$\hfill $page$/$numpages$}
+  \renewcommand{\headrulewidth}{0pt}
+}
+
+%% ============================================================================
+%% TITRES
+%% ============================================================================
+% Titre principal (section = #)
+\titleformat{\section}
+  {\Large\bfseries\color{black}}
+  {\thesection}{1em}{}
+\titlespacing*{\section}{0pt}{18pt}{8pt}
+
+% Sous-titres (subsection = ##)  
+\titleformat{\subsection}
+  {\large\bfseries\color{black}}
+  {\thesubsection}{1em}{}
+\titlespacing*{\subsection}{0pt}{14pt}{6pt}
+
+% Sous-sous-titres (subsubsection = ###)
+\titleformat{\subsubsection}
+  {\normalsize\bfseries\color{black}}
+  {\thesubsubsection}{1em}{}
+
+%% ============================================================================
+%% LISTES DE DÉFINITIONS (pour les questions Q1, Q2, etc.)
+%% ============================================================================
+\setlist[description]{
+  style=nextline,
+  labelindent=0em,
+  leftmargin=1.5em,
+  font=\normalfont
+}
+
+%% ============================================================================
+%% TABLEAUX
+%% ============================================================================
+% Réduire légèrement la taille du texte dans les tableaux
+\let\oldlongtable\longtable
+\let\endoldlongtable\endlongtable
+
+%% ============================================================================
+%% STYLES PERSONNALISÉS
+%% ============================================================================
+
+% Texte attendu (résultats en bleu italique)
+\newcommand{\expected}[1]{\textcolor{expectedblue}{\textit{#1}}}
+
+% Clef primaire (souligné)
+\newcommand{\pk}[1]{\underline{#1}}
+
+% Clef étrangère (italique avec #)  
+\newcommand{\fk}[1]{\textit{#1}}
+
+% Clef primaire+étrangère (souligné + italique)
+\newcommand{\pkfk}[1]{\underline{\textit{#1}}}
+
+%% ============================================================================
+%% BLOC REMARQUES
+%% ============================================================================
+\newenvironment{remarques}{%
+  \par\vspace{6pt}\noindent%
+}{%
+  \par\vspace{6pt}%
+}
+
+%% ============================================================================
+%% BLOC SCHÉMA RELATIONNEL
+%% ============================================================================
+\newenvironment{schema-relationnel}{%
+  \par\vspace{6pt}\noindent%
+  \setlength{\parskip}{4pt}%
+}{%
+  \par\vspace{6pt}%
+}
+
+%% ============================================================================
+%% VARIABLES PANDOC
+%% ============================================================================
+\usepackage{lastpage}
+\makeatletter
+\newcommand{\numpages}{\pageref{LastPage}}
+\newcommand{\page}{\thepage}
+\makeatother
+
+% Tight list support (Pandoc)
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+% Support CSL references (Pandoc)
+$if(csl-refs)$
+\newlength{\cslhangindent}
+\setlength{\cslhangindent}{1.5em}
+\newenvironment{CSLReferences}[2]{}{}
+$endif$
+
+%% ============================================================================
+%% DOCUMENT
+%% ============================================================================
+\begin{document}
+
+%% --- PAGE DE TITRE INTÉGRÉE ---
+\thispagestyle{firstpage}
+
+\begin{center}
+  {\Huge\bfseries $title$}\\[6pt]
+  {\Huge\bfseries $version$}\\[16pt]
+
+  $if(license-badge)$
+  \includegraphics[height=30pt]{$license-badge$}\\[12pt]
+  $endif$
+
+  Cette œuvre de $license-holder$ est mise à disposition sous licence Creative Commons\\
+  Attribution - Utilisation non commerciale - Partage dans les mêmes conditions.\\[10pt]
+
+  Document en ligne : \href{https://$website$}{\texttt{$website$}}
+\end{center}
+
+\noindent\textcolor{headerrule}{\rule{\textwidth}{0.4pt}}
+
+\vspace{12pt}
+
+$body$
+
+\end{document}

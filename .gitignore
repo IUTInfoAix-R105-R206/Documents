@@ -1,0 +1,18 @@
+# Fichiers générés
+output/
+
+# LaTeX temporaires
+*.aux
+*.log
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+*.out
+*.toc
+
+# Sauf les PDF des figures (versionnés pour accélérer la CI)
+!docs/*/figures/*.pdf
+
+# OS
+.DS_Store
+Thumbs.db

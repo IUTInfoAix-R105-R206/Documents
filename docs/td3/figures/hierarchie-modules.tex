@@ -1,0 +1,81 @@
+\documentclass[border=8pt]{standalone}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{forest}
+\usepackage{xcolor}
+
+\definecolor{nodegreen}{HTML}{C8E6C8}
+\definecolor{nodeblue}{HTML}{C8DFF0}
+
+\forestset{
+  module tree/.style={
+    for tree={
+      draw=black!50, thick,
+      rectangle, rounded corners=1pt,
+      minimum width=1.3cm, minimum height=0.55cm,
+      font=\footnotesize\sffamily,
+      inner sep=2pt,
+      fill=nodeblue,
+      s sep=4pt,
+      l sep=8pt,
+      edge={draw=black!50, thick},
+      anchor=north,
+      align=center,
+    },
+  },
+  matiere/.style={fill=nodegreen},
+}
+
+\begin{document}
+\begin{forest}
+  module tree
+  [PPNINFO, matiere
+    [PINFO1
+      [OMGL
+        [OMGL1
+          [ACSI
+            [CAS1, matiere]
+            [CAS2, matiere]
+          ]
+        ]
+        [OMGL2
+          [BD, matiere]
+        ]
+      ]
+    ]
+    [PINFO2
+      [ASR
+        [ASR1
+          [SYS, matiere]
+          [RES, matiere]
+        ]
+      ]
+      [AP
+        [AP1
+          [C++, matiere]
+          [ADA, matiere]
+          [PRL, matiere]
+        ]
+      ]
+    ]
+    [PCC1
+      [MATH1, matiere]
+      [LANG1
+        [ANGL1, matiere]
+      ]
+    ]
+    [PCC2
+      [EGO
+        [CPTA, matiere]
+        [MKTG, matiere]
+      ]
+      [MATH2
+        [RO, matiere]
+      ]
+      [LANG2
+        [ANGL2, matiere]
+      ]
+    ]
+  ]
+\end{forest}
+\end{document}

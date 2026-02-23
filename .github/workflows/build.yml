@@ -1,0 +1,58 @@
+# .github/workflows/build.yml
+# Compile les TD en PDF à chaque push et les publie en artefact
+
+name: Build PDFs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'templates/**'
+      - 'Makefile'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'templates/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            pandoc \
+            texlive-latex-base \
+            texlive-latex-extra \
+            texlive-latex-recommended \
+            texlive-fonts-recommended \
+            texlive-lang-french \
+            texlive-pictures \
+            texlive-science \
+            texlive-plain-generic \
+            lmodern
+
+      - name: Build all PDFs
+        run: make all
+
+      - name: Upload PDF artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: td-pdfs
+          path: output/**/*.pdf
+          retention-days: 30
+
+      # Publication sur GitHub Pages (branche main uniquement)
+      - name: Deploy to GitHub Pages
+        if: github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./output
+          destination_dir: pdfs

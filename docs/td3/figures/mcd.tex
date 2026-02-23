@@ -1,0 +1,100 @@
+\documentclass[border=8pt]{standalone}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{tikz}
+\usetikzlibrary{positioning, shapes.geometric}
+\usepackage{xcolor}
+
+\definecolor{entitycolor}{HTML}{C8DFF0}
+\definecolor{assoccolor}{HTML}{C8E6C8}
+
+\tikzset{
+  entity/.style={
+    rectangle, draw=black!60, thick, fill=entitycolor,
+    minimum width=2.5cm, minimum height=1cm,
+    font=\small\sffamily, align=left, inner sep=5pt
+  },
+  entity title/.style={
+    font=\small\sffamily\bfseries
+  },
+  association/.style={
+    diamond, draw=black!60, thick, fill=assoccolor,
+    minimum width=2cm, minimum height=1cm,
+    font=\small\sffamily, inner sep=2pt, aspect=2
+  },
+  card/.style={
+    font=\scriptsize, midway
+  }
+}
+
+\begin{document}
+\begin{tikzpicture}[node distance=2cm and 3cm]
+
+% Entités
+\node[entity] (etudiant) {
+  \textbf{Etudiant}\\[2pt]
+  \underline{numEt}\\
+  nomEt\\
+  prenomEt\\
+  cpEt\\
+  villeEt\\
+  anneeEt\\
+  groupeEt
+};
+
+\node[entity, right=5cm of etudiant, yshift=2cm] (module) {
+  \textbf{Module}\\[2pt]
+  \underline{code}\\
+  libelle\\
+  heureCMPrev\\
+  heureCMReal\\
+  heureTDPrev\\
+  heureTDReal\\
+  discipline\\
+  coefCC\\
+  coefTest
+};
+
+\node[entity, below=4cm of etudiant, xshift=2cm] (professeur) {
+  \textbf{Professeur}\\[2pt]
+  \underline{numProf}\\
+  nomProf\\
+  prenomProf\\
+  adresseProf\\
+  cpProf\\
+  villeProf
+};
+
+% Associations
+\node[association] (note) at ($(etudiant.east)!0.5!(module.west)+(0,1.5)$) {Note};
+\node[association] (enseigne) at ($(etudiant.south)!0.5!(professeur.north)+(1.5,0)$) {Enseigne};
+\node[association, right=1.5cm of module] (rattache) {Rattache};
+\node[association] (assume) at ($(module.south)+(0,-1.5)$) {Assume};
+\node[association, right=1cm of professeur, yshift=-0.5cm] (specialise) {Spécialise};
+
+% Liens Note
+\draw[thick] (etudiant.north east) -- node[card, above left] {0,n} (note);
+\draw[thick] (note) -- node[card, above right] {0,n} (module.north west);
+
+% Attributs Note
+\node[font=\scriptsize, above=0.1cm of note] {moyCC, moyTest};
+
+% Liens Enseigne
+\draw[thick] (etudiant.south) |- node[card, above, pos=0.25] {0,n} (enseigne);
+\draw[thick] (enseigne) -- node[card, above] {0,n} (module.south west |- enseigne.east);
+\draw[thick] (professeur.north) |- node[card, left, pos=0.25] {0,n} (enseigne);
+
+% Liens Rattache (réflexive sur Module)
+\draw[thick] (module.east) -- node[card, above] {0,1} (rattache);
+\draw[thick] (rattache.south) -- ++(0,-0.8) -| node[card, below, pos=0.25] {0,n} (module.south east);
+
+% Liens Assume
+\draw[thick] (module.south) -- node[card, right] {0,1} (assume);
+\draw[thick] (assume) -- node[card, right] {0,n} (professeur.east |- assume.south);
+
+% Liens Spécialise
+\draw[thick] (professeur.east) -| node[card, above, pos=0.25] {0,1} (specialise);
+\draw[thick] (specialise) -- node[card, right] {0,n} (module.south east |- specialise.north);
+
+\end{tikzpicture}
+\end{document}
