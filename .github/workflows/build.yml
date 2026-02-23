@@ -27,6 +27,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Cache apt packages
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/apt/archives
+          key: ${{ runner.os }}-apt-${{ hashFiles('.github/workflows/build.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-apt-
+
       - name: Install dependencies
         run: |
           sudo apt-get update
@@ -54,10 +62,38 @@ jobs:
           retention-days: 30
 
       # Publication sur GitHub Pages (branche main uniquement)
+      - name: Prepare GitHub Pages content
+        if: github.ref == 'refs/heads/main'
+        run: |
+          mkdir -p site/pdfs
+          find output -name "*.pdf" | sort | while read pdf; do
+            cp "$pdf" site/pdfs/
+          done
+          {
+            printf '<!DOCTYPE html>\n<html lang="fr">\n<head>\n'
+            printf '<meta charset="UTF-8">\n'
+            printf '<meta name="viewport" content="width=device-width, initial-scale=1">\n'
+            printf '<title>Exploitation d'\''une base de données — TD</title>\n'
+            printf '<style>\n'
+            printf '  body { font-family: sans-serif; max-width: 640px; margin: 2rem auto; padding: 0 1rem; }\n'
+            printf '  h1 { font-size: 1.4rem; }\n'
+            printf '  ul { list-style: none; padding: 0; }\n'
+            printf '  li { margin: .5rem 0; }\n'
+            printf '  a { text-decoration: none; color: #0366d6; }\n'
+            printf '  a:hover { text-decoration: underline; }\n'
+            printf '</style>\n</head>\n<body>\n'
+            printf '<h1>Exploitation d'\''une base de données</h1>\n'
+            printf '<ul>\n'
+            for pdf in site/pdfs/*.pdf; do
+              name=$(basename "$pdf")
+              printf '  <li><a href="pdfs/%s">%s</a></li>\n' "$name" "$name"
+            done
+            printf '</ul>\n</body>\n</html>\n'
+          } > site/index.html
+
       - name: Deploy to GitHub Pages
         if: github.ref == 'refs/heads/main'
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./output
-          destination_dir: pdfs
+          publish_dir: ./site
