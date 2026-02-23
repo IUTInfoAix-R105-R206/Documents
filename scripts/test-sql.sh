@@ -171,7 +171,7 @@ test_query() {
 
     if [[ -z "$query" ]]; then
         log_skip "$label — requête vide"
-        [[ -n "$REPORT_FILE" ]] && echo "$label;$DBMS;skip;$exp_cols;$exp_rows;0;0" >> "$REPORT_FILE"
+        if [[ -n "$REPORT_FILE" ]]; then echo "$label;$DBMS;skip;$exp_cols;$exp_rows;0;0" >> "$REPORT_FILE"; fi
         return
     fi
 
@@ -179,7 +179,7 @@ test_query() {
     local result
     result=$(run_sql "$query" 2>&1) || {
         log_fail "$label — erreur d'exécution SQL"
-        [[ -n "$REPORT_FILE" ]] && echo "$label;$DBMS;error;$exp_cols;$exp_rows;-1;-1" >> "$REPORT_FILE"
+        if [[ -n "$REPORT_FILE" ]]; then echo "$label;$DBMS;error;$exp_cols;$exp_rows;-1;-1" >> "$REPORT_FILE"; fi
         return
     }
 
@@ -194,7 +194,7 @@ test_query() {
     # Vérifier
     if [[ "$actual_rows" -eq "$exp_rows" && "$actual_cols" -eq "$exp_cols" ]]; then
         log_pass "$label — attendu: $expected, reçu: $actual"
-        [[ -n "$REPORT_FILE" ]] && echo "$label;$DBMS;pass;$exp_cols;$exp_rows;$actual_cols;$actual_rows" >> "$REPORT_FILE"
+        if [[ -n "$REPORT_FILE" ]]; then echo "$label;$DBMS;pass;$exp_cols;$exp_rows;$actual_cols;$actual_rows" >> "$REPORT_FILE"; fi
     else
         local details=""
         if [[ "$actual_cols" -ne "$exp_cols" ]]; then
@@ -204,7 +204,7 @@ test_query() {
             details+=" lignes: attendu=$exp_rows reçu=$actual_rows"
         fi
         log_fail "$label — attendu: $expected, reçu: $actual —$details"
-        [[ -n "$REPORT_FILE" ]] && echo "$label;$DBMS;fail;$exp_cols;$exp_rows;$actual_cols;$actual_rows" >> "$REPORT_FILE"
+        if [[ -n "$REPORT_FILE" ]]; then echo "$label;$DBMS;fail;$exp_cols;$exp_rows;$actual_cols;$actual_rows" >> "$REPORT_FILE"; fi
     fi
 }
 

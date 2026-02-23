@@ -32,6 +32,7 @@ TD_PDFS = $(patsubst docs/%,$(OUTPUT_DIR)/%,$(TD_SOURCES:.md=.pdf))
 	test-sql-postgresql-local test-sql-postgresql-docker \
 	test-sql-sqlite-local    test-sql-sqlite-docker    \
 	test-sql-oracle-local    test-sql-oracle-docker    \
+	test-sql-docker \
 	help
 
 help: ## Affiche cette aide
@@ -149,6 +150,13 @@ test-sql-oracle-docker: ## Exécute les corrections SQL via un conteneur Oracle 
 		-e ORACLE_SID=FREEPDB1 \
 		$$CONTAINER \
 		bash /project/scripts/test-sql.sh oracle
+
+test-sql-docker: ## Exécute les corrections SQL avec tous les SGBD via Docker (continue même en cas d'échec)
+	@rc=0; \
+	$(MAKE) test-sql-postgresql-docker || rc=1; \
+	$(MAKE) test-sql-sqlite-docker     || rc=1; \
+	$(MAKE) test-sql-oracle-docker     || rc=1; \
+	exit $$rc
 
 clean: ## Supprime les fichiers générés
 	rm -rf $(OUTPUT_DIR)
