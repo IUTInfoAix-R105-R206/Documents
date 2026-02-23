@@ -109,7 +109,7 @@ test-sql-sqlite-local: ## Exécute les corrections SQL avec SQLite local (aucune
 	echo "=== Validation des corrections SQL (SQLite local) ==="; \
 	SQLITE_DB=$$(mktemp /tmp/gestion_pedagogique_XXXXXX.db); \
 	trap "rm -f $$SQLITE_DB" EXIT; \
-	./scripts/test-sql.sh sqlite
+	SQLITE_DB=$$SQLITE_DB ./scripts/test-sql.sh sqlite
 
 test-sql-sqlite-docker: ## Exécute les corrections SQL avec SQLite dans un conteneur Docker
 	@command -v docker > /dev/null 2>&1 || { echo "Erreur : Docker n'est pas installé."; exit 1; }; \

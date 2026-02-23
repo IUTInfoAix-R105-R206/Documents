@@ -202,6 +202,19 @@ load_data() {
                 } | sqlplus -s "${ORACLE_USER:-system}/${ORACLE_PASS:-oracle}@${ORACLE_SID:-XE}" > /dev/null 2>&1 || true
             fi
             ;;
+        sqlite)
+            # SQLite : charger en filtrant les constructions non supportées
+            # - CASCADE dans DROP TABLE (non supporté par SQLite)
+            # - ALTER TABLE ADD CONSTRAINT / FOREIGN KEY (non supporté par SQLite)
+            if [[ -f "$DATA_DIR/schema.sql" ]]; then
+                sed 's/ CASCADE//gi' "$DATA_DIR/schema.sql" \
+                    | sqlite3 "${SQLITE_DB:-/tmp/gestion_pedagogique.db}" 2>/dev/null || true
+            fi
+            if [[ -f "$DATA_DIR/insert.sql" ]]; then
+                sed '/ADD CONSTRAINT/,/;/d' "$DATA_DIR/insert.sql" \
+                    | sqlite3 "${SQLITE_DB:-/tmp/gestion_pedagogique.db}" 2>/dev/null || true
+            fi
+            ;;
         *)
             if [[ -f "$DATA_DIR/schema.sql" ]]; then
                 run_sql "$(cat "$DATA_DIR/schema.sql")" > /dev/null 2>&1 || true
