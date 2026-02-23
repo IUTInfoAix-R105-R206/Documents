@@ -75,6 +75,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Cache apt packages
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/apt/archives
+          key: ${{ runner.os }}-apt-sqlite3-${{ hashFiles('.github/workflows/test-sql.yml') }}
+          restore-keys: ${{ runner.os }}-apt-sqlite3-
+
       - name: Install sqlite3
         run: sudo apt-get install -y sqlite3
 
@@ -92,9 +99,66 @@ jobs:
           name: results-sqlite
           path: results-sqlite.csv
 
-  # ── 3. Génération du rapport HTML ──────────────────────────────────────────
+  # ── 3. Tests Oracle ────────────────────────────────────────────────────────
+  # Exécute le script directement dans le container Oracle Free (qui inclut sqlplus),
+  # en montant le workspace — même approche que make test-sql-oracle-docker.
+  test-oracle:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache Oracle Free Docker image
+        uses: actions/cache@v4
+        id: cache-oracle
+        with:
+          path: /tmp/docker-oracle-free.tar
+          key: docker-gvenzl-oracle-free-23.5
+
+      - name: Load or pull Oracle Free image
+        run: |
+          if [ -f /tmp/docker-oracle-free.tar ]; then
+            echo "Chargement de l'image Oracle depuis le cache..."
+            docker load --input /tmp/docker-oracle-free.tar
+          else
+            echo "Téléchargement de l'image Oracle depuis Docker Hub..."
+            docker pull gvenzl/oracle-free:23.5
+            docker save gvenzl/oracle-free:23.5 --output /tmp/docker-oracle-free.tar
+          fi
+
+      - name: Start Oracle Free container
+        run: |
+          docker run -d --name oracle-test \
+            -e ORACLE_PASSWORD=test \
+            -v "$GITHUB_WORKSPACE:/project" \
+            gvenzl/oracle-free:23.5
+          echo "En attente du démarrage d'Oracle Free (~2 min)..."
+          for i in $(seq 1 40); do
+            docker exec oracle-test healthcheck.sh 2>/dev/null && echo "Oracle prêt." && break || true
+            sleep 5
+            printf "  %ds...\r" $((i * 5))
+          done
+          docker exec oracle-test healthcheck.sh || { echo "Timeout : Oracle ne répond pas."; exit 1; }
+
+      - name: Run SQL tests (Oracle)
+        run: |
+          docker exec \
+            -e ORACLE_USER=system \
+            -e ORACLE_PASS=test \
+            -e ORACLE_SID=FREEPDB1 \
+            oracle-test \
+            bash /project/scripts/test-sql.sh oracle --report /project/results-oracle.csv
+
+      - name: Upload Oracle results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: results-oracle
+          path: results-oracle.csv
+
+  # ── 4. Génération du rapport HTML ──────────────────────────────────────────
   generate-report:
-    needs: [test-postgres, test-sqlite]
+    needs: [test-postgres, test-sqlite, test-oracle]
     if: always()
     runs-on: ubuntu-latest
     permissions:
@@ -117,12 +181,20 @@ jobs:
           path: artifacts/
         continue-on-error: true
 
+      - name: Download Oracle results
+        uses: actions/download-artifact@v4
+        with:
+          name: results-oracle
+          path: artifacts/
+        continue-on-error: true
+
       - name: Generate HTML report
         run: |
           mkdir -p site
           python3 scripts/generate-sql-report.py \
             artifacts/results-postgres.csv \
             artifacts/results-sqlite.csv \
+            artifacts/results-oracle.csv \
             --output site/index.html
 
       - name: Upload HTML report

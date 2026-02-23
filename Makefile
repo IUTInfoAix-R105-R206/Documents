@@ -134,7 +134,7 @@ test-sql-oracle-docker: ## Exécute les corrections SQL via un conteneur Oracle 
 		--name $$CONTAINER \
 		-e ORACLE_PASSWORD=test \
 		-v "$(CURDIR):/project" \
-		docker.io/gvenzl/oracle-free:latest > /dev/null; \
+		docker.io/gvenzl/oracle-free:23.5 > /dev/null; \
 	echo "En attente d'Oracle Free..."; \
 	i=0; \
 	until docker exec $$CONTAINER healthcheck.sh > /dev/null 2>&1; do \
