@@ -9,7 +9,6 @@
 \usepackage[T1]{fontenc}
 \usepackage[french]{babel}
 \usepackage{lmodern}
-\usepackage{geometry}
 \usepackage{fancyhdr}
 \usepackage{hyperref}
 \usepackage{xcolor}
@@ -26,17 +25,22 @@
 \providecommand{\ul}[1]{\uline{#1}}  % alias pour Pandoc
 \usepackage{etoolbox}
 \usepackage{footmisc}
+\usepackage{rotating}
+\usepackage{svg}
+\usepackage[framemethod=default]{mdframed}
 
 %% ============================================================================
 %% MISE EN PAGE
 %% ============================================================================
-\geometry{
-  top=2.5cm,
-  bottom=2.5cm,
-  left=2.5cm,
-  right=2.5cm,
-  headheight=14pt
-}
+\usepackage{geometry}
+\geometry{%
+a4paper,
+body={160mm,250mm},
+left=25mm,top=20mm,
+headheight=7mm,headsep=4mm,
+marginparsep=3mm,
+marginparwidth=27mm}
+
 
 %% ============================================================================
 %% COULEURS
@@ -66,19 +70,19 @@
 
 % En-tête
 \fancyhead[L]{\small\textit{$title$ -- $version$}}
-\fancyhead[R]{\raisebox{-2pt}{\includegraphics[height=12pt]{$if(license-badge)$$license-badge$$else$cc-by-nc-sa.png$endif$}}}
+\fancyhead[R]{\raisebox{-2pt}{\includesvg[height=12pt]{$if(license-badge)$$license-badge$$else$cc-by-nc-sa$endif$}}}
 
 % Filet d'en-tête
 \renewcommand{\headrulewidth}{0.4pt}
 \renewcommand{\headrule}{\hbox to\headwidth{\color{headerrule}\leaders\hrule height \headrulewidth\hfill}}
 
 % Pied de page
-\fancyfoot[C]{\noindent\textcolor{headerrule}{\rule{\textwidth}{0.4pt}}\\[2pt]\small\textit{$course$}\\[-1pt]\small $for(authors)$$authors$$sep$ - $endfor$\hfill $page$/$numpages$}
+\fancyfoot[C]{\noindent\textcolor{headerrule}{\rule{\textwidth}{0.4pt}}\\[1pt]\small\textit{$course$}\\[-1pt]\small $for(authors)$$authors$$sep$ - $endfor$\hfill $page$/$numpages$}
 
 % Style pour la première page
 \fancypagestyle{firstpage}{
   \fancyhf{}
-  \fancyfoot[C]{\noindent\textcolor{headerrule}{\rule{\textwidth}{0.4pt}}\\[2pt]\small\textit{$course$}\\[-1pt]\small $for(authors)$$authors$$sep$ - $endfor$\hfill $page$/$numpages$}
+  \fancyfoot[C]{\noindent\textcolor{headerrule}{\rule{\textwidth}{0.4pt}}\\[1pt]\small\textit{$course$}\\[-1pt]\small $for(authors)$$authors$$sep$ - $endfor$\hfill $page$/$numpages$}
   \renewcommand{\headrulewidth}{0pt}
 }
 
@@ -89,35 +93,64 @@
 \titleformat{\section}
   {\Large\bfseries\color{black}}
   {\thesection}{1em}{}
-\titlespacing*{\section}{0pt}{18pt}{8pt}
+\titlespacing*{\section}{0pt}{12pt}{6pt}
 
-% Sous-titres (subsection = ##)  
+% Sous-titres (subsection = ##)
 \titleformat{\subsection}
   {\large\bfseries\color{black}}
   {\thesubsection}{1em}{}
-\titlespacing*{\subsection}{0pt}{14pt}{6pt}
+\titlespacing*{\subsection}{0pt}{10pt}{4pt}
 
 % Sous-sous-titres (subsubsection = ###)
 \titleformat{\subsubsection}
   {\normalsize\bfseries\color{black}}
   {\thesubsubsection}{1em}{}
+\titlespacing*{\subsubsection}{0pt}{8pt}{4pt}
 
 %% ============================================================================
 %% LISTES DE DÉFINITIONS (pour les questions Q1, Q2, etc.)
 %% ============================================================================
 \setlist[description]{
-  style=nextline,
+  style=sameline,
   labelindent=0em,
-  leftmargin=1.5em,
-  font=\normalfont
+  leftmargin=0em,
+  itemsep=8pt,
+  parsep=4pt,
+  labelsep=1em,
+  font=\normalfont\bfseries
 }
+
+% Listes à puces et numérotées (style Word)
+\setlist[itemize]{
+  leftmargin=1.5em,
+  itemsep=3pt,
+  parsep=2pt,
+  topsep=4pt
+}
+
+\setlist[enumerate]{
+  leftmargin=1.5em,
+  itemsep=3pt,
+  parsep=2pt,
+  topsep=4pt
+}
+
+% Espacement global entre les paragraphes (style Word)
+\setlength{\parskip}{6pt}
+\setlength{\parindent}{0pt}
 
 %% ============================================================================
 %% TABLEAUX
 %% ============================================================================
-% Réduire légèrement la taille du texte dans les tableaux
-\let\oldlongtable\longtable
-\let\endoldlongtable\endlongtable
+% Réduire la taille du texte dans les tableaux et améliorer le formatage
+\setlength{\LTpre}{6pt}
+\setlength{\LTpost}{6pt}
+
+% Appliquer \small au début de chaque longtable
+\AtBeginEnvironment{longtable}{\small}
+
+% Améliorer l'espacement dans les tableaux
+\renewcommand{\arraystretch}{1.3}
 
 %% ============================================================================
 %% STYLES PERSONNALISÉS
@@ -138,20 +171,33 @@
 %% ============================================================================
 %% BLOC REMARQUES
 %% ============================================================================
-\newenvironment{remarques}{%
-  \par\vspace{6pt}\noindent%
-}{%
-  \par\vspace{6pt}%
-}
+\newmdenv[
+  backgroundcolor=gray!8,
+  linecolor=gray!50,
+  linewidth=0.6pt,
+  frametitle={\small\bfseries Remarques},
+  frametitlefont=\small\bfseries,
+  frametitlerule=true,
+  frametitlerulecolor=gray!50,
+  frametitlebackgroundcolor=gray!18,
+  frametitleaboveskip=4pt,
+  frametitlebelowskip=4pt,
+  skipabove=8pt,
+  skipbelow=8pt,
+  innertopmargin=6pt,
+  innerbottommargin=6pt,
+  innerleftmargin=8pt,
+  innerrightmargin=8pt,
+]{remarques}
 
 %% ============================================================================
 %% BLOC SCHÉMA RELATIONNEL
 %% ============================================================================
 \newenvironment{schema-relationnel}{%
-  \par\vspace{6pt}\noindent%
-  \setlength{\parskip}{4pt}%
+  \par\vspace{4pt}\noindent%
+  \setlength{\parskip}{3pt}%
 }{%
-  \par\vspace{6pt}%
+  \par\vspace{4pt}%
 }
 
 %% ============================================================================
@@ -166,6 +212,18 @@
 % Tight list support (Pandoc)
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+% Améliorer le formatage des légendes (captions)
+\captionsetup{
+  font=small,
+  labelfont=bf,
+  skip=6pt,
+  position=below
+}
+
+% Réduire l'espacement autour des figures
+\setlength{\intextsep}{8pt}
+\setlength{\textfloatsep}{8pt}
 
 % Support CSL references (Pandoc)
 $if(csl-refs)$
@@ -183,22 +241,24 @@ $endif$
 \thispagestyle{firstpage}
 
 \begin{center}
-  {\Huge\bfseries $title$}\\[6pt]
-  {\Huge\bfseries $version$}\\[16pt]
+  {\Huge\bfseries $title$}\\[4pt]
+  {\Huge\bfseries $version$}\\[12pt]
 
   $if(license-badge)$
-  \includegraphics[height=30pt]{$license-badge$}\\[12pt]
+  \includesvg[height=28pt]{$license-badge$}\\[8pt]
+  $else$
+  \includesvg[height=28pt]{cc-by-nc-sa}\\[8pt]
   $endif$
 
-  Cette œuvre de $license-holder$ est mise à disposition sous licence Creative Commons\\
-  Attribution - Utilisation non commerciale - Partage dans les mêmes conditions.\\[10pt]
+  {\small Cette œuvre de $license-holder$ est mise à disposition sous licence Creative Commons}\\
+  {\small Attribution - Utilisation non commerciale - Partage dans les mêmes conditions.}\\[6pt]
 
-  Document en ligne : \href{https://$website$}{\texttt{$website$}}
+  {\small Document en ligne : \href{https://$website$}{\texttt{$website$}}}
 \end{center}
 
 \noindent\textcolor{headerrule}{\rule{\textwidth}{0.4pt}}
 
-\vspace{12pt}
+\vspace{8pt}
 
 $body$
 

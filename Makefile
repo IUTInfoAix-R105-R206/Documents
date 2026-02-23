@@ -7,14 +7,19 @@ TEMPLATE_DIR = templates
 FILTER_DIR = $(TEMPLATE_DIR)/filters
 OUTPUT_DIR = output
 
+# Version : tag exact si le commit courant en a un, sinon SHA1 court
+GIT_VERSION := $(shell git describe --exact-match --tags HEAD 2>/dev/null || git rev-parse --short HEAD)
+
 # Options Pandoc communes
 PANDOC_OPTS = \
 	--from markdown+footnotes+definition_lists+fenced_divs+bracketed_spans \
 	--pdf-engine=pdflatex \
+	--pdf-engine-opt=-shell-escape \
 	--template=$(TEMPLATE_DIR)/template.tex \
 	--lua-filter=$(FILTER_DIR)/custom-styles.lua \
 	--resource-path=.:$(TEMPLATE_DIR) \
-	--variable=license-badge:$(TEMPLATE_DIR)/cc-by-nc-sa.png \
+	--variable=license-badge:$(TEMPLATE_DIR)/cc-by-nc-sa \
+	--variable=version:$(GIT_VERSION) \
 	--number-sections
 
 # Lister tous les TD
@@ -39,16 +44,24 @@ docs/%/figures/%.pdf: docs/%/figures/%.tex
 TD3_FIGURES = docs/td3/figures/hierarchie-modules.pdf docs/td3/figures/mcd.pdf
 
 docs/td3/figures/hierarchie-modules.pdf: docs/td3/figures/hierarchie-modules.tex
-	cd docs/td3/figures && $(PDFLATEX) -interaction=nonstopmode hierarchie-modules.tex
+	cd docs/td3/figures && TEXINPUTS="$(CURDIR)/$(TEMPLATE_DIR):" $(PDFLATEX) -interaction=nonstopmode hierarchie-modules.tex
 
 docs/td3/figures/mcd.pdf: docs/td3/figures/mcd.tex
-	cd docs/td3/figures && $(PDFLATEX) -interaction=nonstopmode mcd.tex
+	cd docs/td3/figures && TEXINPUTS="$(CURDIR)/$(TEMPLATE_DIR):" $(PDFLATEX) -interaction=nonstopmode mcd.tex
 
 # Compilation TD3
 $(OUTPUT_DIR)/td3/td3-interrogations-sql.pdf: docs/td3/td3-interrogations-sql.md $(TEMPLATE_DIR)/template.tex $(FILTER_DIR)/custom-styles.lua $(TD3_FIGURES)
 	@mkdir -p $(OUTPUT_DIR)/td3
-	cd docs/td3 && $(PANDOC) $(PANDOC_OPTS) \
+	cd docs/td3 && $(PANDOC) \
+		--from markdown+footnotes+definition_lists+fenced_divs+bracketed_spans \
+		--pdf-engine=pdflatex \
+		--pdf-engine-opt=-shell-escape \
+		--template=../../$(TEMPLATE_DIR)/template.tex \
+		--lua-filter=../../$(FILTER_DIR)/custom-styles.lua \
 		--resource-path=.:../../$(TEMPLATE_DIR):figures \
+		--variable=license-badge:../../$(TEMPLATE_DIR)/cc-by-nc-sa \
+		--variable=version:$(GIT_VERSION) \
+		--number-sections \
 		td3-interrogations-sql.md \
 		-o ../../$@
 
