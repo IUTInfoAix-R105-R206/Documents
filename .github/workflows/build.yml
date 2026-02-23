@@ -38,7 +38,8 @@ jobs:
             texlive-pictures \
             texlive-science \
             texlive-plain-generic \
-            lmodern
+            lmodern \
+            inkscape
 
       - name: Build all PDFs
         run: make all
