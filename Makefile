@@ -6,7 +6,8 @@ PDFLATEX = pdflatex
 TEMPLATE_DIR = templates
 FILTER_DIR = $(TEMPLATE_DIR)/filters
 OUTPUT_DIR = output
-DOCKER_PG_CONTAINER = exploitation-bd-test-pg
+DOCKER_PG_CONTAINER     = exploitation-bd-test-pg
+DOCKER_ORACLE_CONTAINER = exploitation-bd-test-oracle
 
 # Version : tag exact si le commit courant en a un, sinon SHA1 court
 GIT_VERSION := $(shell git describe --exact-match --tags HEAD 2>/dev/null || git rev-parse --short HEAD)
@@ -27,7 +28,11 @@ PANDOC_OPTS = \
 TD_SOURCES = $(wildcard docs/*/td*-*.md)
 TD_PDFS = $(patsubst docs/%,$(OUTPUT_DIR)/%,$(TD_SOURCES:.md=.pdf))
 
-.PHONY: all clean td3 figures test-sql test-sql-docker test-sql-sqlite help
+.PHONY: all clean td3 figures \
+	test-sql-postgresql-local test-sql-postgresql-docker \
+	test-sql-sqlite-local    test-sql-sqlite-docker    \
+	test-sql-oracle-local    test-sql-oracle-docker    \
+	help
 
 help: ## Affiche cette aide
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -67,11 +72,11 @@ $(OUTPUT_DIR)/td3/td3-interrogations-sql.pdf: docs/td3/td3-interrogations-sql.md
 		-o ../../$@
 
 # Validation SQL
-test-sql: ## Exécute les corrections SQL (PostgreSQL local requis)
+test-sql-postgresql-local: ## Exécute les corrections SQL avec PostgreSQL local
 	@echo "=== Validation des corrections SQL ==="
 	./scripts/test-sql.sh
 
-test-sql-docker: ## Exécute les corrections SQL via un conteneur PostgreSQL Docker (sans PostgreSQL local requis)
+test-sql-postgresql-docker: ## Exécute les corrections SQL via un conteneur PostgreSQL Docker (sans PostgreSQL local requis)
 	@command -v docker > /dev/null 2>&1 || { echo "Erreur : Docker n'est pas installé."; exit 1; }; \
 	CONTAINER=$(DOCKER_PG_CONTAINER); \
 	trap "docker stop $$CONTAINER > /dev/null 2>&1 || true" EXIT INT TERM; \
@@ -99,12 +104,51 @@ test-sql-docker: ## Exécute les corrections SQL via un conteneur PostgreSQL Doc
 		$$CONTAINER \
 		bash /project/scripts/test-sql.sh postgres
 
-test-sql-sqlite: ## Exécute les corrections SQL avec SQLite (aucune dépendance externe)
+test-sql-sqlite-local: ## Exécute les corrections SQL avec SQLite local (aucune dépendance externe)
 	@command -v sqlite3 > /dev/null 2>&1 || { echo "Erreur : sqlite3 n'est pas installé."; exit 1; }; \
-	echo "=== Validation des corrections SQL (SQLite) ==="; \
+	echo "=== Validation des corrections SQL (SQLite local) ==="; \
 	SQLITE_DB=$$(mktemp /tmp/gestion_pedagogique_XXXXXX.db); \
 	trap "rm -f $$SQLITE_DB" EXIT; \
 	./scripts/test-sql.sh sqlite
+
+test-sql-sqlite-docker: ## Exécute les corrections SQL avec SQLite dans un conteneur Docker
+	@command -v docker > /dev/null 2>&1 || { echo "Erreur : Docker n'est pas installé."; exit 1; }; \
+	echo "=== Validation des corrections SQL (SQLite dans Docker) ==="; \
+	docker run --rm \
+		-v "$(CURDIR):/project" \
+		docker.io/library/debian:bookworm-slim \
+		bash -c "apt-get update -qq && apt-get install -y -qq sqlite3 2>/dev/null && bash /project/scripts/test-sql.sh sqlite"
+
+test-sql-oracle-local: ## Exécute les corrections SQL avec Oracle local (sqlplus requis)
+	@command -v sqlplus > /dev/null 2>&1 || { echo "Erreur : sqlplus n'est pas installé."; exit 1; }; \
+	echo "=== Validation des corrections SQL (Oracle local) ==="; \
+	./scripts/test-sql.sh oracle
+
+test-sql-oracle-docker: ## Exécute les corrections SQL via un conteneur Oracle Free Docker
+	@command -v docker > /dev/null 2>&1 || { echo "Erreur : Docker n'est pas installé."; exit 1; }; \
+	CONTAINER=$(DOCKER_ORACLE_CONTAINER); \
+	trap "docker stop $$CONTAINER > /dev/null 2>&1 || true" EXIT INT TERM; \
+	docker rm -f $$CONTAINER > /dev/null 2>&1 || true; \
+	echo "=== Démarrage du conteneur Oracle Free (peut prendre 1-2 minutes) ==="; \
+	docker run --rm -d \
+		--name $$CONTAINER \
+		-e ORACLE_PASSWORD=test \
+		-v "$(CURDIR):/project" \
+		docker.io/gvenzl/oracle-free:latest > /dev/null; \
+	echo "En attente d'Oracle Free..."; \
+	i=0; \
+	until docker exec $$CONTAINER healthcheck.sh > /dev/null 2>&1; do \
+		sleep 5; i=$$((i+5)); \
+		if [ $$i -ge 180 ]; then echo "Timeout : Oracle Free ne répond pas."; exit 1; fi; \
+		printf "  %ds/180s\r" $$i; \
+	done; \
+	echo "Oracle Free prêt."; \
+	docker exec \
+		-e ORACLE_USER=system \
+		-e ORACLE_PASS=test \
+		-e ORACLE_SID=FREEPDB1 \
+		$$CONTAINER \
+		bash /project/scripts/test-sql.sh oracle
 
 clean: ## Supprime les fichiers générés
 	rm -rf $(OUTPUT_DIR)

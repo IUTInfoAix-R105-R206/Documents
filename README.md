@@ -17,7 +17,7 @@ sudo apt-get install build-essential pandoc texlive-latex-base texlive-latex-ext
 ```
 
 - `inkscape` : requis pour inclure le badge Creative Commons au format SVG lors de la compilation PDF
-- `sqlite3` : requis pour `make test-sql-sqlite` (tests SQL sans PostgreSQL ni Docker)
+- `sqlite3` : requis pour `make test-sql-sqlite-local` (tests SQL sans PostgreSQL ni Docker)
 
 ## Compilation
 
@@ -139,13 +139,22 @@ que le nombre de colonnes (`c:`) et de lignes (`t:`) correspond.
 
 ```bash
 # Avec PostgreSQL local
-make test-sql
+make test-sql-postgresql-local
 
-# Avec SQLite (aucune dépendance externe hormis sqlite3)
-make test-sql-sqlite
+# Avec PostgreSQL dans Docker
+make test-sql-postgresql-docker
 
-# Avec Docker (lance un conteneur PostgreSQL temporaire)
-make test-sql-docker
+# Avec SQLite local (aucune dépendance externe hormis sqlite3)
+make test-sql-sqlite-local
+
+# Avec SQLite dans Docker
+make test-sql-sqlite-docker
+
+# Avec Oracle local (sqlplus requis)
+make test-sql-oracle-local
+
+# Avec Oracle Free dans Docker
+make test-sql-oracle-docker
 ```
 
 ## Contribuer

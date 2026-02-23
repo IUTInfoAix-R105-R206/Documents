@@ -15,9 +15,12 @@ Sources Markdown des sujets de TD du cours **"Exploitation d'une base de donnée
 - `make help` : liste des cibles disponibles
 
 ### Tests SQL
-- `make test-sql` : valide les corrections SQL (PostgreSQL local requis)
-- `make test-sql-sqlite` : valide avec SQLite (aucune dépendance externe hormis `sqlite3`)
-- `make test-sql-docker` : valide avec PostgreSQL via Docker (Docker requis)
+- `make test-sql-postgresql-local` : valide avec PostgreSQL local
+- `make test-sql-postgresql-docker` : valide avec PostgreSQL via Docker
+- `make test-sql-sqlite-local` : valide avec SQLite local (aucune dépendance hormis `sqlite3`)
+- `make test-sql-sqlite-docker` : valide avec SQLite dans Docker (image `debian:bookworm-slim`)
+- `make test-sql-oracle-local` : valide avec Oracle local (`sqlplus` requis)
+- `make test-sql-oracle-docker` : valide avec Oracle Free via Docker (image `gvenzl/oracle-free`, ~1-2 min de démarrage)
 - `./scripts/test-sql.sh postgres` : test avec PostgreSQL
 - `./scripts/test-sql.sh sqlite` : test avec SQLite
 - `./scripts/test-sql.sh oracle` : test avec Oracle (nécessite Oracle installé)
@@ -144,7 +147,7 @@ sudo apt-get install build-essential pandoc texlive-latex-base texlive-latex-ext
 ```
 
 - `inkscape` : requis pour la compilation des SVG via le package LaTeX `svg`
-- `sqlite3` : requis pour `make test-sql-sqlite` (tests SQL sans PostgreSQL ni Docker)
+- `sqlite3` : requis pour `make test-sql-sqlite-local` (tests SQL sans PostgreSQL ni Docker)
 
 Pour les tests SQL : PostgreSQL, SQLite, ou Oracle selon disponibilité.
 
@@ -228,7 +231,7 @@ Les règles de compilation spécifient explicitement tous les paramètres Pandoc
 - **Figures TikZ** : doivent rester en format texte pour être diffables et versionnables
 - **Placement des figures** : ne pas forcer avec `H` ; référencer les figures avec `` `figure~\ref{fig:X}`{=latex} `` dans le texte ; figures larges en `sidewaysfigure`
 - **Output** : ne jamais modifier les fichiers dans `output/` (générés automatiquement par `make`)
-- **Tests** : toute nouvelle requête SQL doit être validée avec `make test-sql` avant commit
+- **Tests** : toute nouvelle requête SQL doit être validée avec `make test-sql-postgresql-local` (ou `make test-sql-sqlite-local`) avant commit
 - **Template LaTeX** : éviter de redéfinir complètement les environnements standards (utiliser `\AtBeginEnvironment` de `etoolbox`)
 
 ## Jeu de données de test
