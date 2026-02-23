@@ -1,100 +1,99 @@
-\documentclass[border=8pt]{standalone}
+\documentclass[border=10pt]{standalone}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage{tikz}
-\usetikzlibrary{positioning, shapes.geometric}
-\usepackage{xcolor}
 
-\definecolor{entitycolor}{HTML}{C8DFF0}
-\definecolor{assoccolor}{HTML}{C8E6C8}
+\usepackage{tikz-er2}
+\usepackage{pgf-umlcd}
 
-\tikzset{
-  entity/.style={
-    rectangle, draw=black!60, thick, fill=entitycolor,
-    minimum width=2.5cm, minimum height=1cm,
-    font=\small\sffamily, align=left, inner sep=5pt
-  },
-  entity title/.style={
-    font=\small\sffamily\bfseries
-  },
-  association/.style={
-    diamond, draw=black!60, thick, fill=assoccolor,
-    minimum width=2cm, minimum height=1cm,
-    font=\small\sffamily, inner sep=2pt, aspect=2
-  },
-  card/.style={
-    font=\scriptsize, midway
-  }
-}
+\usetikzlibrary{decorations.text}
+\usetikzlibrary{decorations.markings}
+\usetikzlibrary{positioning}
+\usetikzlibrary{shadows}
+\usetikzlibrary{backgrounds}
+
+\tikzstyle{every entity} = [top color=white,
+                            bottom color=blue!30,
+                            draw=blue!50!black!100,
+                            drop shadow]
+
+\tikzstyle{every weak entity} = [drop shadow={shadow xshift=.7ex, shadow yshift=-.7ex}]
+
+\tikzstyle{every attribute} = [top color=white,
+                               bottom color=yellow!20,
+                               draw=yellow,
+                               node distance=1cm,
+                               drop shadow]
+
+\tikzstyle{every relationship} = [top color=white,
+                                  bottom color=yellow!20,
+                                  draw=yellow,
+                                  drop shadow]
+
+\tikzstyle{every isa} = [draw=blue!50!black!100]
+
+\tikzset{card/.style={font=\scriptsize\sffamily, fill=white, inner sep=1pt}}
 
 \begin{document}
-\begin{tikzpicture}[node distance=2cm and 3cm]
+\begin{tikzpicture}[node distance=1.96cm, every edge/.style={link}]
 
-% Entités
-\node[entity] (etudiant) {
-  \textbf{Etudiant}\\[2pt]
-  \underline{numEt}\\
-  nomEt\\
-  prenomEt\\
-  cpEt\\
-  villeEt\\
-  anneeEt\\
-  groupeEt
-};
+  \node[entity] (mat) {
+    \textbf{Module}
+    \nodepart{second}
+    \key{code}\\
+    libelle\\
+    heureCMPrev\\
+    heureCMReal\\
+    heureTDPrev\\
+    heureTDReal\\
+    discipline\\
+    coefCC\\
+    coefTest\\
+  };
 
-\node[entity, right=5cm of etudiant, yshift=2cm] (module) {
-  \textbf{Module}\\[2pt]
-  \underline{code}\\
-  libelle\\
-  heureCMPrev\\
-  heureCMReal\\
-  heureTDPrev\\
-  heureTDReal\\
-  discipline\\
-  coefCC\\
-  coefTest
-};
+  \node[entity] (etud) [below right =of mat ] {
+    \textbf{Etudiant}
+    \nodepart{second}
+    \key{numEt}\\
+    nomEt\\
+    prenomEt\\
+    cpEt\\
+    villeEt\\
+    anneeEt\\
+    groupeEt\\
+  };
 
-\node[entity, below=4cm of etudiant, xshift=2cm] (professeur) {
-  \textbf{Professeur}\\[2pt]
-  \underline{numProf}\\
-  nomProf\\
-  prenomProf\\
-  adresseProf\\
-  cpProf\\
-  villeProf
-};
+  \node[entity] (ens) [above right=of etud ] {
+    \textbf{Prof}
+    \nodepart{second}
+    \key{numProf}\\
+    nomProf\\
+    prenomProf\\
+    adresseProf\\
+    cpProf\\
+    villeProf\\
+  };
 
-% Associations
-\node[association] (note) at ($(etudiant.east)!0.5!(module.west)+(0,1.5)$) {Note};
-\node[association] (enseigne) at ($(etudiant.south)!0.5!(professeur.north)+(1.5,0)$) {Enseigne};
-\node[association, right=1.5cm of module] (rattache) {Rattache};
-\node[association] (assume) at ($(module.south)+(0,-1.5)$) {Assume};
-\node[association, right=1cm of professeur, yshift=-0.5cm] (specialise) {Spécialise};
+  \node[relationship] (notation) [below =of mat] {Notation}
+     child {node[attributes] {moyCC\\moyTest}};
+  \draw[link] (mat.south) -- node [pos=0.15, auto] {(0,n)} (notation);
+  \draw[link] (etud.145) -- node [pos=0.3, auto, swap] {(0,n)} (notation);
 
-% Liens Note
-\draw[thick] (etudiant.north east) -- node[card, above left] {0,n} (note);
-\draw[thick] (note) -- node[card, above right] {0,n} (module.north west);
+  \node[relationship] (enseigne) [above=of etud] {Enseignement};
+  \draw[link] (mat.317) -- node [pos=0.4, auto, swap] {(0,n)} (enseigne.west);
+  \draw[link] (ens.205) -- node [pos=0.4, auto] {(0,n)} (enseigne.east);
+  \draw[link] (etud.north) -- node [pos=0.15, auto, swap] {(0,n)} (enseigne);
 
-% Attributs Note
-\node[font=\scriptsize, above=0.1cm of note] {moyCC, moyTest};
+  \node[relationship] (mat_spec) [above=1cm of enseigne] {Spécialiste};
+  \draw[link] (mat.20) -- node [pos=0.3, auto, swap] {(0,n)} (mat_spec);
+  \draw[link] (ens.140) -- node [pos=0.3, auto] {(1,1)} (mat_spec);
 
-% Liens Enseigne
-\draw[thick] (etudiant.south) |- node[card, above, pos=0.25] {0,n} (enseigne);
-\draw[thick] (enseigne) -- node[card, above] {0,n} (module.south west |- enseigne.east);
-\draw[thick] (professeur.north) |- node[card, left, pos=0.25] {0,n} (enseigne);
+  \node[relationship] (resp) [above=1.7cm of mat_spec] {Responsable};
+  \draw[link] (mat.north) |- node [pos=0.15, auto, swap] {(1,1)} (resp);
+  \draw[link] (ens.north) |- node [pos=0.07, auto] {(0,n)} (resp.east);
 
-% Liens Rattache (réflexive sur Module)
-\draw[thick] (module.east) -- node[card, above] {0,1} (rattache);
-\draw[thick] (rattache.south) -- ++(0,-0.8) -| node[card, below, pos=0.25] {0,n} (module.south east);
-
-% Liens Assume
-\draw[thick] (module.south) -- node[card, right] {0,1} (assume);
-\draw[thick] (assume) -- node[card, right] {0,n} (professeur.east |- assume.south);
-
-% Liens Spécialise
-\draw[thick] (professeur.east) -| node[card, above, pos=0.25] {0,1} (specialise);
-\draw[thick] (specialise) -- node[card, right] {0,n} (module.south east |- specialise.north);
+  \node[relationship] (mat_pere) [left=1cm of mat] {A pour père};
+  \draw[link] (mat.150) -| node [pos=0.1, auto, swap] {(1,1)} (mat_pere.north);
+  \draw[link] (mat.210) -| node [pos=0.1, auto] {(0,n)} (mat_pere.south);
 
 \end{tikzpicture}
 \end{document}
