@@ -15,7 +15,9 @@ Sources Markdown des sujets de TD du cours **"Exploitation d'une base de donnée
 - `make help` : liste des cibles disponibles
 
 ### Tests SQL
-- `make test-sql` : valide les corrections SQL (PostgreSQL par défaut)
+- `make test-sql` : valide les corrections SQL (PostgreSQL local requis)
+- `make test-sql-sqlite` : valide avec SQLite (aucune dépendance externe hormis `sqlite3`)
+- `make test-sql-docker` : valide avec PostgreSQL via Docker (Docker requis)
 - `./scripts/test-sql.sh postgres` : test avec PostgreSQL
 - `./scripts/test-sql.sh sqlite` : test avec SQLite
 - `./scripts/test-sql.sh oracle` : test avec Oracle (nécessite Oracle installé)
@@ -138,10 +140,11 @@ Ubuntu/Debian :
 ```bash
 sudo apt-get install build-essential pandoc texlive-latex-base texlive-latex-extra \
   texlive-latex-recommended texlive-fonts-recommended texlive-lang-french \
-  texlive-pictures texlive-science texlive-plain-generic lmodern inkscape
+  texlive-pictures texlive-science texlive-plain-generic lmodern inkscape sqlite3
 ```
 
 - `inkscape` : requis pour la compilation des SVG via le package LaTeX `svg`
+- `sqlite3` : requis pour `make test-sql-sqlite` (tests SQL sans PostgreSQL ni Docker)
 
 Pour les tests SQL : PostgreSQL, SQLite, ou Oracle selon disponibilité.
 

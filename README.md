@@ -13,11 +13,11 @@ sous Git avec intégration continue.
 # Ubuntu / Debian
 sudo apt-get install build-essential pandoc texlive-latex-base texlive-latex-extra \
   texlive-latex-recommended texlive-fonts-recommended texlive-lang-french \
-  texlive-pictures texlive-science texlive-plain-generic lmodern inkscape
+  texlive-pictures texlive-science texlive-plain-generic lmodern inkscape sqlite3
 ```
 
-`inkscape` est requis pour inclure le badge Creative Commons au format SVG lors
-de la compilation PDF.
+- `inkscape` : requis pour inclure le badge Creative Commons au format SVG lors de la compilation PDF
+- `sqlite3` : requis pour `make test-sql-sqlite` (tests SQL sans PostgreSQL ni Docker)
 
 ## Compilation
 
@@ -138,8 +138,14 @@ La CI exécute chaque requête contre un jeu de données PostgreSQL et vérifie
 que le nombre de colonnes (`c:`) et de lignes (`t:`) correspond.
 
 ```bash
-# Lancer les tests localement (nécessite PostgreSQL)
+# Avec PostgreSQL local
 make test-sql
+
+# Avec SQLite (aucune dépendance externe hormis sqlite3)
+make test-sql-sqlite
+
+# Avec Docker (lance un conteneur PostgreSQL temporaire)
+make test-sql-docker
 ```
 
 ## Contribuer

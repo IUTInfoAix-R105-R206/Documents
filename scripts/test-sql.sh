@@ -27,11 +27,12 @@ NC='\033[0m'
 PASS=0
 FAIL=0
 SKIP=0
+FAILED_LABELS=()
 
 # --- Fonctions utilitaires ---
-log_pass() { echo -e "  ${GREEN}✓${NC} $1"; ((PASS++)); }
-log_fail() { echo -e "  ${RED}✗${NC} $1"; ((FAIL++)); }
-log_skip() { echo -e "  ${YELLOW}⊘${NC} $1"; ((SKIP++)); }
+log_pass() { echo -e "  ${GREEN}✓${NC} $1"; ((PASS += 1)); }
+log_fail() { echo -e "  ${RED}✗${NC} $1"; ((FAIL += 1)); FAILED_LABELS+=("$1"); }
+log_skip() { echo -e "  ${YELLOW}⊘${NC} $1"; ((SKIP += 1)); }
 
 # --- Fonction d'exécution SQL selon le SGBD ---
 run_sql() {
@@ -77,6 +78,7 @@ test_correction_file() {
     local in_query=false
 
     while IFS= read -r line || [[ -n "$line" ]]; do
+        line="${line%$'\r'}"  # Supprimer le \r des fins de lignes Windows (CRLF)
         # Détecter les marqueurs de question avec résultats attendus
         # Format: -- Q1 - c:2, t:9
         if [[ "$line" =~ ^--\ Q([0-9]+).*c:([0-9]+).*t:([0-9]+) ]]; then
@@ -138,43 +140,39 @@ test_query() {
 
     # Nettoyer la requête
     query=$(echo "$query" | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//')
-    
+
     if [[ -z "$query" ]]; then
-        log_skip "$label: requête vide"
+        log_skip "$label — requête vide"
         return
     fi
 
     # Exécuter la requête
     local result
     result=$(run_sql "$query" 2>&1) || {
-        log_fail "$label: erreur d'exécution SQL"
+        log_fail "$label — erreur d'exécution SQL"
         return
     }
 
     # Compter lignes et colonnes
-    local actual_rows
+    local actual_rows actual_cols
     actual_rows=$(count_rows "$result")
-    local actual_cols
     actual_cols=$(count_cols "$result")
 
+    local expected="${exp_cols}c × ${exp_rows}r"
+    local actual="${actual_cols}c × ${actual_rows}r"
+
     # Vérifier
-    local status="PASS"
-    local details=""
-
-    if [[ "$actual_rows" -ne "$exp_rows" ]]; then
-        status="FAIL"
-        details+=" rows: expected=$exp_rows got=$actual_rows"
-    fi
-
-    if [[ "$actual_cols" -ne "$exp_cols" ]]; then
-        status="FAIL"
-        details+=" cols: expected=$exp_cols got=$actual_cols"
-    fi
-
-    if [[ "$status" == "PASS" ]]; then
-        log_pass "$label (${exp_cols}c × ${exp_rows}r)"
+    if [[ "$actual_rows" -eq "$exp_rows" && "$actual_cols" -eq "$exp_cols" ]]; then
+        log_pass "$label — attendu: $expected, reçu: $actual"
     else
-        log_fail "$label:$details"
+        local details=""
+        if [[ "$actual_cols" -ne "$exp_cols" ]]; then
+            details+=" colonnes: attendu=$exp_cols reçu=$actual_cols"
+        fi
+        if [[ "$actual_rows" -ne "$exp_rows" ]]; then
+            details+=" lignes: attendu=$exp_rows reçu=$actual_rows"
+        fi
+        log_fail "$label — attendu: $expected, reçu: $actual —$details"
     fi
 }
 
@@ -212,9 +210,28 @@ for correction in "$PROJECT_DIR"/docs/td*/*-correction.sql; do
 done
 
 # Rapport final
+TOTAL=$((PASS + FAIL + SKIP))
+if [[ $TOTAL -gt 0 ]]; then
+    PCT=$(( PASS * 100 / TOTAL ))
+else
+    PCT=0
+fi
+
 echo ""
 echo "═══════════════════════════════════════════════════════"
-echo -e "Résultats: ${GREEN}$PASS passés${NC}, ${RED}$FAIL échoués${NC}, ${YELLOW}$SKIP ignorés${NC}"
+echo -e "  ${GREEN}✓ Passés  :${NC} $PASS"
+echo -e "  ${RED}✗ Échoués :${NC} $FAIL"
+echo -e "  ${YELLOW}⊘ Ignorés :${NC} $SKIP"
+echo    "  ─────────────────────────────────────────────────"
+echo    "  Total     : $TOTAL tests  |  Taux de succès : ${PCT}%"
+
+if [[ ${#FAILED_LABELS[@]} -gt 0 ]]; then
+    echo ""
+    echo -e "  ${RED}Tests échoués :${NC}"
+    for lbl in "${FAILED_LABELS[@]}"; do
+        echo -e "    ${RED}•${NC} $lbl"
+    done
+fi
 echo "═══════════════════════════════════════════════════════"
 
 exit $FAIL
