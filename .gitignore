@@ -16,3 +16,5 @@ output/
 # OS
 .DS_Store
 Thumbs.db
+.vscode/settings.json
+docs/td3/svg-inkscape/*

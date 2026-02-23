@@ -13,8 +13,11 @@ sous Git avec intégration continue.
 # Ubuntu / Debian
 sudo apt-get install build-essential pandoc texlive-latex-base texlive-latex-extra \
   texlive-latex-recommended texlive-fonts-recommended texlive-lang-french \
-  texlive-pictures texlive-science texlive-plain-generic lmodern
+  texlive-pictures texlive-science texlive-plain-generic lmodern inkscape
 ```
+
+`inkscape` est requis pour inclure le badge Creative Commons au format SVG lors
+de la compilation PDF.
 
 ## Compilation
 
@@ -25,11 +28,28 @@ make all
 # Un TD spécifique
 make td3
 
+# Nettoyer les fichiers générés
+make clean
+
 # Aide
 make help
 ```
 
 Les PDF générés sont placés dans `output/`.
+
+## Versionnage automatique
+
+La version affichée dans les PDF est dérivée de git :
+
+- Si le commit courant porte un tag → le tag est utilisé (ex : `V2.0.5`)
+- Sinon → le SHA1 court du commit (ex : `93e26fc`)
+
+Pour publier une nouvelle version :
+
+```bash
+git tag V2.0.5
+make td3   # le PDF affichera "V2.0.5"
+```
 
 ## Structure du projet
 
@@ -39,14 +59,19 @@ Les PDF générés sont placés dans `output/`.
 │   │   ├── td3-interrogations-sql.md   # Sujet (Markdown)
 │   │   ├── td3-correction.sql          # Correction SQL
 │   │   └── figures/                    # Figures (TikZ → PDF)
+│   │       ├── hierarchie-modules.tex  # Arborescence des modules (forest)
+│   │       └── mcd.tex                 # MCD (tikz-er2)
 │   └── shared/
 │       └── data/
 │           ├── schema.sql              # Schéma de la BD de test
 │           └── insert.sql              # Jeu de données
 ├── templates/
 │   ├── template.tex                    # Template LaTeX Pandoc
+│   ├── cc-by-nc-sa.svg                 # Badge CC BY-NC-SA (vectoriel)
+│   ├── tikz-er2.sty                    # Package TikZ pour diagrammes ER
+│   ├── pgf-umlcd.sty                   # Package TikZ UML
 │   └── filters/
-│       └── custom-styles.lua           # Filtre pour styles personnalisés
+│       └── custom-styles.lua           # Filtre Lua pour styles personnalisés
 ├── scripts/
 │   └── test-sql.sh                     # Validation des corrections SQL
 ├── .github/workflows/                  # CI/CD
@@ -86,8 +111,17 @@ Contenu des remarques...
 ### Figures TikZ
 
 Les figures sont des fichiers LaTeX `standalone` dans `figures/`. Elles sont
-compilées séparément et incluses en tant que PDF dans le document principal.
-Cela permet de les modifier et versionner comme du code.
+compilées séparément (avec `TEXINPUTS` pointant vers `templates/` pour charger
+`tikz-er2.sty`) et incluses en tant que PDF dans le document principal.
+
+Les figures larges (MCD, hiérarchie) sont intégrées en mode paysage via
+`\begin{sidewaysfigure}...\end{sidewaysfigure}` directement dans le Markdown.
+
+Les références aux figures utilisent du LaTeX brut inline :
+
+```markdown
+La figure est présentée en `figure~\ref{fig:mcd}`{=latex}.
+```
 
 ## Validation SQL (CI)
 
@@ -113,7 +147,8 @@ make test-sql
 1. Modifier le fichier `.md` du TD concerné
 2. Prévisualiser : `make td3` (par exemple)
 3. Comparer le PDF généré avec la version précédente
-4. Commit + push / merge request
+4. Poser un tag si c'est une nouvelle version : `git tag V2.x.y`
+5. Commit + push / merge request
 
 ## Licence
 
