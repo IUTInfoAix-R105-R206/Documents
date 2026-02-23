@@ -153,4 +153,5 @@ test-sql-oracle-docker: ## Exécute les corrections SQL via un conteneur Oracle 
 clean: ## Supprime les fichiers générés
 	rm -rf $(OUTPUT_DIR)
 	find docs -name "*.aux" -o -name "*.log" -o -name "*.synctex*" | xargs rm -f
-	find docs/*/figures -name "*.aux" -o -name "*.log" | xargs rm -f
+	find docs/*/figures -name "*.aux" -o -name "*.log" -o -name "*.pdf" | xargs rm -f
+	find docs -type d -name "svg-inkscape" | xargs rm -rf
