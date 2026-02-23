@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rapport SQL — Corrections</title>
+  <style>
+    body { font-family: sans-serif; margin: 2rem; color: #333; }
+    h1 { color: #2c3e50; margin-bottom: 0.25rem; }
+    .subtitle { color: #666; margin-bottom: 1.5rem; font-size: 0.9rem; }
+    .stats { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .stat-box { padding: 0.75rem 1.25rem; border-radius: 6px; background: #f0f4f8;
+                 border: 1px solid #d0d7de; text-align: center; min-width: 130px; }
+    table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+    th { background: #2c3e50; color: white; padding: 0.5rem 0.75rem; text-align: left; }
+    td { padding: 0.4rem 0.75rem; border-bottom: 1px solid #e1e4e8; vertical-align: middle; }
+    tr:hover { background: #f6f8fa; }
+    td.label { font-family: monospace; font-size: 0.85rem; }
+    td.expected { color: #666; font-size: 0.85rem; white-space: nowrap; }
+    td.pass { color: #1a7f37; font-weight: bold; text-align: center; }
+    td.fail { color: #cf222e; text-align: center; }
+    td.skip { color: #9a6700; text-align: center; }
+    td.error { color: #cf222e; font-style: italic; text-align: center; font-size: 0.85rem; }
+    td.missing { color: #999; text-align: center; }
+    .pass { color: #1a7f37; }
+    .error { color: #cf222e; }
+    small { font-weight: normal; font-size: 0.8rem; }
+    .footer { margin-top: 1.5rem; color: #666; font-size: 0.8rem; }
+  </style>
+</head>
+<body>
+  <h1>Rapport des corrections SQL</h1>
+  <p class="subtitle">Comparaison des résultats sur 2 SGBD</p>
+  <div class="stats"><div class="stat-box"><strong>PostgreSQL</strong><br><span class="pass">51 ✓</span> / 51 (100%)</div><div class="stat-box"><strong>SQLite</strong><br><span class="pass">46 ✓</span> / 51 (90%)<br><small class="error">5 erreur(s) SQL</small></div></div>
+  <table>
+    <thead><tr><th>Requête</th><th>Attendu</th><th>PostgreSQL</th><th>SQLite</th></tr></thead>
+    <tbody>
+      <tr><td class="label">Q1 - Version algébrique</td><td class="expected">2c × 9r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q1 - Version imbriquée</td><td class="expected">2c × 9r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q1 - Version prédicative</td><td class="expected">2c × 9r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q2 - Version algébrique</td><td class="expected">2c × 2r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q2 - Version imbriquée</td><td class="expected">2c × 2r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q2 - Version prédicative</td><td class="expected">2c × 2r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q3 - Version algébrique</td><td class="expected">1c × 2r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q3 - Version imbriquée</td><td class="expected">1c × 2r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q3 - Version prédicative</td><td class="expected">1c × 2r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q4 - Version algébrique</td><td class="expected">2c × 18r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q4 - Version imbriquée</td><td class="expected">2c × 18r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q4 - Version prédicative</td><td class="expected">2c × 18r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q5 - Version algébrique</td><td class="expected">2c × 12r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q5 - Version imbriquée</td><td class="expected">2c × 12r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q5 - Version prédicative</td><td class="expected">2c × 12r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q6</td><td class="expected">1c × 1r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q7</td><td class="expected">1c × 1r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q8</td><td class="expected">1c × 1r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q9</td><td class="expected">1c × 1r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q10</td><td class="expected">1c × 1r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q11 - V1</td><td class="expected">1c × 1r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q11 - V2</td><td class="expected">1c × 1r</td><td class="pass">✓</td><td class="error">!<br><small>syntaxe non supportée</small></td></tr><tr><td class="label">Q12</td><td class="expected">1c × 1r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q13</td><td class="expected">1c × 2r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q14 - V1</td><td class="expected">2c × 2r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q14 - V2</td><td class="expected">2c × 2r</td><td class="pass">✓</td><td class="error">!<br><small>syntaxe non supportée</small></td></tr><tr><td class="label">Q14 - V3</td><td class="expected">2c × 2r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q15</td><td class="expected">1c × 6r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q16</td><td class="expected">2c × 4r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q17</td><td class="expected">1c × 23r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q18 - V1</td><td class="expected">2c × 4r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q18 - V2</td><td class="expected">2c × 4r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q19 - V1</td><td class="expected">1c × 23r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q19 - V2</td><td class="expected">1c × 23r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q19 - V3</td><td class="expected">1c × 23r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q20 - V1</td><td class="expected">3c × 27r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q20 - V2</td><td class="expected">3c × 27r</td><td class="pass">✓</td><td class="error">!<br><small>syntaxe non supportée</small></td></tr><tr><td class="label">Q20 - V3</td><td class="expected">3c × 27r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q20 - V4</td><td class="expected">3c × 27r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q21 - V1</td><td class="expected">2c × 41r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q21 - V2</td><td class="expected">2c × 41r</td><td class="pass">✓</td><td class="error">!<br><small>syntaxe non supportée</small></td></tr><tr><td class="label">Q21 - V3</td><td class="expected">2c × 41r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q21 - V4</td><td class="expected">2c × 41r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q22 - V1</td><td class="expected">2c × 8r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q22 - V2</td><td class="expected">2c × 8r</td><td class="pass">✓</td><td class="error">!<br><small>syntaxe non supportée</small></td></tr><tr><td class="label">Q22 - V3</td><td class="expected">2c × 8r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q22 - V4</td><td class="expected">2c × 8r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q23</td><td class="expected">2c × 5r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q24</td><td class="expected">2c × 29r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q25</td><td class="expected">4c × 71r</td><td class="pass">✓</td><td class="pass">✓</td></tr><tr><td class="label">Q26</td><td class="expected">2c × 2r</td><td class="pass">✓</td><td class="pass">✓</td></tr>
+    </tbody>
+  </table>
+  <p class="footer">Généré le 2026-02-23 15:09 UTC</p>
+</body>
+</html>
