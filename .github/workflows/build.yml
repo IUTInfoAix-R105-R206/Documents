@@ -92,7 +92,7 @@ jobs:
             printf '</ul>\n'
             printf '<h2>Tests SQL</h2>\n'
             printf '<ul>\n'
-            printf '  <li><a href="reports/">Rapport multi-SGBD (PostgreSQL, SQLite)</a></li>\n'
+            printf '  <li><a href="reports/">Rapport multi-SGBD (PostgreSQL, SQLite, Oracle)</a></li>\n'
             printf '</ul>\n'
             printf '</body>\n</html>\n'
           } > site/index.html
