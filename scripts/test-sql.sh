@@ -43,7 +43,20 @@ run_sql() {
                  -t -A -F'|' -c "$query" 2>/dev/null
             ;;
         oracle)
-            echo "$query" | sqlplus -s "${ORACLE_USER:-system}/${ORACLE_PASS:-oracle}@${ORACLE_SID:-XE}" 2>/dev/null
+            {
+                echo "SET HEADING OFF"
+                echo "SET FEEDBACK OFF"
+                echo "SET PAGESIZE 0"
+                echo "SET NEWPAGE NONE"
+                echo "SET COLSEP '|'"
+                echo "SET LINESIZE 32767"
+                echo "SET TRIMOUT ON"
+                echo "SET TRIMSPOOL ON"
+                echo "SET VERIFY OFF"
+                echo "SET NULL ''"
+                echo "$query;"
+                echo "EXIT"
+            } | sqlplus -s "${ORACLE_USER:-system}/${ORACLE_PASS:-oracle}@${ORACLE_SID:-XE}" 2>/dev/null
             ;;
         sqlite)
             sqlite3 "${SQLITE_DB:-/tmp/gestion_pedagogique.db}" "$query" 2>/dev/null
@@ -53,12 +66,12 @@ run_sql() {
 
 # Compte les lignes d'un résultat (en ignorant les lignes vides)
 count_rows() {
-    echo "$1" | grep -c '[^[:space:]]' 2>/dev/null || echo 0
+    echo "$1" | grep -c '[^[:space:]]' 2>/dev/null || true
 }
 
-# Compte les colonnes d'un résultat
+# Compte les colonnes d'un résultat (en ignorant les lignes vides)
 count_cols() {
-    echo "$1" | head -1 | awk -F'|' '{print NF}'
+    echo "$1" | grep -v '^[[:space:]]*$' | head -1 | awk -F'|' '{print NF}'
 }
 
 # --- Extraction et test des requêtes ---
@@ -179,12 +192,25 @@ test_query() {
 # --- Charger le schéma et les données ---
 load_data() {
     echo "Chargement du schéma et des données..."
-    if [[ -f "$DATA_DIR/schema.sql" ]]; then
-        run_sql "$(cat "$DATA_DIR/schema.sql")" > /dev/null 2>&1 || true
-    fi
-    if [[ -f "$DATA_DIR/insert.sql" ]]; then
-        run_sql "$(cat "$DATA_DIR/insert.sql")" > /dev/null 2>&1 || true
-    fi
+    case "$DBMS" in
+        oracle)
+            local oracle_file="$DATA_DIR/gestion-pedagogique-oracle.sql"
+            if [[ -f "$oracle_file" ]]; then
+                {
+                    cat "$oracle_file"
+                    echo "EXIT"
+                } | sqlplus -s "${ORACLE_USER:-system}/${ORACLE_PASS:-oracle}@${ORACLE_SID:-XE}" > /dev/null 2>&1 || true
+            fi
+            ;;
+        *)
+            if [[ -f "$DATA_DIR/schema.sql" ]]; then
+                run_sql "$(cat "$DATA_DIR/schema.sql")" > /dev/null 2>&1 || true
+            fi
+            if [[ -f "$DATA_DIR/insert.sql" ]]; then
+                run_sql "$(cat "$DATA_DIR/insert.sql")" > /dev/null 2>&1 || true
+            fi
+            ;;
+    esac
     echo "Données chargées."
 }
 
