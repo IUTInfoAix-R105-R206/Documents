@@ -83,12 +83,18 @@ jobs:
             printf '  a:hover { text-decoration: underline; }\n'
             printf '</style>\n</head>\n<body>\n'
             printf '<h1>Exploitation d'\''une base de données</h1>\n'
+            printf '<h2>Sujets de TD</h2>\n'
             printf '<ul>\n'
             for pdf in site/pdfs/*.pdf; do
               name=$(basename "$pdf")
               printf '  <li><a href="pdfs/%s">%s</a></li>\n' "$name" "$name"
             done
-            printf '</ul>\n</body>\n</html>\n'
+            printf '</ul>\n'
+            printf '<h2>Tests SQL</h2>\n'
+            printf '<ul>\n'
+            printf '  <li><a href="reports/">Rapport multi-SGBD (PostgreSQL, SQLite)</a></li>\n'
+            printf '</ul>\n'
+            printf '</body>\n</html>\n'
           } > site/index.html
 
       - name: Deploy to GitHub Pages
@@ -97,3 +103,4 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./site
+          keep_files: true

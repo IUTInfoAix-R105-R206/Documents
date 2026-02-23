@@ -1,19 +1,29 @@
 #!/usr/bin/env bash
 # test-sql.sh — Valide les corrections SQL contre le jeu de données de test
 #
-# Usage: ./scripts/test-sql.sh [--dbms oracle|postgres] [--td TD_NUM]
+# Usage: ./scripts/test-sql.sh [DBMS] [--report FILE] [--td TD_NUM]
 #
 # Ce script :
 # 1. Charge le schéma et les données de test dans la base
 # 2. Extrait les requêtes et les résultats attendus depuis les fichiers de correction
 # 3. Exécute chaque requête et vérifie le nombre de colonnes et de lignes
 # 4. Affiche un rapport de test
+# 5. Écrit un rapport CSV si --report FILE est spécifié
 
 set -euo pipefail
 
 # --- Configuration ---
-DBMS="${1:-postgres}"
-TD_FILTER="${2:-}"
+DBMS="postgres"
+TD_FILTER=""
+REPORT_FILE=""
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --report) REPORT_FILE="$2"; shift 2 ;;
+        --td)     TD_FILTER="$2";   shift 2 ;;
+        *)        DBMS="$1";         shift   ;;
+    esac
+done
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 DATA_DIR="$PROJECT_DIR/docs/shared/data"
@@ -28,6 +38,11 @@ PASS=0
 FAIL=0
 SKIP=0
 FAILED_LABELS=()
+
+# Initialiser le fichier rapport CSV si demandé
+if [[ -n "$REPORT_FILE" ]]; then
+    echo "label;dbms;status;expected_cols;expected_rows;actual_cols;actual_rows" > "$REPORT_FILE"
+fi
 
 # --- Fonctions utilitaires ---
 log_pass() { echo -e "  ${GREEN}✓${NC} $1"; ((PASS += 1)); }
@@ -156,6 +171,7 @@ test_query() {
 
     if [[ -z "$query" ]]; then
         log_skip "$label — requête vide"
+        [[ -n "$REPORT_FILE" ]] && echo "$label;$DBMS;skip;$exp_cols;$exp_rows;0;0" >> "$REPORT_FILE"
         return
     fi
 
@@ -163,6 +179,7 @@ test_query() {
     local result
     result=$(run_sql "$query" 2>&1) || {
         log_fail "$label — erreur d'exécution SQL"
+        [[ -n "$REPORT_FILE" ]] && echo "$label;$DBMS;error;$exp_cols;$exp_rows;-1;-1" >> "$REPORT_FILE"
         return
     }
 
@@ -177,6 +194,7 @@ test_query() {
     # Vérifier
     if [[ "$actual_rows" -eq "$exp_rows" && "$actual_cols" -eq "$exp_cols" ]]; then
         log_pass "$label — attendu: $expected, reçu: $actual"
+        [[ -n "$REPORT_FILE" ]] && echo "$label;$DBMS;pass;$exp_cols;$exp_rows;$actual_cols;$actual_rows" >> "$REPORT_FILE"
     else
         local details=""
         if [[ "$actual_cols" -ne "$exp_cols" ]]; then
@@ -186,6 +204,7 @@ test_query() {
             details+=" lignes: attendu=$exp_rows reçu=$actual_rows"
         fi
         log_fail "$label — attendu: $expected, reçu: $actual —$details"
+        [[ -n "$REPORT_FILE" ]] && echo "$label;$DBMS;fail;$exp_cols;$exp_rows;$actual_cols;$actual_rows" >> "$REPORT_FILE"
     fi
 }
 

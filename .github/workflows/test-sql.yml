@@ -1,7 +1,5 @@
 # .github/workflows/test-sql.yml
-# Valide les corrections SQL contre le jeu de données de test
-# Utilise PostgreSQL pour la CI (léger et rapide)
-# Note : certaines requêtes Oracle-spécifiques peuvent nécessiter des adaptations
+# Valide les corrections SQL sur PostgreSQL et SQLite, puis génère un rapport HTML.
 
 name: Test SQL Corrections
 
@@ -14,6 +12,7 @@ on:
       - 'docs/**/*correction*.sql'
       - 'docs/shared/data/**'
       - 'scripts/test-sql.sh'
+      - 'scripts/generate-sql-report.py'
   pull_request:
     branches: [main]
     paths:
@@ -21,6 +20,8 @@ on:
       - 'docs/shared/data/**'
 
 jobs:
+
+  # ── 1. Tests PostgreSQL ────────────────────────────────────────────────────
   test-postgres:
     runs-on: ubuntu-latest
 
@@ -55,27 +56,87 @@ jobs:
           psql -h localhost -U test -d gestion_pedagogique \
             -f docs/shared/data/insert.sql
 
-      - name: Run SQL tests
+      - name: Run SQL tests (PostgreSQL)
         run: |
           chmod +x scripts/test-sql.sh
-          ./scripts/test-sql.sh postgres
+          ./scripts/test-sql.sh postgres --report results-postgres.csv
 
-  # Job optionnel pour Oracle (nécessite un runner self-hosted ou Oracle Free Tier)
-  # test-oracle:
-  #   runs-on: ubuntu-latest
-  #   services:
-  #     oracle:
-  #       image: gvenzl/oracle-xe:21-slim
-  #       env:
-  #         ORACLE_PASSWORD: oracle
-  #       ports:
-  #         - 1521:1521
-  #       options: >-
-  #         --health-cmd "healthcheck.sh"
-  #         --health-interval 30s
-  #         --health-timeout 10s
-  #         --health-retries 10
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Run SQL tests
-  #       run: ./scripts/test-sql.sh oracle
+      - name: Upload PostgreSQL results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: results-postgres
+          path: results-postgres.csv
+
+  # ── 2. Tests SQLite ────────────────────────────────────────────────────────
+  test-sqlite:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install sqlite3
+        run: sudo apt-get install -y sqlite3
+
+      - name: Run SQL tests (SQLite)
+        # || true : certaines requêtes utilisent des syntaxes non supportées par SQLite
+        run: |
+          chmod +x scripts/test-sql.sh
+          SQLITE_DB=/tmp/gestion_pedagogique.db \
+            ./scripts/test-sql.sh sqlite --report results-sqlite.csv || true
+
+      - name: Upload SQLite results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: results-sqlite
+          path: results-sqlite.csv
+
+  # ── 3. Génération du rapport HTML ──────────────────────────────────────────
+  generate-report:
+    needs: [test-postgres, test-sqlite]
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download PostgreSQL results
+        uses: actions/download-artifact@v4
+        with:
+          name: results-postgres
+          path: artifacts/
+        continue-on-error: true
+
+      - name: Download SQLite results
+        uses: actions/download-artifact@v4
+        with:
+          name: results-sqlite
+          path: artifacts/
+        continue-on-error: true
+
+      - name: Generate HTML report
+        run: |
+          mkdir -p site
+          python3 scripts/generate-sql-report.py \
+            artifacts/results-postgres.csv \
+            artifacts/results-sqlite.csv \
+            --output site/index.html
+
+      - name: Upload HTML report
+        uses: actions/upload-artifact@v4
+        with:
+          name: sql-report
+          path: site/index.html
+          retention-days: 30
+
+      - name: Deploy report to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        if: github.ref == 'refs/heads/main'
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site
+          destination_dir: reports
+          keep_files: true
