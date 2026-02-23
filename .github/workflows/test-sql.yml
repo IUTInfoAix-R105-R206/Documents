@@ -143,6 +143,7 @@ jobs:
       - name: Run SQL tests (Oracle)
         run: |
           docker exec \
+            -u root \
             -e ORACLE_USER=system \
             -e ORACLE_PASS=test \
             -e ORACLE_SID=FREEPDB1 \
