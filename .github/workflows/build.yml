@@ -87,7 +87,7 @@ jobs:
 
             printf '<h2>R1.05 — Introduction aux bases de données et SQL</h2>\n'
             printf '<ul>\n'
-            for pdf in site/pdfs/r1.05/*.pdf 2>/dev/null; do
+            for pdf in site/pdfs/r1.05/*.pdf; do
               [ -f "$pdf" ] || continue
               name=$(basename "$pdf")
               printf '  <li><a href="pdfs/r1.05/%s">%s</a></li>\n' "$name" "$name"
@@ -96,7 +96,7 @@ jobs:
 
             printf '<h2>R2.06 — Exploitation d'\''une base de données</h2>\n'
             printf '<ul>\n'
-            for pdf in site/pdfs/r2.06/*.pdf 2>/dev/null; do
+            for pdf in site/pdfs/r2.06/*.pdf; do
               [ -f "$pdf" ] || continue
               name=$(basename "$pdf")
               printf '  <li><a href="pdfs/r2.06/%s">%s</a></li>\n' "$name" "$name"
