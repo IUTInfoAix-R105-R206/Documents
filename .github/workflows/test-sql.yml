@@ -49,13 +49,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Load schema and test data
-        run: |
-          psql -h localhost -U test -d gestion_pedagogique \
-            -f docs/shared/data/schema.sql
-          psql -h localhost -U test -d gestion_pedagogique \
-            -f docs/shared/data/insert.sql
-
       - name: Run SQL tests (PostgreSQL)
         run: |
           chmod +x scripts/test-sql.sh

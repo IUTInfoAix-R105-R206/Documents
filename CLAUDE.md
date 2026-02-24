@@ -4,13 +4,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Projet
 
-Sources Markdown des sujets de TD du cours **"Exploitation d'une base de données"** (IUT d'Aix-Marseille), compilés en PDF via Pandoc + LaTeX. Le but est de remplacer les sources Word par du Markdown versionné sous Git, avec CI pour la compilation PDF et la validation des corrections SQL.
+Sources Markdown des sujets de TD des cours de bases de données de l'IUT d'Aix-Marseille :
+- **R1.05** — Introduction aux bases de données et SQL (7 TD)
+- **R2.06** — Exploitation d'une base de données (6 TD)
+
+Les sujets sont compilés en PDF via Pandoc + LaTeX. Le but est de remplacer les sources Word par du Markdown versionné sous Git, avec CI pour la compilation PDF et la validation des corrections SQL.
 
 ## Commandes essentielles
 
 ### Compilation PDF
 - `make all` : compile tous les TD en PDF (sortie dans `output/`)
-- `make td3` : compile uniquement le TD3
+- `make r105` : compile tous les TD de R1.05
+- `make r206` : compile tous les TD de R2.06
 - `make clean` : supprime les fichiers générés
 - `make help` : liste des cibles disponibles
 
@@ -26,24 +31,29 @@ Sources Markdown des sujets de TD du cours **"Exploitation d'une base de donnée
 - `./scripts/test-sql.sh oracle` : test avec Oracle (nécessite Oracle installé)
 
 ### Figures
-- Compiler une figure standalone : `cd docs/td3/figures && TEXINPUTS="$(pwd)/../../../templates:" pdflatex mcd.tex`
-- Compiler toutes les figures du TD3 : `make td3` (les compile automatiquement avec `TEXINPUTS` correct)
+- Compiler une figure standalone : `cd docs/r2.06/td3/figures && TEXINPUTS="$(pwd)/../../../../templates:" pdflatex mcd.tex`
+- Compiler toutes les figures du TD3 R2.06 : `make r206` (les compile automatiquement avec `TEXINPUTS` correct)
 
 ## Architecture
 
 ```
-docs/tdN/                    → Sources Markdown + corrections SQL + figures TikZ
-docs/shared/data/            → Schéma et jeu de données partagés (schema.sql, insert.sql)
+docs/r1.05/tdN/              → TD de R1.05 (PDF/docx de référence, corrections SQL pour TD6-TD7)
+docs/r2.06/tdN/              → TD de R2.06 (sources Markdown, corrections SQL, figures TikZ)
+docs/shared/data/            → Bases de données partagées entre ressources
+  gestion-pedagogique/       →   R2.06 TD3/TD5/TD6 (schema.sql, insert.sql, oracle.sql)
+  voyages/                   →   R1.05 TD7, R2.06 TD1-TD2 (schema.sql, insert.sql, oracle.sql)
+  questionnaire/             →   R2.06 TD4 (oracle.sql)
 templates/template.tex       → Template LaTeX Pandoc (reproduit le style des anciens PDF Word)
 templates/filters/           → Filtres Lua pour Pandoc (styles personnalisés)
 templates/cc-by-nc-sa.svg    → Badge licence Creative Commons (vectoriel, source)
-templates/cc-by-nc-sa.png    → Badge licence Creative Commons (raster, fallback)
 templates/tikz-er2.sty       → Package TikZ pour diagrammes ER (ellipses associations)
 templates/pgf-umlcd.sty      → Package TikZ UML class diagrams
-scripts/                     → Scripts utilitaires (test-sql.sh)
+scripts/                     → Scripts utilitaires (test-sql.sh, generate-sql-report.py)
 .github/workflows/           → CI GitHub Actions (build PDF + test SQL)
 output/                      → PDF générés (gitignored)
 ```
+
+Chaque TD avec des corrections SQL possède un lien symbolique `data/` → `../../shared/data/<nom-bd>/` pour que `test-sql.sh` trouve automatiquement le schéma et les données.
 
 ## Pipeline de compilation
 
@@ -182,7 +192,7 @@ Le projet utilise une stratégie multi-SGBD pour équilibrer les contraintes pé
 ## Problèmes résolus et solutions techniques
 
 ### Compilation Pandoc
-- **Chemins relatifs des templates** : Le Makefile utilise `cd docs/td3` avant d'appeler Pandoc, donc les chemins doivent être relatifs à ce répertoire (`../../templates/...`)
+- **Chemins relatifs des templates** : Le Makefile utilise `cd docs/r2.06/td3` avant d'appeler Pandoc, donc les chemins doivent être relatifs à ce répertoire (`../../../templates/...`)
 - **Filtre Lua et caractères spéciaux** :
   - Utiliser `pandoc.utils.stringify()` au lieu de `pandoc.write()` (compatibilité)
   - Échapper les caractères LaTeX spéciaux (`#`, `$`, `%`, `&`, `_`, etc.) avec la fonction `escape_latex()`
@@ -221,7 +231,7 @@ Le template LaTeX reproduit l'apparence d'un document professionnel :
 - **Cardinalités** : placées via des **ancres de bord** des entités (ex: `mat.south`, `etud.north`, `mat.315`) plutôt que le centre, pour que `pos=0.1` tombe dans l'espace entre entité et association — les valeurs `pos` sont ajustées manuellement par lien
 
 ### Makefile
-Les règles de compilation spécifient explicitement tous les paramètres Pandoc au lieu de réutiliser `PANDOC_OPTS`, pour permettre l'ajustement correct des chemins relatifs lors du `cd docs/td3`.
+Les règles de compilation spécifient explicitement tous les paramètres Pandoc au lieu de réutiliser `PANDOC_OPTS`, pour permettre l'ajustement correct des chemins relatifs lors du `cd docs/r2.06/td3`.
 
 ## Règles de développement
 
@@ -234,52 +244,57 @@ Les règles de compilation spécifient explicitement tous les paramètres Pandoc
 - **Tests** : toute nouvelle requête SQL doit être validée avec `make test-sql-postgresql-local` (ou `make test-sql-sqlite-local`) avant commit
 - **Template LaTeX** : éviter de redéfinir complètement les environnements standards (utiliser `\AtBeginEnvironment` de `etoolbox`)
 
-## Jeu de données de test
+## Jeux de données de test
 
-### Contenu
+### Gestion pédagogique (R2.06 TD3/TD5/TD6)
 - **56 étudiants** (27 sans notes, 45 de 2e année, 11 de 1re année)
-- **17 professeurs**
-- **31 modules** (hiérarchie de PPNINFO aux matières feuilles)
-- **121 enseignements**
-- **79 notes**
+- **17 professeurs**, **31 modules**, **121 enseignements**, **79 notes**
+- Fichiers : `docs/shared/data/gestion-pedagogique/{oracle.sql,schema.sql,insert.sql}`
 
-### Fichiers
-- `docs/shared/data/gestion-pedagogique-oracle.sql` — Script Oracle original (schéma + données), référence
-- `docs/shared/data/schema.sql` — Schéma adapté pour PostgreSQL/SQLite
-- `docs/shared/data/insert.sql` — INSERT standards + ALTER TABLE pour la FK circulaire
+### Voyages (R1.05 TD7, R2.06 TD1-TD2)
+- Fichiers : `docs/shared/data/voyages/{oracle.sql,schema.sql,insert.sql}`
+
+### Questionnaire (R2.06 TD4)
+- Fichiers : `docs/shared/data/questionnaire/oracle.sql`
+- Adaptations PostgreSQL/SQLite à créer
 
 ### Validation locale rapide
 ```bash
-# Avec SQLite
-sqlite3 /tmp/test.db < docs/shared/data/schema.sql
-sqlite3 /tmp/test.db < docs/shared/data/insert.sql
+# Avec SQLite (Gestion pédagogique)
+sqlite3 /tmp/test.db < docs/shared/data/gestion-pedagogique/schema.sql
+sqlite3 /tmp/test.db < docs/shared/data/gestion-pedagogique/insert.sql
 sqlite3 /tmp/test.db "SELECT COUNT(*) FROM Etudiant;"  # → 56
 
-# Avec PostgreSQL
-psql -U test -d gestion_pedagogique -f docs/shared/data/schema.sql
-psql -U test -d gestion_pedagogique -f docs/shared/data/insert.sql
+# Avec PostgreSQL (Gestion pédagogique)
+psql -U test -d gestion_pedagogique -f docs/shared/data/gestion-pedagogique/schema.sql
+psql -U test -d gestion_pedagogique -f docs/shared/data/gestion-pedagogique/insert.sql
 ```
 
 ### État de validation
-Toutes les corrections du TD3 (Q1-Q26) ont été validées avec les résultats attendus du sujet.
+Toutes les corrections du TD3 R2.06 (Q1-Q26) ont été validées avec les résultats attendus du sujet.
 
 ## État actuel du projet
 
 ### Fonctionnel
+- ✅ Structure multi-ressource (R1.05, R2.06) avec données partagées
 - ✅ Compilation Markdown → PDF via Pandoc + LaTeX
-- ✅ Makefile avec cibles pour compilation sélective (td3, all, clean)
+- ✅ Makefile avec cibles par ressource (r105, r206, all, clean)
 - ✅ Filtre Lua pour styles personnalisés (pk, fk, pkfk, expected)
 - ✅ Figures TikZ (hiérarchie modules, MCD avec tikz-er2)
-- ✅ Figures larges en paysage avec `sidewaysfigure`
 - ✅ Template LaTeX reproduisant le style professionnel
 - ✅ Badge CC BY-NC-SA vectoriel (SVG via package `svg` + Inkscape)
 - ✅ Versionnage dynamique depuis git (tag ou SHA1 court)
-- ✅ Jeu de données complet (schema.sql + insert.sql)
-- ✅ Script de test SQL fonctionnel (test-sql.sh)
-- ✅ CI GitHub Actions (build PDF + test SQL PostgreSQL)
-- ✅ Corrections SQL validées (Q1-Q26)
+- ✅ Jeux de données complets (gestion-pedagogique, voyages, questionnaire)
+- ✅ Script de test SQL multi-BD fonctionnel (test-sql.sh)
+- ✅ CI GitHub Actions (build PDF + test SQL PostgreSQL/SQLite/Oracle)
+- ✅ Corrections SQL R2.06 TD3 validées (Q1-Q26)
+- ✅ Corrections SQL importées pour tous les TD R2.06 (TD1-TD6)
+- ✅ Corrections SQL importées pour R1.05 TD6-TD7
 
-### À améliorer
-- **CI** : ajouter `inkscape` dans le workflow GitHub Actions (requis pour le badge SVG)
-- **Autres TD** : convertir TD1, TD2, etc. en suivant le même modèle
-- **Tests CI** : valider les workflows GitHub Actions sur un vrai dépôt
+### À faire
+- **Conversions Markdown** : convertir les sujets R2.06 TD2/TD4/TD5/TD6 de Word vers Markdown (même modèle que TD3)
+- **Conversions Markdown R1.05** : convertir les sujets R1.05 de Word/PDF vers Markdown
+- **Annotations c:t manquantes** : compléter les annotations `-- QN - c:X, t:Y` pour R1.05 TD6 (0/28) et R2.06 TD1 (10/20)
+- **Adaptations PostgreSQL/SQLite** : créer schema.sql + insert.sql pour les BD Questionnaire et Airbase
+- **SAE** : intégrer S1.04 et S2.04 quand prêts
+- **Tests CI** : valider les workflows GitHub Actions avec la nouvelle structure

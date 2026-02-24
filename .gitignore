@@ -10,12 +10,14 @@ output/
 *.out
 *.toc
 
-# Sauf les PDF des figures (versionnés pour accélérer la CI)
-!docs/*/figures/*.pdf
+# Figures PDF générées (compilées depuis les .tex)
+docs/**/figures/*.pdf
+
+# Fichiers temporaires Inkscape (générés par le package svg)
+docs/**/svg-inkscape/
 
 # OS
 .DS_Store
 Thumbs.db
 .vscode/settings.json
-docs/td3/svg-inkscape/*
-docs/td3/figures/*.pdf
+Base De Données/

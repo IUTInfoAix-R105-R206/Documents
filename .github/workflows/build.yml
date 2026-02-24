@@ -3,7 +3,7 @@
 
 name: Build PDFs
 
-on:  
+on:
   workflow_dispatch:
 
   push:
@@ -65,31 +65,44 @@ jobs:
       - name: Prepare GitHub Pages content
         if: github.ref == 'refs/heads/main'
         run: |
-          mkdir -p site/pdfs
-          find output -name "*.pdf" | sort | while read pdf; do
-            cp "$pdf" site/pdfs/
-          done
+          mkdir -p site/pdfs/r1.05 site/pdfs/r2.06
+          find output/r1.05 -name "*.pdf" -exec cp {} site/pdfs/r1.05/ \; 2>/dev/null || true
+          find output/r2.06 -name "*.pdf" -exec cp {} site/pdfs/r2.06/ \; 2>/dev/null || true
           {
             printf '<!DOCTYPE html>\n<html lang="fr">\n<head>\n'
             printf '<meta charset="UTF-8">\n'
             printf '<meta name="viewport" content="width=device-width, initial-scale=1">\n'
-            printf '<title>Exploitation d'\''une base de données — TD</title>\n'
+            printf '<title>Bases de données — TD</title>\n'
             printf '<style>\n'
             printf '  body { font-family: sans-serif; max-width: 640px; margin: 2rem auto; padding: 0 1rem; }\n'
             printf '  h1 { font-size: 1.4rem; }\n'
+            printf '  h2 { font-size: 1.2rem; margin-top: 1.5rem; }\n'
+            printf '  h3 { font-size: 1rem; margin-top: 1rem; color: #555; }\n'
             printf '  ul { list-style: none; padding: 0; }\n'
             printf '  li { margin: .5rem 0; }\n'
             printf '  a { text-decoration: none; color: #0366d6; }\n'
             printf '  a:hover { text-decoration: underline; }\n'
             printf '</style>\n</head>\n<body>\n'
-            printf '<h1>Exploitation d'\''une base de données</h1>\n'
-            printf '<h2>Sujets de TD</h2>\n'
+            printf '<h1>Bases de données — Sujets de TD</h1>\n'
+
+            printf '<h2>R1.05 — Introduction aux bases de données et SQL</h2>\n'
             printf '<ul>\n'
-            for pdf in site/pdfs/*.pdf; do
+            for pdf in site/pdfs/r1.05/*.pdf 2>/dev/null; do
+              [ -f "$pdf" ] || continue
               name=$(basename "$pdf")
-              printf '  <li><a href="pdfs/%s">%s</a></li>\n' "$name" "$name"
+              printf '  <li><a href="pdfs/r1.05/%s">%s</a></li>\n' "$name" "$name"
             done
             printf '</ul>\n'
+
+            printf '<h2>R2.06 — Exploitation d'\''une base de données</h2>\n'
+            printf '<ul>\n'
+            for pdf in site/pdfs/r2.06/*.pdf 2>/dev/null; do
+              [ -f "$pdf" ] || continue
+              name=$(basename "$pdf")
+              printf '  <li><a href="pdfs/r2.06/%s">%s</a></li>\n' "$name" "$name"
+            done
+            printf '</ul>\n'
+
             printf '<h2>Tests SQL</h2>\n'
             printf '<ul>\n'
             printf '  <li><a href="reports/">Rapport multi-SGBD (PostgreSQL, SQLite, Oracle)</a></li>\n'

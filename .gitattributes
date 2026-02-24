@@ -16,4 +16,6 @@ Makefile    text eol=lf
 # Binaires — pas de conversion
 *.pdf       binary
 *.png       binary
+*.docx      binary
+*.jpg       binary
 *.svg       text eol=lf

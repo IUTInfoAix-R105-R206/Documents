@@ -1,7 +1,10 @@
-# Exploitation d'une base de données — Sources des TD
+# Bases de données — Sources des TD
 
-Ce dépôt contient les sources des sujets de travaux dirigés du cours
-**Exploitation d'une base de données** (IUT d'Aix-Marseille).
+Ce dépôt contient les sources des sujets de travaux dirigés des cours de
+bases de données de l'IUT d'Aix-Marseille :
+
+- **R1.05** — Introduction aux bases de données et SQL
+- **R2.06** — Exploitation d'une base de données
 
 Les sujets sont écrits en **Markdown** et compilés en **PDF** via
 [Pandoc](https://pandoc.org/) + LaTeX, permettant un workflow collaboratif
@@ -22,11 +25,12 @@ sudo apt-get install build-essential pandoc texlive-latex-base texlive-latex-ext
 ## Compilation
 
 ```bash
-# Tous les TD
+# Tous les TD (R1.05 + R2.06)
 make all
 
-# Un TD spécifique
-make td3
+# Tous les TD d'une ressource
+make r105
+make r206
 
 # Nettoyer les fichiers générés
 make clean
@@ -35,7 +39,7 @@ make clean
 make help
 ```
 
-Les PDF générés sont placés dans `output/`.
+Les PDF générés sont placés dans `output/r1.05/` et `output/r2.06/`.
 
 ## Versionnage automatique
 
@@ -48,37 +52,61 @@ Pour publier une nouvelle version :
 
 ```bash
 git tag V2.0.5
-make td3   # le PDF affichera "V2.0.5"
+make r206   # les PDF afficheront "V2.0.5"
 ```
 
 ## Structure du projet
 
 ```
-├── docs/                      # Sources des TD
-│   ├── td3/
-│   │   ├── td3-interrogations-sql.md   # Sujet (Markdown)
-│   │   ├── td3-correction.sql          # Correction SQL
-│   │   └── figures/                    # Figures (TikZ → PDF)
-│   │       ├── hierarchie-modules.tex  # Arborescence des modules (forest)
-│   │       └── mcd.tex                 # MCD (tikz-er2)
+├── docs/
+│   ├── r1.05/                        # R1.05 — Introduction aux BD et SQL
+│   │   ├── td1/                      #   Algèbre relationnelle
+│   │   ├── td2/                      #   Concepts relationnels
+│   │   ├── td3/                      #   DF et normalisation
+│   │   ├── td4/                      #   Modèle E/A
+│   │   ├── td5/                      #   Conception E/A
+│   │   ├── td6/                      #   Interrogation SQL (BD Airbase)
+│   │   └── td7/                      #   SQL interprété (BD Voyages)
+│   ├── r2.06/                        # R2.06 — Exploitation d'une BD
+│   │   ├── td1/                      #   Opérateurs ensemblistes (BD Voyages)
+│   │   ├── td2/                      #   Jointures externes (BD Voyages)
+│   │   ├── td3/                      #   Interrogations SQL (BD Gestion péda.)
+│   │   │   └── figures/              #   Figures TikZ (MCD, hiérarchie)
+│   │   ├── td4/                      #   Récursif, division (BD Questionnaire)
+│   │   ├── td5/                      #   SQL avancé (BD Gestion péda.)
+│   │   └── td6/                      #   Vues, tables système (BD Gestion péda.)
 │   └── shared/
 │       └── data/
-│           ├── schema.sql              # Schéma de la BD de test
-│           └── insert.sql              # Jeu de données
+│           ├── gestion-pedagogique/  # Schéma partagé R2.06 TD3/TD5/TD6
+│           ├── voyages/              # Schéma partagé R1.05 TD7, R2.06 TD1-TD2
+│           └── questionnaire/        # Schéma R2.06 TD4
 ├── templates/
-│   ├── template.tex                    # Template LaTeX Pandoc
-│   ├── cc-by-nc-sa.svg                 # Badge CC BY-NC-SA (vectoriel)
-│   ├── tikz-er2.sty                    # Package TikZ pour diagrammes ER
-│   ├── pgf-umlcd.sty                   # Package TikZ UML
+│   ├── template.tex                  # Template LaTeX Pandoc
+│   ├── cc-by-nc-sa.svg              # Badge CC BY-NC-SA (vectoriel)
+│   ├── tikz-er2.sty                 # Package TikZ pour diagrammes ER
+│   ├── pgf-umlcd.sty               # Package TikZ UML
 │   └── filters/
-│       └── custom-styles.lua           # Filtre Lua pour styles personnalisés
+│       └── custom-styles.lua        # Filtre Lua pour styles personnalisés
 ├── scripts/
-│   └── test-sql.sh                     # Validation des corrections SQL
-├── .github/workflows/                  # CI/CD
-│   ├── build.yml                       # Compilation des PDF
-│   └── test-sql.yml                    # Tests SQL (PostgreSQL)
+│   ├── test-sql.sh                  # Validation des corrections SQL
+│   └── generate-sql-report.py       # Génération du rapport HTML multi-SGBD
+├── .github/workflows/               # CI/CD
+│   ├── build.yml                    # Compilation des PDF
+│   └── test-sql.yml                 # Tests SQL (PostgreSQL, SQLite, Oracle)
 └── Makefile
 ```
+
+## Bases de données
+
+| Base de données | Utilisée par |
+|---|---|
+| **Airbase** (Pilote, Avion, Vol) | R1.05 TD1-TD2-TD6 |
+| **Voyages** (Voyage, Client, Planning...) | R1.05 TD7, R2.06 TD1-TD2 |
+| **Gestion pédagogique** (Etudiant, Professeur, Module...) | R2.06 TD3-TD5-TD6 |
+| **Questionnaire** (Etudiant, Question, Theme...) | R2.06 TD4 |
+
+Chaque TD avec des corrections SQL possède un lien symbolique `data/` pointant
+vers le sous-dossier approprié dans `docs/shared/data/`.
 
 ## Conventions du Markdown
 
@@ -134,7 +162,7 @@ attendus :
 SELECT ...
 ```
 
-La CI exécute chaque requête contre un jeu de données PostgreSQL et vérifie
+La CI exécute chaque requête contre un jeu de données et vérifie
 que le nombre de colonnes (`c:`) et de lignes (`t:`) correspond.
 
 ```bash
@@ -160,7 +188,7 @@ make test-sql-oracle-docker
 ## Contribuer
 
 1. Modifier le fichier `.md` du TD concerné
-2. Prévisualiser : `make td3` (par exemple)
+2. Prévisualiser : `make r206` (par exemple)
 3. Comparer le PDF généré avec la version précédente
 4. Poser un tag si c'est une nouvelle version : `git tag V2.x.y`
 5. Commit + push / merge request

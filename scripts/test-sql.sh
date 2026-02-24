@@ -92,11 +92,12 @@ count_cols() {
 # --- Extraction et test des requêtes ---
 test_correction_file() {
     local correction_file="$1"
-    local td_name
+    local td_name resource_name
     td_name=$(basename "$(dirname "$correction_file")")
-    
+    resource_name=$(basename "$(dirname "$(dirname "$correction_file")")")
+
     echo ""
-    echo "=== Testing: $td_name ($(basename "$correction_file")) ==="
+    echo "=== Testing: $resource_name/$td_name ($(basename "$correction_file")) ==="
     echo ""
 
     local current_query=""
@@ -270,7 +271,7 @@ echo "╚═══════════════════════�
 
 # Trouver et tester les fichiers de correction (chargement des données par TD)
 LAST_DATA_DIR=""
-for correction in "$PROJECT_DIR"/docs/td*/*-correction.sql; do
+for correction in "$PROJECT_DIR"/docs/r*/td*/*-correction.sql; do
     [[ -f "$correction" ]] || continue
     td_abs_dir=$(dirname "$correction")
     td_name=$(basename "$td_abs_dir")

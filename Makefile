@@ -1,5 +1,6 @@
-# Makefile pour le projet "Exploitation d'une base de données"
+# Makefile pour le projet "Bases de données"
 # Génère les PDF des TD à partir des sources Markdown via Pandoc + LaTeX
+# Ressources : R1.05 (Introduction aux BD et SQL), R2.06 (Exploitation d'une BD)
 
 PANDOC = pandoc
 PDFLATEX = pdflatex
@@ -24,11 +25,11 @@ PANDOC_OPTS = \
 	--variable=version:$(GIT_VERSION) \
 	--number-sections
 
-# Lister tous les TD
-TD_SOURCES = $(wildcard docs/*/td*-*.md)
+# Lister tous les TD (sources Markdown) dans docs/r*/td*/
+TD_SOURCES = $(shell find docs/r*/td* -name 'td*-*.md' 2>/dev/null)
 TD_PDFS = $(patsubst docs/%,$(OUTPUT_DIR)/%,$(TD_SOURCES:.md=.pdf))
 
-.PHONY: all clean td1 td3 figures \
+.PHONY: all clean r105 r206 \
 	test-sql-postgresql-local test-sql-postgresql-docker \
 	test-sql-sqlite-local    test-sql-sqlite-docker    \
 	test-sql-oracle-local    test-sql-oracle-docker    \
@@ -36,67 +37,72 @@ TD_PDFS = $(patsubst docs/%,$(OUTPUT_DIR)/%,$(TD_SOURCES:.md=.pdf))
 	help
 
 help: ## Affiche cette aide
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
-		awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
+		awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 all: $(TD_PDFS) ## Compile tous les TD
 
-td1: $(OUTPUT_DIR)/td1/td1-operateurs-ensemblistes-ldd-lct.pdf ## Compile le TD1
+# --- Cibles par ressource ---
 
-td3: $(OUTPUT_DIR)/td3/td3-interrogations-sql.pdf ## Compile le TD3
+r105: $(filter $(OUTPUT_DIR)/r1.05/%,$(TD_PDFS)) ## Compile tous les TD de R1.05
 
-# Règle générique : compiler les figures standalone LaTeX
-docs/%/figures/%.pdf: docs/%/figures/%.tex
-	cd $(dir $<) && $(PDFLATEX) -interaction=nonstopmode $(notdir $<)
+r206: $(filter $(OUTPUT_DIR)/r2.06/%,$(TD_PDFS)) ## Compile tous les TD de R2.06
 
-# Figures du TD1
-TD1_FIGURES = docs/td1/figures/mcd.pdf
+# ==============================================================================
+# R2.06 — Exploitation d'une base de données
+# ==============================================================================
 
-docs/td1/figures/mcd.pdf: docs/td1/figures/mcd.tex
-	cd docs/td1/figures && TEXINPUTS="$(CURDIR)/$(TEMPLATE_DIR):" $(PDFLATEX) -interaction=nonstopmode mcd.tex
+# --- TD1 : Opérateurs ensemblistes, LDD et LCT (BD Voyages) ---
 
-# Compilation TD1
-$(OUTPUT_DIR)/td1/td1-operateurs-ensemblistes-ldd-lct.pdf: docs/td1/td1-operateurs-ensemblistes-ldd-lct.md $(TEMPLATE_DIR)/template.tex $(FILTER_DIR)/custom-styles.lua $(TD1_FIGURES)
-	@mkdir -p $(OUTPUT_DIR)/td1
-	cd docs/td1 && $(PANDOC) \
+R206_TD1_FIGURES = docs/r2.06/td1/figures/mcd.pdf
+
+docs/r2.06/td1/figures/mcd.pdf: docs/r2.06/td1/figures/mcd.tex
+	cd docs/r2.06/td1/figures && TEXINPUTS="$(CURDIR)/$(TEMPLATE_DIR):" $(PDFLATEX) -interaction=nonstopmode mcd.tex
+
+$(OUTPUT_DIR)/r2.06/td1/td1-operateurs-ensemblistes-ldd-lct.pdf: docs/r2.06/td1/td1-operateurs-ensemblistes-ldd-lct.md $(TEMPLATE_DIR)/template.tex $(FILTER_DIR)/custom-styles.lua $(R206_TD1_FIGURES)
+	@mkdir -p $(OUTPUT_DIR)/r2.06/td1
+	cd docs/r2.06/td1 && $(PANDOC) \
 		--from markdown+footnotes+definition_lists+fenced_divs+bracketed_spans \
 		--pdf-engine=pdflatex \
 		--pdf-engine-opt=-shell-escape \
-		--template=../../$(TEMPLATE_DIR)/template.tex \
-		--lua-filter=../../$(FILTER_DIR)/custom-styles.lua \
-		--resource-path=.:../../$(TEMPLATE_DIR):figures \
-		--variable=license-badge:../../$(TEMPLATE_DIR)/cc-by-nc-sa \
+		--template=../../../$(TEMPLATE_DIR)/template.tex \
+		--lua-filter=../../../$(FILTER_DIR)/custom-styles.lua \
+		--resource-path=.:../../../$(TEMPLATE_DIR):figures \
+		--variable=license-badge:../../../$(TEMPLATE_DIR)/cc-by-nc-sa \
 		--variable=version:$(GIT_VERSION) \
 		--number-sections \
 		td1-operateurs-ensemblistes-ldd-lct.md \
-		-o ../../$@
+		-o ../../../$@
 
-# Figures du TD3
-TD3_FIGURES = docs/td3/figures/hierarchie-modules.pdf docs/td3/figures/mcd.pdf
+# --- TD3 : Interrogations en SQL (BD Gestion pédagogique) ---
 
-docs/td3/figures/hierarchie-modules.pdf: docs/td3/figures/hierarchie-modules.tex
-	cd docs/td3/figures && TEXINPUTS="$(CURDIR)/$(TEMPLATE_DIR):" $(PDFLATEX) -interaction=nonstopmode hierarchie-modules.tex
+R206_TD3_FIGURES = docs/r2.06/td3/figures/hierarchie-modules.pdf docs/r2.06/td3/figures/mcd.pdf
 
-docs/td3/figures/mcd.pdf: docs/td3/figures/mcd.tex
-	cd docs/td3/figures && TEXINPUTS="$(CURDIR)/$(TEMPLATE_DIR):" $(PDFLATEX) -interaction=nonstopmode mcd.tex
+docs/r2.06/td3/figures/hierarchie-modules.pdf: docs/r2.06/td3/figures/hierarchie-modules.tex
+	cd docs/r2.06/td3/figures && TEXINPUTS="$(CURDIR)/$(TEMPLATE_DIR):" $(PDFLATEX) -interaction=nonstopmode hierarchie-modules.tex
 
-# Compilation TD3
-$(OUTPUT_DIR)/td3/td3-interrogations-sql.pdf: docs/td3/td3-interrogations-sql.md $(TEMPLATE_DIR)/template.tex $(FILTER_DIR)/custom-styles.lua $(TD3_FIGURES)
-	@mkdir -p $(OUTPUT_DIR)/td3
-	cd docs/td3 && $(PANDOC) \
+docs/r2.06/td3/figures/mcd.pdf: docs/r2.06/td3/figures/mcd.tex
+	cd docs/r2.06/td3/figures && TEXINPUTS="$(CURDIR)/$(TEMPLATE_DIR):" $(PDFLATEX) -interaction=nonstopmode mcd.tex
+
+$(OUTPUT_DIR)/r2.06/td3/td3-interrogations-sql.pdf: docs/r2.06/td3/td3-interrogations-sql.md $(TEMPLATE_DIR)/template.tex $(FILTER_DIR)/custom-styles.lua $(R206_TD3_FIGURES)
+	@mkdir -p $(OUTPUT_DIR)/r2.06/td3
+	cd docs/r2.06/td3 && $(PANDOC) \
 		--from markdown+footnotes+definition_lists+fenced_divs+bracketed_spans \
 		--pdf-engine=pdflatex \
 		--pdf-engine-opt=-shell-escape \
-		--template=../../$(TEMPLATE_DIR)/template.tex \
-		--lua-filter=../../$(FILTER_DIR)/custom-styles.lua \
-		--resource-path=.:../../$(TEMPLATE_DIR):figures \
-		--variable=license-badge:../../$(TEMPLATE_DIR)/cc-by-nc-sa \
+		--template=../../../$(TEMPLATE_DIR)/template.tex \
+		--lua-filter=../../../$(FILTER_DIR)/custom-styles.lua \
+		--resource-path=.:../../../$(TEMPLATE_DIR):figures \
+		--variable=license-badge:../../../$(TEMPLATE_DIR)/cc-by-nc-sa \
 		--variable=version:$(GIT_VERSION) \
 		--number-sections \
 		td3-interrogations-sql.md \
-		-o ../../$@
+		-o ../../../$@
 
+# ==============================================================================
 # Validation SQL
+# ==============================================================================
+
 test-sql-postgresql-local: ## Exécute les corrections SQL avec PostgreSQL local
 	@echo "=== Validation des corrections SQL ==="
 	./scripts/test-sql.sh
@@ -182,8 +188,12 @@ test-sql-docker: ## Exécute les corrections SQL avec tous les SGBD via Docker (
 	$(MAKE) test-sql-oracle-docker     || rc=1; \
 	exit $$rc
 
+# ==============================================================================
+# Nettoyage
+# ==============================================================================
+
 clean: ## Supprime les fichiers générés
 	rm -rf $(OUTPUT_DIR)
 	find docs -name "*.aux" -o -name "*.log" -o -name "*.synctex*" | xargs rm -f
-	find docs/*/figures -name "*.aux" -o -name "*.log" -o -name "*.pdf" | xargs rm -f
+	find docs -path "*/figures/*.aux" -o -path "*/figures/*.log" -o -path "*/figures/*.pdf" | xargs rm -f
 	find docs -type d -name "svg-inkscape" | xargs rm -rf
