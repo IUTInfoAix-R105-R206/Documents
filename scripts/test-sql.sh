@@ -264,6 +264,19 @@ resolve_data_dir() {
     fi
 }
 
+# Vérifie que les fichiers de données nécessaires existent pour le SGBD courant
+has_data_files() {
+    local data_dir="$1"
+    case "$DBMS" in
+        oracle)
+            [[ -f "$data_dir/oracle.sql" ]]
+            ;;
+        *)
+            [[ -f "$data_dir/schema.sql" ]]
+            ;;
+    esac
+}
+
 # --- Main ---
 echo "╔══════════════════════════════════════════════════════╗"
 echo "║  Test des corrections SQL — SGBD: $DBMS             "
@@ -283,6 +296,15 @@ for correction in "$PROJECT_DIR"/docs/r*/td*/*-correction.sql; do
 
     # Recharger les données si on change de TD (base de données différente)
     current_data_dir=$(resolve_data_dir "$td_abs_dir")
+
+    # Vérifier que les fichiers de données existent pour ce SGBD
+    if ! has_data_files "$current_data_dir"; then
+        resource_name=$(basename "$(dirname "$td_abs_dir")")
+        echo ""
+        echo -e "=== ${YELLOW}Skipping: $resource_name/$td_name — pas de données pour $DBMS${NC} ==="
+        continue
+    fi
+
     if [[ "$current_data_dir" != "$LAST_DATA_DIR" ]]; then
         load_data "$current_data_dir"
         LAST_DATA_DIR="$current_data_dir"
