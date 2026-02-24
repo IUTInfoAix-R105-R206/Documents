@@ -86,7 +86,7 @@ count_rows() {
 
 # Compte les colonnes d'un résultat (en ignorant les lignes vides)
 count_cols() {
-    echo "$1" | grep -v '^[[:space:]]*$' | head -1 | awk -F'|' '{print NF}'
+    echo "$1" | grep -v '^[[:space:]]*$' | head -1 | awk -F'|' '{print NF}' || echo "0"
 }
 
 # --- Extraction et test des requêtes ---
