@@ -12,11 +12,13 @@ on:
       - 'docs/**'
       - 'templates/**'
       - 'Makefile'
+      - '.github/workflows/build.yml'
   pull_request:
     branches: [main]
     paths:
       - 'docs/**'
       - 'templates/**'
+      - '.github/workflows/build.yml'
 
 jobs:
   build:
