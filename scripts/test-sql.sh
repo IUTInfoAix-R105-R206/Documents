@@ -209,11 +209,15 @@ test_query() {
 }
 
 # --- Charger le schéma et les données ---
+# Paramètre optionnel : répertoire de données (défaut : $DATA_DIR)
 load_data() {
-    echo "Chargement du schéma et des données..."
+    local data_dir="${1:-$DATA_DIR}"
+    echo "Chargement du schéma et des données depuis $(basename "$data_dir")..."
     case "$DBMS" in
         oracle)
-            local oracle_file="$DATA_DIR/gestion-pedagogique-oracle.sql"
+            # Cherche oracle.sql dans le répertoire du TD, sinon gestion-pedagogique-oracle.sql dans shared
+            local oracle_file="$data_dir/oracle.sql"
+            [[ -f "$oracle_file" ]] || oracle_file="$data_dir/gestion-pedagogique-oracle.sql"
             if [[ -f "$oracle_file" ]]; then
                 {
                     cat "$oracle_file"
@@ -225,25 +229,38 @@ load_data() {
             # SQLite : charger en filtrant les constructions non supportées
             # - CASCADE dans DROP TABLE (non supporté par SQLite)
             # - ALTER TABLE ADD CONSTRAINT / FOREIGN KEY (non supporté par SQLite)
-            if [[ -f "$DATA_DIR/schema.sql" ]]; then
-                sed 's/ CASCADE//gi' "$DATA_DIR/schema.sql" \
+            if [[ -f "$data_dir/schema.sql" ]]; then
+                sed 's/ CASCADE//gi' "$data_dir/schema.sql" \
                     | sqlite3 "${SQLITE_DB:-/tmp/gestion_pedagogique.db}" 2>/dev/null || true
             fi
-            if [[ -f "$DATA_DIR/insert.sql" ]]; then
-                sed '/ADD CONSTRAINT/,/;/d' "$DATA_DIR/insert.sql" \
+            if [[ -f "$data_dir/insert.sql" ]]; then
+                sed '/ADD CONSTRAINT/,/;/d' "$data_dir/insert.sql" \
                     | sqlite3 "${SQLITE_DB:-/tmp/gestion_pedagogique.db}" 2>/dev/null || true
             fi
             ;;
         *)
-            if [[ -f "$DATA_DIR/schema.sql" ]]; then
-                run_sql "$(cat "$DATA_DIR/schema.sql")" > /dev/null 2>&1 || true
+            if [[ -f "$data_dir/schema.sql" ]]; then
+                run_sql "$(cat "$data_dir/schema.sql")" > /dev/null 2>&1 || true
             fi
-            if [[ -f "$DATA_DIR/insert.sql" ]]; then
-                run_sql "$(cat "$DATA_DIR/insert.sql")" > /dev/null 2>&1 || true
+            if [[ -f "$data_dir/insert.sql" ]]; then
+                run_sql "$(cat "$data_dir/insert.sql")" > /dev/null 2>&1 || true
             fi
             ;;
     esac
     echo "Données chargées."
+}
+
+# Résout le répertoire de données pour un TD :
+# - docs/tdN/data/ si ce répertoire existe
+# - sinon docs/shared/data/
+resolve_data_dir() {
+    local td_dir="$1"
+    local td_data="$td_dir/data"
+    if [[ -d "$td_data" ]]; then
+        echo "$td_data"
+    else
+        echo "$DATA_DIR"
+    fi
 }
 
 # --- Main ---
@@ -251,19 +268,25 @@ echo "╔═══════════════════════�
 echo "║  Test des corrections SQL — SGBD: $DBMS             "
 echo "╚══════════════════════════════════════════════════════╝"
 
-# Charger les données
-load_data
-
-# Trouver et tester les fichiers de correction
+# Trouver et tester les fichiers de correction (chargement des données par TD)
+LAST_DATA_DIR=""
 for correction in "$PROJECT_DIR"/docs/td*/*-correction.sql; do
     [[ -f "$correction" ]] || continue
-    td_dir=$(basename "$(dirname "$correction")")
-    
+    td_abs_dir=$(dirname "$correction")
+    td_name=$(basename "$td_abs_dir")
+
     # Filtrer si demandé
-    if [[ -n "$TD_FILTER" && "$td_dir" != "$TD_FILTER" ]]; then
+    if [[ -n "$TD_FILTER" && "$td_name" != "$TD_FILTER" ]]; then
         continue
     fi
-    
+
+    # Recharger les données si on change de TD (base de données différente)
+    current_data_dir=$(resolve_data_dir "$td_abs_dir")
+    if [[ "$current_data_dir" != "$LAST_DATA_DIR" ]]; then
+        load_data "$current_data_dir"
+        LAST_DATA_DIR="$current_data_dir"
+    fi
+
     test_correction_file "$correction"
 done
 

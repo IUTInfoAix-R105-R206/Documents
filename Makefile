@@ -28,7 +28,7 @@ PANDOC_OPTS = \
 TD_SOURCES = $(wildcard docs/*/td*-*.md)
 TD_PDFS = $(patsubst docs/%,$(OUTPUT_DIR)/%,$(TD_SOURCES:.md=.pdf))
 
-.PHONY: all clean td3 figures \
+.PHONY: all clean td1 td3 figures \
 	test-sql-postgresql-local test-sql-postgresql-docker \
 	test-sql-sqlite-local    test-sql-sqlite-docker    \
 	test-sql-oracle-local    test-sql-oracle-docker    \
@@ -41,11 +41,35 @@ help: ## Affiche cette aide
 
 all: $(TD_PDFS) ## Compile tous les TD
 
+td1: $(OUTPUT_DIR)/td1/td1-operateurs-ensemblistes-ldd-lct.pdf ## Compile le TD1
+
 td3: $(OUTPUT_DIR)/td3/td3-interrogations-sql.pdf ## Compile le TD3
 
 # Règle générique : compiler les figures standalone LaTeX
 docs/%/figures/%.pdf: docs/%/figures/%.tex
 	cd $(dir $<) && $(PDFLATEX) -interaction=nonstopmode $(notdir $<)
+
+# Figures du TD1
+TD1_FIGURES = docs/td1/figures/mcd.pdf
+
+docs/td1/figures/mcd.pdf: docs/td1/figures/mcd.tex
+	cd docs/td1/figures && TEXINPUTS="$(CURDIR)/$(TEMPLATE_DIR):" $(PDFLATEX) -interaction=nonstopmode mcd.tex
+
+# Compilation TD1
+$(OUTPUT_DIR)/td1/td1-operateurs-ensemblistes-ldd-lct.pdf: docs/td1/td1-operateurs-ensemblistes-ldd-lct.md $(TEMPLATE_DIR)/template.tex $(FILTER_DIR)/custom-styles.lua $(TD1_FIGURES)
+	@mkdir -p $(OUTPUT_DIR)/td1
+	cd docs/td1 && $(PANDOC) \
+		--from markdown+footnotes+definition_lists+fenced_divs+bracketed_spans \
+		--pdf-engine=pdflatex \
+		--pdf-engine-opt=-shell-escape \
+		--template=../../$(TEMPLATE_DIR)/template.tex \
+		--lua-filter=../../$(FILTER_DIR)/custom-styles.lua \
+		--resource-path=.:../../$(TEMPLATE_DIR):figures \
+		--variable=license-badge:../../$(TEMPLATE_DIR)/cc-by-nc-sa \
+		--variable=version:$(GIT_VERSION) \
+		--number-sections \
+		td1-operateurs-ensemblistes-ldd-lct.md \
+		-o ../../$@
 
 # Figures du TD3
 TD3_FIGURES = docs/td3/figures/hierarchie-modules.pdf docs/td3/figures/mcd.pdf

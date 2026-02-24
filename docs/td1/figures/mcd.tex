@@ -1,0 +1,92 @@
+\documentclass[border=10pt]{standalone}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage{tikz-er2}
+
+\usetikzlibrary{decorations.text}
+\usetikzlibrary{decorations.markings}
+\usetikzlibrary{positioning}
+\usetikzlibrary{shadows}
+\usetikzlibrary{backgrounds}
+
+\tikzstyle{every entity} = [top color=white,
+                            bottom color=blue!30,
+                            draw=blue!50!black!100,
+                            drop shadow]
+
+\tikzstyle{every weak entity} = [drop shadow={shadow xshift=.7ex, shadow yshift=-.7ex}]
+
+\tikzstyle{every attribute} = [top color=white,
+                               bottom color=yellow!20,
+                               draw=yellow,
+                               node distance=1cm,
+                               drop shadow]
+
+\tikzstyle{every relationship} = [top color=white,
+                                  bottom color=yellow!20,
+                                  draw=yellow,
+                                  drop shadow]
+
+\tikzstyle{every isa} = [draw=blue!50!black!100]
+
+\tikzset{card/.style={font=\scriptsize\sffamily, fill=white, inner sep=1pt}}
+
+\begin{document}
+\begin{tikzpicture}[node distance=2cm, every edge/.style={link}]
+
+  \node[entity] (voyage) {
+    \textbf{Voyage}
+    \nodepart{second}
+    \key{idV}\\
+    villeArr\\
+    paysArr\\
+    villeDep\\
+    hotel\\
+    nbEtoiles\\
+    duree\\
+  };
+
+  \node[entity] (optionv) [right=9cm of voyage] {
+    \textbf{OptionV}
+    \nodepart{second}
+    \key{code}\\
+    libelle\\
+  };
+
+  \node[relationship] (carac) [right=3.8cm of voyage] {Carac}
+    child {node[attributes] {prix}};
+  \draw[link] (voyage.east) -- node [pos=0.2, above] {(0,n)} (carac.west);
+  \draw[link] (carac.east) -- node [pos=0.8, above] {(0,n)} (optionv.west);
+
+  \node[entity] (planning) [below=7cm of voyage] {
+    \textbf{Planning}
+    \nodepart{second}
+    \key{dateDep}\\
+    tarif\\
+  };
+
+  \node[entity] (client) [right=9cm of planning] {
+    \textbf{Client}
+    \nodepart{second}
+    \key{numCl}\\
+    nom\\
+    prenom\\
+    adresse\\
+    cp\\
+    ville\\
+    categorie\\
+  };
+
+  \node[relationship] (assoc_a) [left=1.8cm of voyage, yshift=-3.5cm]
+    {A (n$^\circ$1)};
+  \draw[link] (voyage.220) -- node [pos=0.2, right] {(0,n)} (assoc_a.north);
+  \draw[link] (assoc_a.south) -- node [pos=0.8, right] {(1,1(R))} (planning.150);
+
+  \node[relationship] (reservation) [below=7cm of carac] {Réservation}
+    child {node[attributes] {nbPers\\dateRes}};
+  \draw[link] (planning.east) -- node [pos=0.2, above] {(0,n)} (reservation.west);
+  \draw[link] (reservation.east) -- node [pos=0.8, above] {(0,n)} (client.west);
+
+\end{tikzpicture}
+\end{document}
