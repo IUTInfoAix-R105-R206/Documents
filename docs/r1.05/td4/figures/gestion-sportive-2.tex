@@ -1,0 +1,79 @@
+\documentclass[border=10pt]{standalone}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage{tikz-er2}
+
+\usetikzlibrary{decorations.text}
+\usetikzlibrary{decorations.markings}
+\usetikzlibrary{positioning}
+\usetikzlibrary{shadows}
+\usetikzlibrary{backgrounds}
+
+\tikzstyle{every entity} = [top color=white,
+                            bottom color=blue!30,
+                            draw=blue!50!black!100,
+                            drop shadow]
+
+\tikzstyle{every weak entity} = [drop shadow={shadow xshift=.7ex, shadow yshift=-.7ex}]
+
+\tikzstyle{every attribute} = [top color=white,
+                               bottom color=yellow!20,
+                               draw=yellow,
+                               node distance=1cm,
+                               drop shadow]
+
+\tikzstyle{every relationship} = [top color=white,
+                                  bottom color=yellow!20,
+                                  draw=yellow,
+                                  drop shadow]
+
+\tikzstyle{every isa} = [draw=blue!50!black!100]
+
+\tikzset{card/.style={font=\scriptsize\sffamily, fill=white, inner sep=1pt}}
+
+\begin{document}
+\begin{tikzpicture}[node distance=1.5cm, every edge/.style={link}]
+
+  \node[entity] (joueur) {
+    \textbf{Joueur}
+    \nodepart{second}
+    \key{N°Joueur}\\
+    Nom\\
+    An\_Naiss\\
+    Pays\\
+    Classement\\
+  };
+
+  \node[relationship] (match) [right=3.5cm of joueur] {Match}
+    child[grow=up, level distance=3cm] {node[attributes] {Nom-arbitre\\
+    Score\\
+    N°Jour\\
+    Heure\_Deb\\
+    N°Court 
+    }};
+
+  \node[entity] (tournoi) [right=3.5cm of match] {
+    \textbf{Tournois}
+    \nodepart{second}
+    \key{An\_Tournoi}\\
+    Lieu\\
+    Mois\_Deb\\
+    Jour\_Deb\\
+  };
+
+  % Lien gagnant : JOUEUR -> MATCH
+  \draw[link] (joueur.30) to [bend left=10] node [below, pos=0.1] {(0,n)}
+                              node [above, pos=0.6] {gagnant}
+                              (match.165);
+
+  % Lien battu : JOUEUR -> MATCH
+  \draw[link] (joueur.-30) to [bend right=10] node [above, pos=0.1] {(0,n)}
+                               node [ below, pos=0.6] {battu}
+                               (match.195);
+
+  % Lien MATCH -> TOURNOI
+  \draw[link] (match.east) -- node [pos=0.8, above] {(1,n)} (tournoi.west);
+
+\end{tikzpicture}
+\end{document}

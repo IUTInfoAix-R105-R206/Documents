@@ -374,6 +374,30 @@ $(OUTPUT_DIR)/r2.06/td6/td6-correction.pdf: docs/r2.06/td6/td6-correction.gen.md
 # R1.05 — Introduction aux bases de données et SQL
 # ==============================================================================
 
+# --- TD4 : Modèle Entité/Association et traduction relationnelle ---
+
+R105_TD4_FIGURES = docs/r1.05/td4/figures/gestion-artistique-1.pdf \
+	docs/r1.05/td4/figures/gestion-artistique-2.pdf \
+	docs/r1.05/td4/figures/gestion-sportive-1.pdf \
+	docs/r1.05/td4/figures/gestion-sportive-2.pdf
+
+docs/r1.05/td4/figures/%.pdf: docs/r1.05/td4/figures/%.tex
+	cd docs/r1.05/td4/figures && TEXINPUTS="$(CURDIR)/$(TEMPLATE_DIR):" $(PDFLATEX) -interaction=nonstopmode $*.tex
+
+$(OUTPUT_DIR)/r1.05/td4/td4.pdf: docs/r1.05/td4/td4.md $(TEMPLATE_DIR)/template.tex $(FILTER_DIR)/custom-styles.lua $(R105_TD4_FIGURES)
+	@mkdir -p $(OUTPUT_DIR)/r1.05/td4
+	cd docs/r1.05/td4 && $(PANDOC) \
+		--from markdown+footnotes+definition_lists+fenced_divs+bracketed_spans \
+		--pdf-engine=pdflatex \
+		--pdf-engine-opt=-shell-escape \
+		--template=../../../$(TEMPLATE_DIR)/template.tex \
+		--lua-filter=../../../$(FILTER_DIR)/custom-styles.lua \
+		--resource-path=.:../../../$(TEMPLATE_DIR):figures \
+		--variable=license-badge:../../../$(TEMPLATE_DIR)/cc-by-nc-sa \
+		--variable=version:$(GIT_VERSION) \
+		td4.md \
+		-o ../../../$@
+
 # --- TD5 : Conception avec le modèle Entité/Association ---
 
 $(OUTPUT_DIR)/r1.05/td5/td5.pdf: docs/r1.05/td5/td5.md $(TEMPLATE_DIR)/template.tex $(FILTER_DIR)/custom-styles.lua

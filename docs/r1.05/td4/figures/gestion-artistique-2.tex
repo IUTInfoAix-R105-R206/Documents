@@ -1,0 +1,71 @@
+\documentclass[border=10pt]{standalone}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage{tikz-er2}
+
+\usetikzlibrary{decorations.text}
+\usetikzlibrary{decorations.markings}
+\usetikzlibrary{positioning}
+\usetikzlibrary{shadows}
+\usetikzlibrary{backgrounds}
+
+\tikzstyle{every entity} = [top color=white,
+                            bottom color=blue!30,
+                            draw=blue!50!black!100,
+                            drop shadow]
+
+\tikzstyle{every weak entity} = [drop shadow={shadow xshift=.7ex, shadow yshift=-.7ex}]
+
+\tikzstyle{every attribute} = [top color=white,
+                               bottom color=yellow!20,
+                               draw=yellow,
+                               node distance=1cm,
+                               drop shadow]
+
+\tikzstyle{every relationship} = [top color=white,
+                                  bottom color=yellow!20,
+                                  draw=yellow,
+                                  drop shadow]
+
+\tikzstyle{every isa} = [draw=blue!50!black!100]
+
+\tikzset{card/.style={font=\scriptsize\sffamily, fill=white, inner sep=1pt}}
+
+\begin{document}
+\begin{tikzpicture}[node distance=2cm, every edge/.style={link}]
+
+  \node[entity] (morceau) {
+    \textbf{Morceau}
+    \nodepart{second}
+    \key{Identification}\\
+    Date publication\\
+    N° Arrangement\\
+  };
+
+  \node[relationship] (interprete) [right= of morceau] {Interprète}
+      child {node[attributes] {rôle}};
+
+
+  \node[entity] (personne) [right= of interprete] {
+    \textbf{Personne}
+    \nodepart{second}
+    \key{N° Personne}\\
+    Nom\\
+    Type Voix\\
+    Instrument\\
+  };
+
+
+  \node[entity, text width=2.8cm, align=center] (enregistrement) [above=of interprete] {
+    \textbf{Enregistrement}
+    \nodepart{second}
+    \key{N° Enregistrement}\\
+  };
+
+  \draw[link] (morceau.east) -- node [pos=0.2, above] {(1,n)} (interprete.west);
+  \draw[link] (interprete.east) -- node [pos=0.8, above] {(0,n)} (personne.west);
+  \draw[link] (interprete.north) -- node [pos=0.8, right] {(1,n)} (enregistrement.south);
+
+\end{tikzpicture}
+\end{document}
