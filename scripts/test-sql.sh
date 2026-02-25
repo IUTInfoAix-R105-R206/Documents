@@ -50,6 +50,7 @@ log_fail() { echo -e "  ${RED}✗${NC} $1"; ((FAIL += 1)); FAILED_LABELS+=("$1")
 log_skip() { echo -e "  ${YELLOW}⊘${NC} $1"; ((SKIP += 1)); }
 
 # --- Fonction d'exécution SQL selon le SGBD ---
+# Exécute une requête SELECT unique et retourne le résultat tabulaire
 run_sql() {
     local query="$1"
     case "$DBMS" in
@@ -79,17 +80,107 @@ run_sql() {
     esac
 }
 
+# Exécute un bloc SQL brut (multi-statement, DDL, PL/SQL) pour ses effets de bord
+# Ne retourne rien d'utile — utilisé pour CREATE VIEW, DROP, INSERT, ALTER, PL/SQL
+run_sql_block() {
+    local block="$1"
+    case "$DBMS" in
+        postgres)
+            psql -h "${PGHOST:-localhost}" -U "${PGUSER:-test}" -d "${PGDATABASE:-gestion_pedagogique}" \
+                 -c "$block" > /dev/null 2>&1 || true
+            ;;
+        oracle)
+            {
+                echo "SET HEADING OFF"
+                echo "SET FEEDBACK OFF"
+                echo "SET PAGESIZE 0"
+                echo "SET VERIFY OFF"
+                echo "WHENEVER SQLERROR CONTINUE"
+                echo "$block"
+                echo "EXIT"
+            } | sqlplus -s "${ORACLE_USER:-system}/${ORACLE_PASS:-oracle}@${ORACLE_SID:-XE}" > /dev/null 2>&1 || true
+            ;;
+        sqlite)
+            sqlite3 "${SQLITE_DB:-/tmp/gestion_pedagogique.db}" "$block" > /dev/null 2>&1 || true
+            ;;
+    esac
+}
+
 # Compte les lignes d'un résultat (en ignorant les lignes vides)
 count_rows() {
-    echo "$1" | grep -c '[^[:space:]]' 2>/dev/null || true
+    echo "$1" | tr -d '\r' | grep -c '[^[:space:]]' 2>/dev/null || true
 }
 
 # Compte les colonnes d'un résultat (en ignorant les lignes vides)
 count_cols() {
-    echo "$1" | grep -v '^[[:space:]]*$' | head -1 | awk -F'|' '{print NF}' || echo "0"
+    echo "$1" | tr -d '\r' | grep -v '^[[:space:]]*$' | head -1 | awk -F'|' '{print NF}' || echo "0"
 }
 
 # --- Extraction et test des requêtes ---
+
+# Sépare un bloc SQL en statements individuels.
+# Gère les blocs PL/SQL (BEGIN...END; /) comme un seul statement.
+# Retourne les statements séparés par un délimiteur NUL.
+split_statements() {
+    local block="$1"
+    local current=""
+    local in_plsql=false
+
+    while IFS= read -r line; do
+        # Détecter le début d'un bloc PL/SQL
+        if [[ "$line" =~ ^[[:space:]]*(BEGIN|DECLARE) ]] && ! $in_plsql; then
+            in_plsql=true
+            current+="$line"$'\n'
+            continue
+        fi
+
+        # Fin d'un bloc PL/SQL (ligne contenant juste /)
+        if $in_plsql; then
+            if [[ "$line" =~ ^[[:space:]]*/[[:space:]]*$ ]]; then
+                current+="/"$'\n'
+                printf '%s\0' "$current"
+                current=""
+                in_plsql=false
+            else
+                current+="$line"$'\n'
+            fi
+            continue
+        fi
+
+        # En dehors du PL/SQL, découper par ;
+        if [[ "$line" =~ \;[[:space:]]*$ ]]; then
+            current+="$line"$'\n'
+            printf '%s\0' "$current"
+            current=""
+        else
+            current+="$line"$'\n'
+        fi
+    done <<< "$block"
+
+    # Reste éventuel (statement sans ; final)
+    local trimmed
+    trimmed=$(echo "$current" | sed '/^[[:space:]]*$/d')
+    if [[ -n "$trimmed" ]]; then
+        printf '%s\0' "$current"
+    fi
+}
+
+# Détermine si un statement est un DDL/DML (non testable) ou un SELECT (testable)
+is_setup_statement() {
+    local stmt="$1"
+    # Récupérer le premier mot significatif (ignorer espaces/newlines)
+    local first_word
+    first_word=$(echo "$stmt" | sed '/^[[:space:]]*$/d' | head -1 | sed 's/^[[:space:]]*//' | awk '{print toupper($1)}')
+    case "$first_word" in
+        CREATE|DROP|INSERT|UPDATE|DELETE|ALTER|BEGIN|DECLARE|GRANT|REVOKE|TRUNCATE|MERGE)
+            return 0  # C'est un setup statement
+            ;;
+        *)
+            return 1  # C'est un SELECT ou autre requête testable
+            ;;
+    esac
+}
+
 test_correction_file() {
     local correction_file="$1"
     local td_name resource_name
@@ -102,7 +193,7 @@ test_correction_file() {
     echo "=== Testing: $td_id ($(basename "$correction_file")) ==="
     echo ""
 
-    local current_query=""
+    local current_block=""
     local current_label=""
     local expected_cols=""
     local expected_rows=""
@@ -110,78 +201,176 @@ test_correction_file() {
 
     while IFS= read -r line || [[ -n "$line" ]]; do
         line="${line%$'\r'}"  # Supprimer le \r des fins de lignes Windows (CRLF)
+
         # Détecter les marqueurs de question avec résultats attendus
-        # Format: -- Q1 - c:2, t:9
+        # Format complet : -- Q1 - c:2, t:9
         if [[ "$line" =~ ^--\ Q([0-9]+).*c:([0-9]+).*t:([0-9]+) ]]; then
-            # Si on avait une requête en cours, la tester
-            if [[ -n "$current_query" && -n "$current_label" ]]; then
-                test_query "$td_id" "$current_label" "$current_query" "$expected_cols" "$expected_rows"
+            # Si on avait un bloc en cours, le tester
+            if [[ -n "$current_block" && -n "$current_label" ]]; then
+                test_block "$td_id" "$current_label" "$current_block" "$expected_cols" "$expected_rows"
             fi
 
             current_label="Q${BASH_REMATCH[1]}"
             expected_cols="${BASH_REMATCH[2]}"
             expected_rows="${BASH_REMATCH[3]}"
-            current_query=""
+            current_block=""
+            in_query=false
+            continue
+        fi
+
+        # Format partiel : -- QN - t:Y (seulement lignes, pas colonnes)
+        if [[ "$line" =~ ^--\ Q([0-9]+)\ -\ t:([0-9]+) ]]; then
+            if [[ -n "$current_block" && -n "$current_label" ]]; then
+                test_block "$td_id" "$current_label" "$current_block" "$expected_cols" "$expected_rows"
+            fi
+
+            current_label="Q${BASH_REMATCH[1]}"
+            expected_cols=""
+            expected_rows="${BASH_REMATCH[2]}"
+            current_block=""
+            in_query=false
+            continue
+        fi
+
+        # Format sans annotation : -- QN (sans c: ni t:)
+        # Réinitialise les attentes pour éviter la propagation depuis la question précédente
+        if [[ "$line" =~ ^--\ Q([0-9]+)[[:space:]]*$ ]]; then
+            if [[ -n "$current_block" && -n "$current_label" ]]; then
+                test_block "$td_id" "$current_label" "$current_block" "$expected_cols" "$expected_rows"
+            fi
+
+            current_label="Q${BASH_REMATCH[1]}"
+            expected_cols=""
+            expected_rows=""
+            current_block=""
             in_query=false
             continue
         fi
 
         # Détecter les PROMPT (début d'une variante de requête)
         if [[ "$line" =~ ^PROMPT ]]; then
-            # Si on avait une requête en cours, la tester
-            if [[ -n "$current_query" && -n "$current_label" ]]; then
-                test_query "$td_id" "$current_label" "$current_query" "$expected_cols" "$expected_rows"
+            # Si on avait un bloc en cours, le tester
+            if [[ -n "$current_block" && -n "$current_label" ]]; then
+                test_block "$td_id" "$current_label" "$current_block" "$expected_cols" "$expected_rows"
             fi
 
             # Extraire le label du PROMPT
             local prompt_label
             prompt_label=$(echo "$line" | sed 's/PROMPT "\(.*\)";/\1/')
             current_label="$prompt_label"
-            current_query=""
+            current_block=""
             in_query=true
             continue
         fi
 
-        # Ignorer les commentaires et lignes vides quand on construit la requête
+        # Accumuler les lignes SQL dans le bloc courant
         if $in_query; then
             if [[ "$line" =~ ^-- ]] || [[ -z "$line" ]]; then
-                # Si on a déjà du contenu dans la requête et on rencontre un commentaire,
-                # ça pourrait être la fin de la requête
-                if [[ -n "$current_query" && "$line" =~ ^-- ]]; then
+                # Un commentaire après du SQL marque la fin du bloc
+                if [[ -n "$current_block" && "$line" =~ ^-- ]]; then
                     in_query=false
                 fi
                 continue
             fi
-            # Ajouter la ligne à la requête (en enlevant le ; final)
-            current_query+=" ${line%;}"
+            # Conserver les ; et sauts de ligne pour le support multi-statement
+            current_block+="$line"$'\n'
         fi
     done < "$correction_file"
 
-    # Tester la dernière requête
-    if [[ -n "$current_query" && -n "$current_label" ]]; then
-        test_query "$td_id" "$current_label" "$current_query" "$expected_cols" "$expected_rows"
+    # Tester le dernier bloc
+    if [[ -n "$current_block" && -n "$current_label" ]]; then
+        test_block "$td_id" "$current_label" "$current_block" "$expected_cols" "$expected_rows"
     fi
 }
 
-test_query() {
+# Teste un bloc SQL (possiblement multi-statement).
+# - Sépare le bloc en statements individuels
+# - Exécute les DDL/DML (setup) via run_sql_block pour leurs effets de bord
+# - Teste le dernier SELECT via run_sql et compare avec les attentes
+test_block() {
     local td_id="$1"
     local label="$2"
-    local query="$3"
+    local block="$3"
     local exp_cols="$4"
     local exp_rows="$5"
 
-    # Nettoyer la requête
-    query=$(echo "$query" | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//')
+    # Nettoyer le bloc (supprimer lignes vides de début/fin)
+    block=$(echo "$block" | sed '/^[[:space:]]*$/d')
 
-    if [[ -z "$query" ]]; then
+    if [[ -z "$block" ]]; then
+        log_skip "$label — bloc vide"
+        if [[ -n "$REPORT_FILE" ]]; then echo "$td_id;$label;$DBMS;skip;$exp_cols;$exp_rows;0;0" >> "$REPORT_FILE"; fi
+        return
+    fi
+
+    # Séparer le bloc en statements
+    local statements=()
+    while IFS= read -r -d $'\0' stmt; do
+        statements+=("$stmt")
+    done < <(split_statements "$block")
+
+    # Si aucun statement n'a été trouvé (bloc sans ;), traiter le bloc entier comme un statement
+    if [[ ${#statements[@]} -eq 0 ]]; then
+        statements=("$block")
+    fi
+
+    # Identifier les setup statements et le dernier SELECT testable
+    local setup_stmts=()
+    local testable_query=""
+
+    for stmt in "${statements[@]}"; do
+        # Nettoyer le statement
+        local trimmed
+        trimmed=$(echo "$stmt" | sed '/^[[:space:]]*$/d')
+        [[ -z "$trimmed" ]] && continue
+
+        if is_setup_statement "$trimmed"; then
+            setup_stmts+=("$trimmed")
+        else
+            testable_query="$trimmed"
+        fi
+    done
+
+    # Exécuter les setup statements (DDL/DML) pour leurs effets de bord
+    for setup in "${setup_stmts[@]}"; do
+        run_sql_block "$setup"
+    done
+
+    # Si pas d'annotation c:t (et pas de t: seul), skip le test mais exécuter quand même
+    if [[ -z "$exp_cols" && -z "$exp_rows" ]]; then
+        # Exécuter le SELECT pour ses effets de bord éventuels, mais ne pas tester
+        if [[ -n "$testable_query" ]]; then
+            # Nettoyer le ; final pour run_sql
+            local clean_query
+            clean_query=$(echo "$testable_query" | sed 's/;[[:space:]]*$//')
+            run_sql "$clean_query" > /dev/null 2>&1 || true
+        fi
+        log_skip "$label — pas d'annotation c:t"
+        if [[ -n "$REPORT_FILE" ]]; then echo "$td_id;$label;$DBMS;skip;;;0;0" >> "$REPORT_FILE"; fi
+        return
+    fi
+
+    # Pas de SELECT testable mais des annotations → skip
+    if [[ -z "$testable_query" ]]; then
+        log_skip "$label — pas de requête testable (DDL/DML uniquement)"
+        if [[ -n "$REPORT_FILE" ]]; then echo "$td_id;$label;$DBMS;skip;$exp_cols;$exp_rows;0;0" >> "$REPORT_FILE"; fi
+        return
+    fi
+
+    # Nettoyer le ; final pour run_sql
+    local clean_query
+    clean_query=$(echo "$testable_query" | sed 's/;[[:space:]]*$//')
+    clean_query=$(echo "$clean_query" | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//')
+
+    if [[ -z "$clean_query" ]]; then
         log_skip "$label — requête vide"
         if [[ -n "$REPORT_FILE" ]]; then echo "$td_id;$label;$DBMS;skip;$exp_cols;$exp_rows;0;0" >> "$REPORT_FILE"; fi
         return
     fi
 
-    # Exécuter la requête
+    # Exécuter la requête testable
     local result
-    result=$(run_sql "$query" 2>&1) || {
+    result=$(run_sql "$clean_query" 2>&1) || {
         log_fail "$label — erreur d'exécution SQL"
         if [[ -n "$REPORT_FILE" ]]; then echo "$td_id;$label;$DBMS;error;$exp_cols;$exp_rows;-1;-1" >> "$REPORT_FILE"; fi
         return
@@ -192,22 +381,31 @@ test_query() {
     actual_rows=$(count_rows "$result")
     actual_cols=$(count_cols "$result")
 
-    local expected="${exp_cols}c × ${exp_rows}r"
-    local actual="${actual_cols}c × ${actual_rows}r"
+    # Vérifier selon les annotations disponibles
+    local ok=true
+    local details=""
 
-    # Vérifier
-    if [[ "$actual_rows" -eq "$exp_rows" && "$actual_cols" -eq "$exp_cols" ]]; then
-        log_pass "$label — attendu: $expected, reçu: $actual"
+    if [[ -n "$exp_cols" && "$actual_cols" -ne "$exp_cols" ]]; then
+        ok=false
+        details+=" colonnes: attendu=$exp_cols reçu=$actual_cols"
+    fi
+
+    if [[ -n "$exp_rows" && "$actual_rows" -ne "$exp_rows" ]]; then
+        ok=false
+        details+=" lignes: attendu=$exp_rows reçu=$actual_rows"
+    fi
+
+    local expected_str=""
+    [[ -n "$exp_cols" ]] && expected_str+="${exp_cols}c"
+    [[ -n "$exp_cols" && -n "$exp_rows" ]] && expected_str+=" × "
+    [[ -n "$exp_rows" ]] && expected_str+="${exp_rows}r"
+    local actual_str="${actual_cols}c × ${actual_rows}r"
+
+    if $ok; then
+        log_pass "$label — attendu: $expected_str, reçu: $actual_str"
         if [[ -n "$REPORT_FILE" ]]; then echo "$td_id;$label;$DBMS;pass;$exp_cols;$exp_rows;$actual_cols;$actual_rows" >> "$REPORT_FILE"; fi
     else
-        local details=""
-        if [[ "$actual_cols" -ne "$exp_cols" ]]; then
-            details+=" colonnes: attendu=$exp_cols reçu=$actual_cols"
-        fi
-        if [[ "$actual_rows" -ne "$exp_rows" ]]; then
-            details+=" lignes: attendu=$exp_rows reçu=$actual_rows"
-        fi
-        log_fail "$label — attendu: $expected, reçu: $actual —$details"
+        log_fail "$label — attendu: $expected_str, reçu: $actual_str —$details"
         if [[ -n "$REPORT_FILE" ]]; then echo "$td_id;$label;$DBMS;fail;$exp_cols;$exp_rows;$actual_cols;$actual_rows" >> "$REPORT_FILE"; fi
     fi
 }
@@ -219,6 +417,23 @@ load_data() {
     echo "Chargement du schéma et des données depuis $(basename "$data_dir")..."
     case "$DBMS" in
         oracle)
+            # Nettoyage complet : supprimer toutes les vues et tables du schéma
+            # pour éviter les interférences entre TD utilisant des bases différentes
+            {
+                echo "WHENEVER SQLERROR CONTINUE"
+                echo "BEGIN"
+                echo "   FOR v IN (SELECT view_name FROM user_views)"
+                echo "   LOOP"
+                echo "      EXECUTE IMMEDIATE 'DROP VIEW \"' || v.view_name || '\"';"
+                echo "   END LOOP;"
+                echo "   FOR t IN (SELECT table_name FROM user_tables)"
+                echo "   LOOP"
+                echo "      EXECUTE IMMEDIATE 'DROP TABLE \"' || t.table_name || '\" CASCADE CONSTRAINTS PURGE';"
+                echo "   END LOOP;"
+                echo "END;"
+                echo "/"
+                echo "EXIT"
+            } | sqlplus -s "${ORACLE_USER:-system}/${ORACLE_PASS:-oracle}@${ORACLE_SID:-XE}" > /dev/null 2>&1 || true
             # Cherche oracle.sql dans le répertoire du TD, sinon gestion-pedagogique-oracle.sql dans shared
             local oracle_file="$data_dir/oracle.sql"
             [[ -f "$oracle_file" ]] || oracle_file="$data_dir/gestion-pedagogique-oracle.sql"

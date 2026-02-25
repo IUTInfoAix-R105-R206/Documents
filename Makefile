@@ -655,6 +655,8 @@ test-sql-oracle-docker: ## Exécute les corrections SQL via un conteneur Oracle 
 	docker run --rm -d \
 		--name $$CONTAINER \
 		-e ORACLE_PASSWORD=test \
+		-e APP_USER=testuser \
+		-e APP_USER_PASSWORD=test \
 		-v "$(CURDIR):/project" \
 		docker.io/gvenzl/oracle-free:23.5 > /dev/null; \
 	echo "En attente d'Oracle Free..."; \
@@ -666,7 +668,7 @@ test-sql-oracle-docker: ## Exécute les corrections SQL via un conteneur Oracle 
 	done; \
 	echo "Oracle Free prêt."; \
 	docker exec \
-		-e ORACLE_USER=system \
+		-e ORACLE_USER=testuser \
 		-e ORACLE_PASS=test \
 		-e ORACLE_SID=FREEPDB1 \
 		$$CONTAINER \

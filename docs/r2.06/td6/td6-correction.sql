@@ -267,6 +267,24 @@ GROUP BY groupeEt;
 -- @text Effectuez les requêtes sur les relations actuelles, pas celles éventuellement dans la corbeille. N'exécutez qu'une seule requête à la fois.
 -- @instruction En cas de doute ou de curiosité, n'oubliez pas d'utiliser la commande `DESCRIBE`.
 
+-- Nettoyage : supprimer les vues et données créées par les questions précédentes
+-- pour que les requêtes sur les tables systèmes retournent les résultats attendus.
+PROMPT "Nettoyage avant consultation des tables systèmes";
+
+BEGIN
+   FOR v IN (SELECT view_name FROM user_views)
+   LOOP
+      EXECUTE IMMEDIATE 'DROP VIEW "' || v.view_name || '"';
+   END LOOP;
+END;
+/
+
+DELETE FROM Enseigne WHERE code = 'FDD';
+DELETE FROM Module WHERE code IN ('DRO', 'FDD');
+
+ALTER TABLE Enseigne DROP CONSTRAINT fk_Enseignt_code;
+ALTER TABLE Enseigne ADD CONSTRAINT fk_Enseignt_code FOREIGN KEY (code) REFERENCES Module(code);
+
 -- Q12 - c:1, t:7
 -- Quels sont les noms des attributs de la relation Professeur ?
 PROMPT "Q12";

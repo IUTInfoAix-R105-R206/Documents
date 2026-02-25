@@ -350,8 +350,8 @@ PROMPT "Q17 - Version imbriquée";
 SELECT DISTINCT nomPil
 FROM Pilote P
 WHERE nomPil <> 'DURAND'
-  AND numPil IN (SELECT numPil)
-                 FROM Vol;
+  AND numPil IN (SELECT numPil
+                 FROM Vol);
 
 -- Version prédicative.
 PROMPT "Q17 - Version prédicative";

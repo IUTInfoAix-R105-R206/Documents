@@ -37,7 +37,7 @@ Les sujets sont compilés en PDF via Pandoc + LaTeX. Le but est de remplacer les
 ## Architecture
 
 ```
-docs/r1.05/tdN/              → TD de R1.05 (PDF/docx de référence, corrections SQL pour TD6-TD7)
+docs/r1.05/tdN/              → TD de R1.05 (sources Markdown, corrections algèbre/SQL)
 docs/r2.06/tdN/              → TD de R2.06 (sources Markdown, corrections SQL, figures TikZ)
 docs/shared/data/            → Bases de données partagées entre ressources
   gestion-pedagogique/       →   R2.06 TD3/TD5/TD6 (schema.sql, insert.sql, oracle.sql)
@@ -265,7 +265,27 @@ Toutes les corrections du TD3 R2.06 (Q1-Q26) ont été validées avec les résul
 
 ## État actuel du projet
 
-### Fonctionnel
+### Sujets Markdown (conversion depuis Word/PDF)
+
+| Ressource | TD1 | TD2 | TD3 | TD4 | TD5 | TD6 | TD7 |
+|-----------|-----|-----|-----|-----|-----|-----|-----|
+| R1.05     | ✅  | ✅  | ✅  | ✅  | ✅  | ✅  | ✅  |
+| R2.06     | ✅  | ✅  | ✅  | ✅  | ✅  | ✅  | —   |
+
+### Corrections
+
+| Ressource | TD1 | TD2 | TD3 | TD4 | TD5 | TD6 | TD7 |
+|-----------|-----|-----|-----|-----|-----|-----|-----|
+| R1.05     | ✅ algèbre | ✅ algèbre | — (DF/normalisation) | — (modèle E/A) | — (modèle E/A) | ✅ SQL (c:t complets) | ✅ SQL |
+| R2.06     | ✅ SQL | ✅ SQL | ✅ SQL (validé Q1-Q26) | ✅ SQL | ✅ SQL | ✅ SQL | — |
+
+Notes :
+- R1.05 TD1-TD2 : corrections en algèbre relationnelle (fichiers Markdown, pas de SQL)
+- R1.05 TD3-TD5 : pas de correction SQL (dépendances fonctionnelles, modèle E/A)
+- R1.05 TD6 : 28 questions SQL, toutes annotées c:t
+- R2.06 TD1 : Q1-Q10 ont des annotations c:t ; Q11-Q20 sont des DDL/DML (ALTER, CREATE, INSERT, UPDATE, transactions) pour lesquels les annotations c:t ne sont pas pertinentes
+
+### Infrastructure
 - ✅ Structure multi-ressource (R1.05, R2.06) avec données partagées
 - ✅ Compilation Markdown → PDF via Pandoc + LaTeX
 - ✅ Makefile avec cibles par ressource (r105, r206, all, clean)
@@ -277,14 +297,10 @@ Toutes les corrections du TD3 R2.06 (Q1-Q26) ont été validées avec les résul
 - ✅ Jeux de données complets (gestion-pedagogique, voyages, questionnaire)
 - ✅ Script de test SQL multi-BD fonctionnel (test-sql.sh)
 - ✅ CI GitHub Actions (build PDF + test SQL PostgreSQL/SQLite/Oracle)
-- ✅ Corrections SQL R2.06 TD3 validées (Q1-Q26)
-- ✅ Corrections SQL importées pour tous les TD R2.06 (TD1-TD6)
-- ✅ Corrections SQL importées pour R1.05 TD6-TD7
 
 ### À faire
-- **Conversions Markdown** : convertir les sujets R2.06 TD2/TD4/TD5/TD6 de Word vers Markdown (même modèle que TD3)
-- **Conversions Markdown R1.05** : convertir les sujets R1.05 de Word/PDF vers Markdown
-- **Annotations c:t manquantes** : compléter les annotations `-- QN - c:X, t:Y` pour R1.05 TD6 (0/28) et R2.06 TD1 (10/20)
+- **Corrections Markdown R1.05** : convertir les corrections TD3 (DF/normalisation), TD4 et TD5 (modèle E/A) depuis les PDF originaux
 - **Adaptations PostgreSQL/SQLite** : créer schema.sql + insert.sql pour les BD Questionnaire et Airbase
 - **SAE** : intégrer S1.04 et S2.04 quand prêts
-- **Tests CI** : valider les workflows GitHub Actions avec la nouvelle structure
+- **Linter SQL** : intégrer un linter SQL (ex : SQLFluff) pour garantir les bonnes pratiques dans les corrections SQL, avec vérification en CI
+- **Tests CI** : valider les workflows GitHub Actions avec la structure complète

@@ -112,7 +112,7 @@ WHERE ville = 'MARSEILLE';
 -- Version imbriquée.
 PROMPT "Q7 - Version imbriquée";
 
-SELECT DISTINCT numCl, dateRes, villeArr
+SELECT DISTINCT Reservation.numCl, dateRes, villeArr
 FROM Voyage, Reservation
 WHERE Voyage.idV = RESERVATION.idV
 AND numCl IN
