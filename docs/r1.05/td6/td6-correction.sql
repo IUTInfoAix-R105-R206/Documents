@@ -524,11 +524,11 @@ FROM Pilote P1, Pilote P2
 WHERE P1.nomPil = P2.nomPil
   AND P1.numPil <> P2.numPil;
 
--- Q24 - c:1, t:7
+-- Q24 - c:1, t:4
 -- Quelles sont les villes où habitent des pilotes et où sont localisés des avions ?
 PROMPT "Q24 - V1";
 
-SELECT adresse
+SELECT DISTINCT adresse
 FROM Pilote
 WHERE adresse IN (SELECT localisation
                   FROM Avion);
