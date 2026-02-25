@@ -3,21 +3,21 @@
     "title": "TD6 : Interrogation en SQL",
     "report_file": "r1.05-td6.html",
     "total": 195,
-    "pass": 182,
-    "error": 13,
+    "pass": 184,
+    "error": 11,
     "fail": 0,
     "has_oracle_only": true,
     "dbms": {
       "postgres": {
         "total": 65,
-        "pass": 61,
-        "error": 4,
+        "pass": 62,
+        "error": 3,
         "fail": 0
       },
       "sqlite": {
         "total": 65,
-        "pass": 56,
-        "error": 9,
+        "pass": 57,
+        "error": 8,
         "fail": 0
       },
       "oracle": {
@@ -32,9 +32,9 @@
     "title": "TD7 : Interrogation en SQL interprété",
     "report_file": "r1.05-td7.html",
     "total": 126,
-    "pass": 114,
+    "pass": 118,
     "error": 8,
-    "fail": 4,
+    "fail": 0,
     "has_oracle_only": true,
     "dbms": {
       "postgres": {
@@ -51,9 +51,9 @@
       },
       "oracle": {
         "total": 42,
-        "pass": 38,
+        "pass": 42,
         "error": 0,
-        "fail": 4
+        "fail": 0
       }
     }
   },
@@ -62,27 +62,27 @@
     "report_file": "r2.06-td1.html",
     "total": 99,
     "pass": 62,
-    "error": 21,
-    "fail": 16,
+    "error": 1,
+    "fail": 0,
     "has_oracle_only": true,
     "dbms": {
       "postgres": {
         "total": 33,
         "pass": 21,
-        "error": 10,
-        "fail": 2
+        "error": 0,
+        "fail": 0
       },
       "sqlite": {
         "total": 33,
         "pass": 20,
-        "error": 11,
-        "fail": 2
+        "error": 1,
+        "fail": 0
       },
       "oracle": {
         "total": 33,
         "pass": 21,
         "error": 0,
-        "fail": 12
+        "fail": 0
       }
     }
   },
@@ -205,29 +205,29 @@
   "r2.06/td6": {
     "title": "TD6 : Vues, tables système et rappels SQL",
     "report_file": "r2.06-td6.html",
-    "total": 77,
-    "pass": 9,
-    "error": 45,
-    "fail": 23,
+    "total": 80,
+    "pass": 21,
+    "error": 26,
+    "fail": 9,
     "has_oracle_only": true,
     "dbms": {
       "postgres": {
-        "total": 26,
-        "pass": 2,
-        "error": 22,
-        "fail": 2
+        "total": 27,
+        "pass": 8,
+        "error": 10,
+        "fail": 1
       },
       "sqlite": {
-        "total": 26,
+        "total": 27,
         "pass": 2,
-        "error": 23,
+        "error": 16,
         "fail": 1
       },
       "oracle": {
-        "total": 25,
-        "pass": 5,
+        "total": 26,
+        "pass": 11,
         "error": 0,
-        "fail": 20
+        "fail": 7
       }
     }
   }
