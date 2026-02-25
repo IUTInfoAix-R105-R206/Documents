@@ -33,6 +33,7 @@ TD_PDFS = $(patsubst docs/%,$(OUTPUT_DIR)/%,$(TD_SOURCES:.md=.pdf))
 # Corrections PDF (générées depuis le SQL annoté)
 R206_CORRECTION_PDFS = \
 	$(OUTPUT_DIR)/r2.06/td1/td1-correction.pdf \
+	$(OUTPUT_DIR)/r2.06/td2/td2-correction.pdf \
 	$(OUTPUT_DIR)/r2.06/td3/td3-correction.pdf
 
 .PHONY: all clean r105 r206 r206-corrections \
@@ -106,6 +107,54 @@ $(OUTPUT_DIR)/r2.06/td1/td1-correction.pdf: docs/r2.06/td1/td1-correction.gen.md
 		--variable=version:$(GIT_VERSION) \
 		--number-sections \
 		td1-correction.gen.md \
+		-o ../../../$@
+
+# --- TD2 : Jointures externes, partitionnement et synthèse (BD Voyages) ---
+
+R206_TD2_FIGURES = docs/r2.06/td2/figures/mcd.pdf
+
+docs/r2.06/td2/figures/mcd.pdf: docs/r2.06/td2/figures/mcd.tex
+	cd docs/r2.06/td2/figures && TEXINPUTS="$(CURDIR)/$(TEMPLATE_DIR):" $(PDFLATEX) -interaction=nonstopmode mcd.tex
+
+# Génération du Markdown depuis le SQL annoté
+R206_TD2_SQL = docs/r2.06/td2/td2-correction.sql
+R206_TD2_TEMPLATE = docs/r2.06/td2/td2.md
+R206_TD2_GEN = scripts/generate-questions.py
+
+docs/r2.06/td2/td2.gen.md: $(R206_TD2_TEMPLATE) $(R206_TD2_SQL) $(R206_TD2_GEN)
+	$(PYTHON) $(R206_TD2_GEN) --mode subject --template $< --output $@ $(word 2,$^)
+
+docs/r2.06/td2/td2-correction.gen.md: $(R206_TD2_TEMPLATE) $(R206_TD2_SQL) $(R206_TD2_GEN)
+	$(PYTHON) $(R206_TD2_GEN) --mode correction --template $< --output $@ $(word 2,$^)
+
+$(OUTPUT_DIR)/r2.06/td2/td2.pdf: docs/r2.06/td2/td2.gen.md $(TEMPLATE_DIR)/template.tex $(FILTER_DIR)/custom-styles.lua $(R206_TD2_FIGURES)
+	@mkdir -p $(OUTPUT_DIR)/r2.06/td2
+	cd docs/r2.06/td2 && $(PANDOC) \
+		--from markdown+footnotes+definition_lists+fenced_divs+bracketed_spans \
+		--pdf-engine=pdflatex \
+		--pdf-engine-opt=-shell-escape \
+		--template=../../../$(TEMPLATE_DIR)/template.tex \
+		--lua-filter=../../../$(FILTER_DIR)/custom-styles.lua \
+		--resource-path=.:../../../$(TEMPLATE_DIR):figures \
+		--variable=license-badge:../../../$(TEMPLATE_DIR)/cc-by-nc-sa \
+		--variable=version:$(GIT_VERSION) \
+		--number-sections \
+		td2.gen.md \
+		-o ../../../$@
+
+$(OUTPUT_DIR)/r2.06/td2/td2-correction.pdf: docs/r2.06/td2/td2-correction.gen.md $(TEMPLATE_DIR)/template.tex $(FILTER_DIR)/custom-styles.lua $(R206_TD2_FIGURES)
+	@mkdir -p $(OUTPUT_DIR)/r2.06/td2
+	cd docs/r2.06/td2 && $(PANDOC) \
+		--from markdown+footnotes+definition_lists+fenced_divs+bracketed_spans \
+		--pdf-engine=pdflatex \
+		--pdf-engine-opt=-shell-escape \
+		--template=../../../$(TEMPLATE_DIR)/template.tex \
+		--lua-filter=../../../$(FILTER_DIR)/custom-styles.lua \
+		--resource-path=.:../../../$(TEMPLATE_DIR):figures \
+		--variable=license-badge:../../../$(TEMPLATE_DIR)/cc-by-nc-sa \
+		--variable=version:$(GIT_VERSION) \
+		--number-sections \
+		td2-correction.gen.md \
 		-o ../../../$@
 
 # --- TD3 : Interrogations en SQL (BD Gestion pédagogique) ---

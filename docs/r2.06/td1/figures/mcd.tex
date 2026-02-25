@@ -62,18 +62,18 @@
   \draw[link] (carac.east) -- node [pos=0.7, above] {(0,n)} (optionv.west);
 
 
-  \node[relationship] (assoc_a) [below= of voyage]
+  \node[relationship] (assoc_a) [below=1cm of voyage]
     {A (n$^\circ$1)};
 
-  \node[entity] (planning) [below= of assoc_a] {
+  \node[entity] (planning) [below=1cm of assoc_a] {
     \textbf{Planning}
     \nodepart{second}
     \key{dateDep}\\
     tarif\\
   };
 
-  \draw[link] (voyage.south) -- node [pos=0.2, right] {(0,n)} (assoc_a.north);
-  \draw[link] (assoc_a.south) -- node [pos=0.8, right] {(1,1(R))} (planning.north);
+  \draw[link] (voyage.south) -- node [pos=0.3, right] {(0,n)} (assoc_a.north);
+  \draw[link] (assoc_a.south) -- node [pos=0.7, right] {(1,1(R))} (planning.north);
 
   \node[relationship] (reservation) [right= of planning] {Réservation}
     child {node[attributes] {nbPers\\dateRes}};

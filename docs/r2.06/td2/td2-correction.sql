@@ -1,11 +1,18 @@
 -- V1.0.2
 
+-- @title Requêtes avec SQL
+-- @intro Vérifiez que lors du TD précédent, vous avez laissé la base de données dans l'état
+-- @+ initial ou réinitialisez-là. Formulez, en SQL, sur la base de données exemple, les requêtes
+-- @+ d'interrogation suivantes.
+
+-- @section Jointures externes
+
 -- Q1 - c:4, t:34
 -- Donnez les numéros et noms des clients ainsi que leurs éventuels identifiants des voyages et dates de réservation datant d'avant le 10/11/2003.
 PROMPT "Q1";
 
 SELECT C.numCl, nom, idV, dateRes
-FROM Client C 
+FROM Client C
 LEFT OUTER JOIN Reservation R ON C.numCl = R.numCl AND dateRes < TO_DATE('2003-11-10', 'YYYY-MM-DD');
 
 -- Q2 - c:4, t:24
@@ -17,64 +24,70 @@ FROM Client C
 LEFT JOIN Reservation R ON C.numCl = R.numCl AND dateRes < TO_DATE('2003-11-10', 'YYYY-MM-DD')
 WHERE C.numCl IS NULL OR idV IS NULL;
 
--- Q3-1 - c:5, t:215
+-- Q3
+-- Formulez les variations de requêtes suivantes de deux manières différentes :
+
+-- Q3a - c:5, t:215
 -- Donnez les numéros et ville de résidence des clients ainsi que les identifiants, villes de départ et pays d'arrivée d'éventuels voyages partant de leur ville de résidence.
-PROMPT "Q3-a - V1";
+PROMPT "Q3a - V1";
 
 SELECT numCl, ville, idV, villeDep, paysArr
 FROM Client
 LEFT OUTER JOIN Voyage ON ville = villeDep;
 
-PROMPT "Q3-a - V2";
+PROMPT "Q3a - V2";
 
 SELECT numCl, ville, idV, villeDep, paysArr
 FROM Voyage
 RIGHT OUTER JOIN Client ON ville = villeDep;
 
--- Q3-2 - c:5, t:215
+-- Q3b - c:5, t:215
 -- Donnez les identifiants, villes de départ et pays d'arrivée des voyages ainsi que les éventuels numéros et ville de résidence des clients résidant dans les villes de départ des voyages.
-PROMPT "Q3-b - V1";
+PROMPT "Q3b - V1";
 
 SELECT idV, villeDep, paysArr, numCl, ville
 FROM Client
 RIGHT OUTER JOIN Voyage ON ville = villeDep;
 
 -- Version alternative.
-PROMPT "Q3-b - V2";
+PROMPT "Q3b - V2";
 
 SELECT idV, villeDep, paysArr, numCl, ville
 FROM Voyage
 LEFT OUTER JOIN Client ON villeDep = ville;
 
--- Q4-1 - c:5, t:46
+-- Q4
+-- Formulez les variations de requêtes suivantes à la manière de votre choix :
+
+-- Q4a - c:5, t:46
 -- Donnez les numéros et ville de résidence des clients ainsi que les identifiants, villes de départ et pays d'arrivée d'éventuels voyages à destination du Kenya partant de la ville de résidence des clients.
-PROMPT "Q4-a";
+PROMPT "Q4a";
 
 SELECT numCl, ville, idV, villeDep, paysArr
 FROM Client
 LEFT OUTER JOIN Voyage ON ville = villeDep AND paysArr = 'KENYA';
 
--- Q4-2 - c:5, t:39
+-- Q4b - c:5, t:39
 -- Donnez les identifiants, villes de départ et pays d'arrivée des voyages à destination du Kenya ainsi que les éventuels numéros et ville de résidence des clients résidant dans les villes de départ des voyages.
-PROMPT "Q4-b";
+PROMPT "Q4b";
 
 SELECT idV, villeDep, paysArr, numCl, ville
 FROM Voyage
-LEFT OUTER JOIN Client ON villeDep = ville 
+LEFT OUTER JOIN Client ON villeDep = ville
 WHERE paysArr = 'KENYA';
 
--- Q4-3 - c:5, t:30
+-- Q4c - c:5, t:30
 -- Donnez les numéros et ville de résidence des clients de numéro supérieur à 2200 ainsi que les identifiants, villes de départ et pays d'arrivée d'éventuels voyages partant de la ville de résidence des clients.
-PROMPT "Q4-c";
+PROMPT "Q4c";
 
 SELECT numCl, ville, idV, villeDep, paysArr
 FROM Client
 LEFT OUTER JOIN Voyage ON ville = villeDep
 WHERE numCl > 2200;
 
--- Q4-4 - c:5, t:41
+-- Q4d - c:5, t:41
 -- Donnez les identifiants, villes de départ et pays d'arrivée des voyages ainsi que les éventuels numéros et ville de résidence des clients de numéro supérieur à 2200 résidant dans les villes de départ des voyages.
-PROMPT "Q4-d";
+PROMPT "Q4d";
 
 SELECT idV, villeDep, paysArr, numCl, ville
 FROM Voyage
@@ -97,6 +110,8 @@ SELECT idV, villeDep, paysArr, C.numCl, ville
 FROM Voyage
 LEFT OUTER JOIN Client C ON villeDep = ville AND numCl > 2200
 WHERE numCl IS NULL;
+
+-- @section Opérations de partitionnement
 
 -- Q7 - c:2, t:7
 -- Donnez, par pays d'arrivée, le nombre de voyages.
@@ -136,7 +151,7 @@ GROUP BY V.idV, villeArr;
 PROMPT "Q11";
 
 SELECT V.idV, villeArr, COUNT(code)
-FROM Voyage V 
+FROM Voyage V
 INNER JOIN Carac Ca ON V.idV = Ca.idV
 WHERE prix = 0 OR prix IS NULL
 GROUP BY V.idV, villeArr;
@@ -267,8 +282,8 @@ WHERE nbRes >= ALL (SELECT nbRes
 PROMPT "Q22";
 
 SELECT C.numCl, nom, COUNT(*)
-FROM Client C 
-INNER JOIN Reservation R ON C.numCl = R.numCl 
+FROM Client C
+INNER JOIN Reservation R ON C.numCl = R.numCl
 WHERE R.numCl IN (SELECT numCl
 				  FROM Reservation R
 				  INNER JOIN Voyage V ON R.idV = V.idV
@@ -285,6 +300,8 @@ WHERE paysArr IN (SELECT paysArr
 				  FROM Voyage
 				  WHERE nbEtoiles = 5)
 GROUP BY paysArr;
+
+-- @section Requêtes complexes
 
 -- Q24 - c:1, t:3
 -- Quelles sont les libellés des options gratuites incluses dans le voyage réservé par le Client Hubert Marin à destination d'Istanbul en date du 04/05/2004 ?
@@ -363,7 +380,7 @@ PROMPT "Q26 - V4";
 SELECT DISTINCT libelle
 FROM OptionV O
 LEFT OUTER JOIN Carac Ca
-ON O.code = Ca.code AND (prix <> 0 OR prix IS NOT NULL) 
+ON O.code = Ca.code AND (prix <> 0 OR prix IS NOT NULL)
 WHERE idV IS NULL;
 
 -- Version alternative.
@@ -438,7 +455,7 @@ FROM Voyage
 WHERE nbEtoiles = (SELECT MAX(nbEtoiles)
                    FROM Voyage);
 
--- Q32 - c:1, t4
+-- Q32 - c:1, t:4
 -- Quels sont les pays n'ayant pas d'hôtel avec le plus grand nombre d'étoiles ?
 PROMPT "Q32";
 
@@ -458,7 +475,7 @@ FROM Client
 FULL OUTER JOIN Voyage ON ville = villeDep AND paysArr = 'KENYA';
 
 -- Q34 - c:2, t:26
--- Quels sont les numéros et noms des clients qui n’ont fait aucune réservation pour un voyage au Maroc ? Donnez deux formulations : une avec jointure externe et une avec test de non-existence.
+-- Quels sont les numéros et noms des clients qui n'ont fait aucune réservation pour un voyage au Maroc ? Donnez deux formulations : une avec jointure externe et une avec test de non-existence.
 -- Version avec jointure externe.
 PROMPT "Q34 - Version avec jointure externe";
 
@@ -476,7 +493,8 @@ PROMPT "Q34 - Version avec test de non existence";
 
 SELECT C.numCl, nom
 FROM Client C
-WHERE NOT EXISTS (SELECT * 
+WHERE NOT EXISTS (SELECT *
                   FROM Voyage V
                   INNER JOIN Reservation R ON V.idV = R.idV
                   WHERE paysArr = 'MAROC'
+                    AND R.numCl = C.numCl);
