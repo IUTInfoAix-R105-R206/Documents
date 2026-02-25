@@ -1,4 +1,33 @@
 {
+  "r1.05/td6": {
+    "title": "TD6 : Interrogation en SQL",
+    "report_file": "r1.05-td6.html",
+    "total": 195,
+    "pass": 179,
+    "error": 15,
+    "fail": 1,
+    "has_oracle_only": true,
+    "dbms": {
+      "postgres": {
+        "total": 65,
+        "pass": 60,
+        "error": 5,
+        "fail": 0
+      },
+      "sqlite": {
+        "total": 65,
+        "pass": 55,
+        "error": 10,
+        "fail": 0
+      },
+      "oracle": {
+        "total": 65,
+        "pass": 64,
+        "error": 0,
+        "fail": 1
+      }
+    }
+  },
   "r1.05/td7": {
     "title": "TD7 : Interrogation en SQL interprété",
     "report_file": "r1.05-td7.html",
