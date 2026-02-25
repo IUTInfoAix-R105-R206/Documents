@@ -1,0 +1,82 @@
+\documentclass[border=10pt]{standalone}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage{tikz-er2}
+
+\usetikzlibrary{decorations.text}
+\usetikzlibrary{decorations.markings}
+\usetikzlibrary{positioning}
+\usetikzlibrary{shadows}
+\usetikzlibrary{backgrounds}
+
+\tikzstyle{every entity} = [top color=white,
+                            bottom color=blue!30,
+                            draw=blue!50!black!100,
+                            drop shadow]
+
+\tikzstyle{every weak entity} = [drop shadow={shadow xshift=.7ex, shadow yshift=-.7ex}]
+
+\tikzstyle{every attribute} = [top color=white,
+                               bottom color=yellow!20,
+                               draw=yellow,
+                               node distance=1cm,
+                               drop shadow]
+
+\tikzstyle{every relationship} = [top color=white,
+                                  bottom color=yellow!20,
+                                  draw=yellow,
+                                  drop shadow]
+
+\tikzstyle{every isa} = [draw=blue!50!black!100]
+
+\tikzset{card/.style={font=\scriptsize\sffamily, fill=white, inner sep=1pt}}
+
+\begin{document}
+\begin{tikzpicture}[node distance=1.75cm, every edge/.style={link}]
+
+  \node[entity] (etudiant) {
+    \textbf{Etudiant}
+    \nodepart{second}
+    \key{numEt}\\
+    nom\\
+    prenom\\
+    typeBac\\
+    groupe\\
+  };
+
+  \node[relationship] (evalue) [right=of etudiant] {Evalue}
+    child {node[attributes] {resultat\\temps\\nbVariantes\\nbPoints}};
+
+  \node[entity] (question) [right=of evalue] {
+    \textbf{Question}
+    \nodepart{second}
+    \key{idQ}\\
+    numTP\\
+    niveau\\
+    temps\\
+    nbVariantes\\
+    nbPoints\\
+  };
+
+  \draw[link] (etudiant.east) -- node [pos=0.3, above] {(0,n)} (evalue.west);
+  \draw[link] (evalue.east) -- node [pos=0.7, above] {(0,n)} (question.west);
+
+  \node[relationship] (traite) [below=1cm of question] {Traite};
+
+  \node[entity] (theme) [below=1cm of traite] {
+    \textbf{Theme}
+    \nodepart{second}
+    \key{idT}\\
+    libelle\\
+  };
+
+  \draw[link] (question.south) -- node [pos=0.3, right] {(1,n)} (traite.north);
+  \draw[link] (traite.south) -- node [pos=0.7, right] {(1,n)} (theme.north);
+
+  \node[relationship] (a_pour_pere) [right=of theme] {A pour p\`ere};
+  \draw[link] (theme.east) -- node [pos=0.3, above] {(0,1)} (a_pour_pere.west);
+  \draw[link] (a_pour_pere.north) |- ++(0,0.6) -| node [pos=0.9, right] {(0,n)} (theme.15);
+
+\end{tikzpicture}
+\end{document}

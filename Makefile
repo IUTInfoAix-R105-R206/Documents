@@ -34,7 +34,8 @@ TD_PDFS = $(patsubst docs/%,$(OUTPUT_DIR)/%,$(TD_SOURCES:.md=.pdf))
 R206_CORRECTION_PDFS = \
 	$(OUTPUT_DIR)/r2.06/td1/td1-correction.pdf \
 	$(OUTPUT_DIR)/r2.06/td2/td2-correction.pdf \
-	$(OUTPUT_DIR)/r2.06/td3/td3-correction.pdf
+	$(OUTPUT_DIR)/r2.06/td3/td3-correction.pdf \
+	$(OUTPUT_DIR)/r2.06/td4/td4-correction.pdf
 
 .PHONY: all clean r105 r206 r206-corrections \
 	test-sql-postgresql-local test-sql-postgresql-docker \
@@ -206,6 +207,57 @@ $(OUTPUT_DIR)/r2.06/td3/td3-correction.pdf: docs/r2.06/td3/td3-correction.gen.md
 		--variable=version:$(GIT_VERSION) \
 		--number-sections \
 		td3-correction.gen.md \
+		-o ../../../$@
+
+# --- TD4 : Recherche récursive, division et requêtes complexes (BD Questionnaire) ---
+
+R206_TD4_FIGURES = docs/r2.06/td4/figures/mcd.pdf docs/r2.06/td4/figures/hierarchie-themes.pdf
+
+docs/r2.06/td4/figures/mcd.pdf: docs/r2.06/td4/figures/mcd.tex
+	cd docs/r2.06/td4/figures && TEXINPUTS="$(CURDIR)/$(TEMPLATE_DIR):" $(PDFLATEX) -interaction=nonstopmode mcd.tex
+
+docs/r2.06/td4/figures/hierarchie-themes.pdf: docs/r2.06/td4/figures/hierarchie-themes.tex
+	cd docs/r2.06/td4/figures && TEXINPUTS="$(CURDIR)/$(TEMPLATE_DIR):" $(PDFLATEX) -interaction=nonstopmode hierarchie-themes.tex
+
+# Génération du Markdown depuis le SQL annoté
+R206_TD4_SQL = docs/r2.06/td4/td4-correction.sql
+R206_TD4_TEMPLATE = docs/r2.06/td4/td4.md
+R206_TD4_GEN = scripts/generate-questions.py
+
+docs/r2.06/td4/td4.gen.md: $(R206_TD4_TEMPLATE) $(R206_TD4_SQL) $(R206_TD4_GEN)
+	$(PYTHON) $(R206_TD4_GEN) --mode subject --template $< --output $@ $(word 2,$^)
+
+docs/r2.06/td4/td4-correction.gen.md: $(R206_TD4_TEMPLATE) $(R206_TD4_SQL) $(R206_TD4_GEN)
+	$(PYTHON) $(R206_TD4_GEN) --mode correction --template $< --output $@ $(word 2,$^)
+
+$(OUTPUT_DIR)/r2.06/td4/td4.pdf: docs/r2.06/td4/td4.gen.md $(TEMPLATE_DIR)/template.tex $(FILTER_DIR)/custom-styles.lua $(R206_TD4_FIGURES)
+	@mkdir -p $(OUTPUT_DIR)/r2.06/td4
+	cd docs/r2.06/td4 && $(PANDOC) \
+		--from markdown+footnotes+definition_lists+fenced_divs+bracketed_spans \
+		--pdf-engine=pdflatex \
+		--pdf-engine-opt=-shell-escape \
+		--template=../../../$(TEMPLATE_DIR)/template.tex \
+		--lua-filter=../../../$(FILTER_DIR)/custom-styles.lua \
+		--resource-path=.:../../../$(TEMPLATE_DIR):figures \
+		--variable=license-badge:../../../$(TEMPLATE_DIR)/cc-by-nc-sa \
+		--variable=version:$(GIT_VERSION) \
+		--number-sections \
+		td4.gen.md \
+		-o ../../../$@
+
+$(OUTPUT_DIR)/r2.06/td4/td4-correction.pdf: docs/r2.06/td4/td4-correction.gen.md $(TEMPLATE_DIR)/template.tex $(FILTER_DIR)/custom-styles.lua $(R206_TD4_FIGURES)
+	@mkdir -p $(OUTPUT_DIR)/r2.06/td4
+	cd docs/r2.06/td4 && $(PANDOC) \
+		--from markdown+footnotes+definition_lists+fenced_divs+bracketed_spans \
+		--pdf-engine=pdflatex \
+		--pdf-engine-opt=-shell-escape \
+		--template=../../../$(TEMPLATE_DIR)/template.tex \
+		--lua-filter=../../../$(FILTER_DIR)/custom-styles.lua \
+		--resource-path=.:../../../$(TEMPLATE_DIR):figures \
+		--variable=license-badge:../../../$(TEMPLATE_DIR)/cc-by-nc-sa \
+		--variable=version:$(GIT_VERSION) \
+		--number-sections \
+		td4-correction.gen.md \
 		-o ../../../$@
 
 # ==============================================================================

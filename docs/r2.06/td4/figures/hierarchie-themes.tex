@@ -1,0 +1,69 @@
+\documentclass[border=8pt]{standalone}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{forest}
+\usepackage{xcolor}
+
+\definecolor{nodegreen}{HTML}{C8E6C8}
+\definecolor{nodeblue}{HTML}{C8DFF0}
+
+\forestset{
+  theme tree/.style={
+    for tree={
+      draw=black!50, thick,
+      rectangle, rounded corners=1pt,
+      minimum width=1.3cm, minimum height=0.55cm,
+      font=\footnotesize\sffamily,
+      inner sep=2pt,
+      fill=nodeblue,
+      s sep=4pt,
+      l sep=8pt,
+      edge={draw=black!50, thick},
+      anchor=north,
+      align=center,
+    },
+  },
+  feuille/.style={fill=nodegreen},
+}
+
+\begin{document}
+\begin{forest}
+  theme tree
+  [,phantom
+    [Conception
+      [Merise
+        [MCT, feuille]
+        [MCD, feuille]
+        [MLT, feuille]
+        [MLD, feuille]
+        [MPT, feuille]
+        [MPD, feuille]
+      ]
+    ]
+    [Langage de\\requ\^etes
+      [Alg\`ebre\\relationnelle, feuille]
+      [SQL
+        [SQL LDD
+          [Cr\'eation\\de table, feuille]
+          [Suppression\\de table
+            [Suppression\\en cascade, feuille]
+          ]
+        ]
+        [SQL LMD
+          [S\'election\\simple, feuille]
+          [Jointure
+            [Jointure\\imbriqu\'ee
+              [Jointure\\corr\'el\'ee, feuille]
+            ]
+            [Jointure\\pr\'edicative, feuille]
+            [Auto-\\jointure, feuille]
+            [Jointure\\externe, feuille]
+          ]
+          [Fonction agr\'egative\\ou statistique, feuille]
+        ]
+        [SQL LCT, feuille]
+      ]
+    ]
+  ]
+\end{forest}
+\end{document}

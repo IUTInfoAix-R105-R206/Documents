@@ -1,5 +1,10 @@
 -- V1.0.0
 
+-- @title Requêtes avec SQL
+-- @intro Formulez, en SQL, sur la base de données exemple, les requêtes d'interrogation suivantes.
+
+-- @section Expression des recherches récursives
+
 -- Q1 - c:2, t:2
 -- Donnez les identifiants et libellés des racines des hiérarchies des thèmes.
 PROMPT "Q1";
@@ -49,7 +54,7 @@ CONNECT BY idTPere = PRIOR idT
        AND libelle <> 'JOINTURE IMBRIQUEE';
 
 -- Q6 - c:2, t:5
--- Donnez les identifiants et libellés des thèmes subordonnés directement ou pas au thème Jointure à l’exception du thème Jointure imbriquée. 
+-- Donnez les identifiants et libellés des thèmes subordonnés directement ou pas au thème Jointure à l'exception du thème Jointure imbriquée.
 PROMPT "Q6";
 
 SELECT idT, libelle
@@ -172,7 +177,7 @@ FROM Theme
 WHERE idT NOT IN (SELECT idTPere FROM Theme WHERE idTPere IS NOT NULL)
 START WITH idT IN (SELECT idT
 				   FROM Theme
-				   WHERE idTPere IS NULL 
+				   WHERE idTPere IS NULL
 				   CONNECT BY idT = PRIOR idTPere
 				   START WITH libelle = 'JOINTURE')
 CONNECT BY PRIOR idT = idTPere;
@@ -191,6 +196,8 @@ FROM Theme
 START WITH libelle = 'JOINTURE'
 CONNECT BY PRIOR idT = idTPere;
 
+-- @section Expression des divisions
+
 -- Q13 - c:3, t:4
 -- Donnez les noms et prénoms des étudiants ayant fait toutes les questions du TP numéro 1. Proposer deux formulations différentes, avec double NOT EXISTS et HAVING, de cette requête.
 PROMPT "Q13 - Version double NOT EXISTS";
@@ -203,9 +210,9 @@ WHERE NOT EXISTS (SELECT *
  				    AND NOT EXISTS (SELECT *
 					                FROM Evalue E
 								    WHERE Et.numEt = E.numEt
-  									  AND Q.idQ = E.idQ));
+									  AND Q.idQ = E.idQ));
 
--- Remarque : cette requête correspond au paraphrasage "Quels sont les numéros, noms et prénoms des étudiants ayant fait autant de questions du TP numéro 1 qu’il en existe ?"
+-- Remarque : cette requête correspond au paraphrasage "Quels sont les numéros, noms et prénoms des étudiants ayant fait autant de questions du TP numéro 1 qu'il en existe ?"
 
 PROMPT "Q13 - Version HAVING";
 
@@ -219,10 +226,10 @@ HAVING COUNT(*) = (SELECT COUNT(*)
 				   FROM Question
 				   WHERE numTP = 1);
 
--- Remarque : cette requête correspond au paraphrasage "Quels sont les numéros, noms et prénoms des étudiants tels qu’il n’existe aucune question du TP numéro 1 qu’ils n’aient pas faite ?"
+-- Remarque : cette requête correspond au paraphrasage "Quels sont les numéros, noms et prénoms des étudiants tels qu'il n'existe aucune question du TP numéro 1 qu'ils n'aient pas faite ?"
 
 -- Q14 - c:1, t:3
--- Quels sont les groupes d'étudiants dans lesquels tous les types de BAC sont représentés ? Proposer deux formulations différentes, avec double NOT EXISTS et HAVING, de cette requête. 
+-- Quels sont les groupes d'étudiants dans lesquels tous les types de BAC sont représentés ? Proposer deux formulations différentes, avec double NOT EXISTS et HAVING, de cette requête.
 PROMPT "Q14 - Version double NOT EXISTS";
 
 SELECT DISTINCT groupe
@@ -234,7 +241,7 @@ WHERE NOT EXISTS (SELECT *
 									WHERE Et.groupe = Et3.groupe
 									  AND Et2.typeBAC = Et3.typeBAC));
 
--- Remarque : cette requête correspond au paraphrasage "Quels sont les groupes d'étudiants pour lesquels il n’existe pas de type de BAC qui ne soit pas représenté ?
+-- Remarque : cette requête correspond au paraphrasage "Quels sont les groupes d'étudiants pour lesquels il n'existe pas de type de BAC qui ne soit pas représenté ?
 
 PROMPT "Q14 - Version HAVING";
 
@@ -244,7 +251,7 @@ GROUP BY groupe
 HAVING COUNT(DISTINCT typeBAC) = (SELECT COUNT(DISTINCT typeBAC)
 								  FROM Etudiant);
 
--- Remarque : cette requête correspond au paraphrasage "Quels sont les groupes d'étudiants ayant autant de Types de BAC qu’il en existe ?"
+-- Remarque : cette requête correspond au paraphrasage "Quels sont les groupes d'étudiants ayant autant de Types de BAC qu'il en existe ?"
 
 -- Q15 - c:1, t:2
 -- Quels sont les groupes d'étudiants pour lesquels au moins un étudiant a été évalué pour chaque TP ?
@@ -263,7 +270,7 @@ WHERE NOT EXISTS (SELECT *
 				                    WHERE Et.groupe = Et2.groupe
   									  AND Q.numTP = Q2.numTP));
 
--- Remarque : cette requête correspond au paraphrasage "Quels sont les groupes pour lesquels il y a autant de TP évalués qu’il en existe ?"
+-- Remarque : cette requête correspond au paraphrasage "Quels sont les groupes pour lesquels il y a autant de TP évalués qu'il en existe ?"
 
 PROMPT "Q15 - Version HAVING";
 
@@ -275,7 +282,9 @@ GROUP BY groupe
 HAVING COUNT(DISTINCT numTP) = (SELECT COUNT(DISTINCT numTP)
                                 FROM Question);
 
--- Remarque : cette requête correspond au paraphrasage "Quels sont les groupes tels qu’il n’existe aucun TP pour lequel ils n’aient pas été évalué ?"
+-- Remarque : cette requête correspond au paraphrasage "Quels sont les groupes tels qu'il n'existe aucun TP pour lequel ils n'aient pas été évalué ?"
+
+-- @section Requêtes complexes
 
 -- Q16 - c:3, t:1
 -- Donnez les numéros, noms et prénoms des étudiants ayant eu au moins un résultat faux au TP numéro 2 et au TP numéro 3. Proposer trois formulations différentes.
@@ -287,7 +296,7 @@ INNER JOIN Evalue E ON Et.numEt = E.numEt
 INNER JOIN Question Q ON E.idQ = Q.idQ
 INNER JOIN Evalue E2 ON Et.numEt = E2.numEt
 INNER JOIN Question Q2 ON E2.idQ = Q2.idQ
-WHERE E.resultat = 'FAUX' AND Q.numTP = 2 
+WHERE E.resultat = 'FAUX' AND Q.numTP = 2
   AND E2.resultat = 'FAUX' AND Q2.numTP = 3;
 
 -- Version alternative.
@@ -341,7 +350,7 @@ WHERE numEt IN (SELECT numEt
 								  AND numTP = 3));
 
 -- Q17 - c:1, t:1 (4)
--- Donnez les numéros des groupes d'étudiants dont aucun étudiant n'a obtenu un résultat faux au TP numéro 1. 
+-- Donnez les numéros des groupes d'étudiants dont aucun étudiant n'a obtenu un résultat faux au TP numéro 1.
 PROMPT "Q17";
 
 SELECT DISTINCT groupe
@@ -374,13 +383,13 @@ WHERE (groupe, typeBAC) IN (SELECT groupe, typeBAC
 							WHERE nom = 'DUJARDIN'
 							  AND prenom = 'MARIE');
 
--- Q19 - c:2, t:19
+-- Q19 - c:3, t:19
 -- Donnez les numéros, noms et prénoms des étudiants ayant réalisés le nombre de variantes demandées pour au moins une Question du TP numéro 2.
 PROMPT "Q19 - V1";
 
 SELECT DISTINCT Et.numEt, nom, prenom
 FROM Etudiant Et
-INNER JOIN Evalue E ON Et.numEt = E.numEt 
+INNER JOIN Evalue E ON Et.numEt = E.numEt
 INNER JOIN Question Q ON E.idQ = Q.idQ AND E.nbVariantes = Q.nbVariantes
 WHERE numTP = 2;
 
@@ -461,3 +470,4 @@ WHERE (Et.numEt, idQ) IN (SELECT numEt, E.idQ
 						  INNER JOIN Question Q ON E.idQ = Q.idQ AND E.idQ = Q.idQ
 						  WHERE resultat = 'JUSTE'
  						    AND numTP = 3)
+GROUP BY Et.numEt, nom;
