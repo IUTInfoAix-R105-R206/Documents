@@ -374,6 +374,22 @@ $(OUTPUT_DIR)/r2.06/td6/td6-correction.pdf: docs/r2.06/td6/td6-correction.gen.md
 # R1.05 — Introduction aux bases de données et SQL
 # ==============================================================================
 
+# --- TD3 : Dépendances fonctionnelles et normalisation ---
+
+$(OUTPUT_DIR)/r1.05/td3/td3.pdf: docs/r1.05/td3/td3.md $(TEMPLATE_DIR)/template.tex $(FILTER_DIR)/custom-styles.lua
+	@mkdir -p $(OUTPUT_DIR)/r1.05/td3
+	cd docs/r1.05/td3 && $(PANDOC) \
+		--from markdown+footnotes+definition_lists+fenced_divs+bracketed_spans \
+		--pdf-engine=pdflatex \
+		--pdf-engine-opt=-shell-escape \
+		--template=../../../$(TEMPLATE_DIR)/template.tex \
+		--lua-filter=../../../$(FILTER_DIR)/custom-styles.lua \
+		--resource-path=.:../../../$(TEMPLATE_DIR) \
+		--variable=license-badge:../../../$(TEMPLATE_DIR)/cc-by-nc-sa \
+		--variable=version:$(GIT_VERSION) \
+		td3.md \
+		-o ../../../$@
+
 # --- TD4 : Modèle Entité/Association et traduction relationnelle ---
 
 R105_TD4_FIGURES = docs/r1.05/td4/figures/gestion-artistique-1.pdf \
