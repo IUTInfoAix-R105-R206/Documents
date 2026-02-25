@@ -4,6 +4,7 @@
 
 PANDOC = pandoc
 PDFLATEX = pdflatex
+PYTHON = python3
 TEMPLATE_DIR = templates
 FILTER_DIR = $(TEMPLATE_DIR)/filters
 OUTPUT_DIR = output
@@ -26,10 +27,13 @@ PANDOC_OPTS = \
 	--number-sections
 
 # Lister tous les TD (sources Markdown) dans docs/r*/td*/
-TD_SOURCES = $(shell find docs/r*/td* -name 'td*-*.md' 2>/dev/null)
+TD_SOURCES = $(shell find docs/r*/td* -name 'td*-*.md' ! -name '*.gen.md' 2>/dev/null)
 TD_PDFS = $(patsubst docs/%,$(OUTPUT_DIR)/%,$(TD_SOURCES:.md=.pdf))
 
-.PHONY: all clean r105 r206 \
+# Corrections PDF (générées depuis le SQL annoté)
+R206_CORRECTION_PDFS = $(OUTPUT_DIR)/r2.06/td3/td3-interrogations-sql-correction.pdf
+
+.PHONY: all clean r105 r206 r206-corrections \
 	test-sql-postgresql-local test-sql-postgresql-docker \
 	test-sql-sqlite-local    test-sql-sqlite-docker    \
 	test-sql-oracle-local    test-sql-oracle-docker    \
@@ -46,7 +50,9 @@ all: $(TD_PDFS) ## Compile tous les TD
 
 r105: $(filter $(OUTPUT_DIR)/r1.05/%,$(TD_PDFS)) ## Compile tous les TD de R1.05
 
-r206: $(filter $(OUTPUT_DIR)/r2.06/%,$(TD_PDFS)) ## Compile tous les TD de R2.06
+r206: $(filter $(OUTPUT_DIR)/r2.06/%,$(TD_PDFS)) $(R206_CORRECTION_PDFS) ## Compile tous les TD de R2.06 (sujets + corrigés)
+
+r206-corrections: $(R206_CORRECTION_PDFS) ## Compile uniquement les corrigés de R2.06
 
 # ==============================================================================
 # R2.06 — Exploitation d'une base de données
@@ -84,7 +90,18 @@ docs/r2.06/td3/figures/hierarchie-modules.pdf: docs/r2.06/td3/figures/hierarchie
 docs/r2.06/td3/figures/mcd.pdf: docs/r2.06/td3/figures/mcd.tex
 	cd docs/r2.06/td3/figures && TEXINPUTS="$(CURDIR)/$(TEMPLATE_DIR):" $(PDFLATEX) -interaction=nonstopmode mcd.tex
 
-$(OUTPUT_DIR)/r2.06/td3/td3-interrogations-sql.pdf: docs/r2.06/td3/td3-interrogations-sql.md $(TEMPLATE_DIR)/template.tex $(FILTER_DIR)/custom-styles.lua $(R206_TD3_FIGURES)
+# Génération du Markdown depuis le SQL annoté
+R206_TD3_SQL = docs/r2.06/td3/td3-correction.sql
+R206_TD3_INTRO = docs/r2.06/td3/td3-interrogations-sql.md
+R206_TD3_GEN = scripts/generate-questions.py
+
+docs/r2.06/td3/td3-interrogations-sql.gen.md: $(R206_TD3_INTRO) $(R206_TD3_SQL) $(R206_TD3_GEN)
+	$(PYTHON) $(R206_TD3_GEN) --mode subject --template $< --output $@ $(word 2,$^)
+
+docs/r2.06/td3/td3-interrogations-sql-correction.gen.md: $(R206_TD3_INTRO) $(R206_TD3_SQL) $(R206_TD3_GEN)
+	$(PYTHON) $(R206_TD3_GEN) --mode correction --template $< --output $@ $(word 2,$^)
+
+$(OUTPUT_DIR)/r2.06/td3/td3-interrogations-sql.pdf: docs/r2.06/td3/td3-interrogations-sql.gen.md $(TEMPLATE_DIR)/template.tex $(FILTER_DIR)/custom-styles.lua $(R206_TD3_FIGURES)
 	@mkdir -p $(OUTPUT_DIR)/r2.06/td3
 	cd docs/r2.06/td3 && $(PANDOC) \
 		--from markdown+footnotes+definition_lists+fenced_divs+bracketed_spans \
@@ -96,7 +113,22 @@ $(OUTPUT_DIR)/r2.06/td3/td3-interrogations-sql.pdf: docs/r2.06/td3/td3-interroga
 		--variable=license-badge:../../../$(TEMPLATE_DIR)/cc-by-nc-sa \
 		--variable=version:$(GIT_VERSION) \
 		--number-sections \
-		td3-interrogations-sql.md \
+		td3-interrogations-sql.gen.md \
+		-o ../../../$@
+
+$(OUTPUT_DIR)/r2.06/td3/td3-interrogations-sql-correction.pdf: docs/r2.06/td3/td3-interrogations-sql-correction.gen.md $(TEMPLATE_DIR)/template.tex $(FILTER_DIR)/custom-styles.lua $(R206_TD3_FIGURES)
+	@mkdir -p $(OUTPUT_DIR)/r2.06/td3
+	cd docs/r2.06/td3 && $(PANDOC) \
+		--from markdown+footnotes+definition_lists+fenced_divs+bracketed_spans \
+		--pdf-engine=pdflatex \
+		--pdf-engine-opt=-shell-escape \
+		--template=../../../$(TEMPLATE_DIR)/template.tex \
+		--lua-filter=../../../$(FILTER_DIR)/custom-styles.lua \
+		--resource-path=.:../../../$(TEMPLATE_DIR):figures \
+		--variable=license-badge:../../../$(TEMPLATE_DIR)/cc-by-nc-sa \
+		--variable=version:$(GIT_VERSION) \
+		--number-sections \
+		td3-interrogations-sql-correction.gen.md \
 		-o ../../../$@
 
 # ==============================================================================
@@ -194,6 +226,7 @@ test-sql-docker: ## Exécute les corrections SQL avec tous les SGBD via Docker (
 
 clean: ## Supprime les fichiers générés
 	rm -rf $(OUTPUT_DIR)
+	find docs -name "*.gen.md" | xargs rm -f
 	find docs -name "*.aux" -o -name "*.log" -o -name "*.synctex*" | xargs rm -f
 	find docs -path "*/figures/*.aux" -o -path "*/figures/*.log" -o -path "*/figures/*.pdf" | xargs rm -f
 	find docs -type d -name "svg-inkscape" | xargs rm -rf

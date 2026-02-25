@@ -26,7 +26,6 @@
 \usepackage{etoolbox}
 \usepackage{footmisc}
 \usepackage{rotating}
-\usepackage{svg}
 \usepackage[framemethod=default]{mdframed}
 
 %% ============================================================================
@@ -70,19 +69,19 @@ marginparwidth=27mm}
 
 % En-tête
 \fancyhead[L]{\small\textit{$title$ -- $version$}}
-\fancyhead[R]{\raisebox{-2pt}{\includesvg[height=12pt]{$if(license-badge)$$license-badge$$else$cc-by-nc-sa$endif$}}}
+\fancyhead[R]{\raisebox{-2pt}{\includegraphics[height=12pt]{$if(license-badge)$$license-badge$$else$cc-by-nc-sa$endif$}}}
 
 % Filet d'en-tête
 \renewcommand{\headrulewidth}{0.4pt}
 \renewcommand{\headrule}{\hbox to\headwidth{\color{headerrule}\leaders\hrule height \headrulewidth\hfill}}
 
 % Pied de page
-\fancyfoot[C]{\noindent\textcolor{headerrule}{\rule{\textwidth}{0.4pt}}\\[1pt]\small\textit{$course$}\\[-1pt]\small $for(authors)$$authors$$sep$ - $endfor$\hfill $page$/$numpages$}
+\fancyfoot[C]{\noindent\textcolor{headerrule}{\rule{\textwidth}{0.4pt}}\\[1pt]\small\textit{$course$}\hfill \page/\numpages}
 
-% Style pour la première page
+% Style pour la première page (sans en-tête)
 \fancypagestyle{firstpage}{
   \fancyhf{}
-  \fancyfoot[C]{\noindent\textcolor{headerrule}{\rule{\textwidth}{0.4pt}}\\[1pt]\small\textit{$course$}\\[-1pt]\small $for(authors)$$authors$$sep$ - $endfor$\hfill $page$/$numpages$}
+  \fancyfoot[C]{\noindent\textcolor{headerrule}{\rule{\textwidth}{0.4pt}}\\[1pt]\small\textit{$course$}\hfill \page/\numpages}
   \renewcommand{\headrulewidth}{0pt}
 }
 
@@ -205,13 +204,18 @@ marginparwidth=27mm}
 %% ============================================================================
 \usepackage{lastpage}
 \makeatletter
-\newcommand{\numpages}{\pageref{LastPage}}
+\newcommand{\numpages}{\pageref*{LastPage}}
 \newcommand{\page}{\thepage}
 \makeatother
 
 % Tight list support (Pandoc)
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+% Syntax highlighting support (Pandoc — for code blocks in correction documents)
+$if(highlighting-macros)$
+$highlighting-macros$
+$endif$
 
 % Améliorer le formatage des légendes (captions)
 \captionsetup{
@@ -242,12 +246,13 @@ $endif$
 
 \begin{center}
   {\Huge\bfseries $title$}\\[4pt]
-  {\Huge\bfseries $version$}\\[12pt]
+  {\Huge\bfseries $version$}\\[8pt]
+  {\small $for(authors)$$authors$$sep$ - $endfor$}\\[8pt]
 
   $if(license-badge)$
-  \includesvg[height=28pt]{$license-badge$}\\[8pt]
+  \includegraphics[height=28pt]{$license-badge$}\\[8pt]
   $else$
-  \includesvg[height=28pt]{cc-by-nc-sa}\\[8pt]
+  \includegraphics[height=28pt]{cc-by-nc-sa}\\[8pt]
   $endif$
 
   {\small Cette œuvre de $license-holder$ est mise à disposition sous licence Creative Commons}\\
