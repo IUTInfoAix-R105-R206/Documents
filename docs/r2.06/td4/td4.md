@@ -85,12 +85,12 @@ Voici la hiérarchie des thèmes de l'extension de la base de données exemple r
 d'arborescences des libellés :
 :::
 
-\begin{figure}[ht]
+\begin{sidewaysfigure}
 \centering
 \includegraphics{figures/hierarchie-themes.pdf}
 \caption{Hiérarchie des thèmes}
 \label{fig:hierarchie-themes}
-\end{figure}
+\end{sidewaysfigure}
 
 ::: remarques
 Nous considérons qu'il n'y a pas deux étudiants homonymes ayant le même prénom et le même nom.

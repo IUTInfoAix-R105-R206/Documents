@@ -33,7 +33,7 @@
 \tikzset{card/.style={font=\scriptsize\sffamily, fill=white, inner sep=1pt}}
 
 \begin{document}
-\begin{tikzpicture}[node distance=1.75cm, every edge/.style={link}]
+\begin{tikzpicture}[node distance=1cm, every edge/.style={link}]
 
   \node[entity] (etudiant) {
     \textbf{Etudiant}
@@ -59,12 +59,12 @@
     nbPoints\\
   };
 
-  \draw[link] (etudiant.east) -- node [pos=0.3, above] {(0,n)} (evalue.west);
-  \draw[link] (evalue.east) -- node [pos=0.7, above] {(0,n)} (question.west);
+  \draw[link] (etudiant.east) -- node [pos=0.4, above] {(0,n)} (evalue.west);
+  \draw[link] (evalue.east) -- node [pos=0.6, above] {(0,n)} (question.west);
 
-  \node[relationship] (traite) [below=1cm of question] {Traite};
+  \node[relationship] (traite) [below= of question] {Traite};
 
-  \node[entity] (theme) [below=1cm of traite] {
+  \node[entity] (theme) [below= of traite] {
     \textbf{Theme}
     \nodepart{second}
     \key{idT}\\
@@ -75,8 +75,9 @@
   \draw[link] (traite.south) -- node [pos=0.7, right] {(1,n)} (theme.north);
 
   \node[relationship] (a_pour_pere) [right=of theme] {A pour p\`ere};
-  \draw[link] (theme.east) -- node [pos=0.3, above] {(0,1)} (a_pour_pere.west);
-  \draw[link] (a_pour_pere.north) |- ++(0,0.6) -| node [pos=0.9, right] {(0,n)} (theme.15);
+
+  \draw[link] (theme.20) to [bend left=10] node [pos=0.4, above] {(0,1)} (a_pour_pere.170);
+  \draw[link] (a_pour_pere.190) to [bend left=10] node [pos=0.6, below] {(0,n)} (theme.340);
 
 \end{tikzpicture}
 \end{document}
