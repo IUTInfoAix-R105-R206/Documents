@@ -47,7 +47,7 @@ RE_QUESTION_RAW = re.compile(r'^--\s+Q' + QNUM + r'\s*-\s*(.+?)\s*$')
 RE_QUESTION_BARE = re.compile(r'^--\s+Q' + QNUM + r'\s*$')
 
 RE_TAG = re.compile(r'^--\s+@(\w+)\s+(.*?)\s*$')
-RE_TAG_CONT = re.compile(r'^--\s+@\+\s+(.*?)\s*$')
+RE_TAG_CONT = re.compile(r'^--\s+@\+(?:\s+(.*?))?\s*$')
 RE_COMMENT = re.compile(r'^--\s?(.*?)\s*$')
 RE_PROMPT = re.compile(r'^PROMPT\s', re.IGNORECASE)
 RE_EMPTY = re.compile(r'^\s*$')
@@ -156,7 +156,7 @@ def parse_sql(path):
             sql = current_variant['sql'].strip()
             current_variant['sql'] = sql
             current_question['variants'].append(current_variant)
-            current_variant = None
+        current_variant = None
 
     def finish_question():
         nonlocal current_question
@@ -181,15 +181,23 @@ def parse_sql(path):
         # --- Tag @+ continuation ---
         m = RE_TAG_CONT.match(line)
         if m:
-            cont_text = m.group(1)
+            cont_text = m.group(1) or ''
             if last_tag_target:
                 tag_type, tag_ref = last_tag_target
+                # Pour @text : retour à la ligne (contenu bloc Markdown)
+                # Pour les autres (@instruction, @title, @intro) : espace (continuation de phrase)
+                if not cont_text:
+                    sep = '\n\n'       # -- @+ vide → saut de paragraphe
+                elif tag_type == 'text':
+                    sep = '\n'         # @text : chaque @+ est une nouvelle ligne
+                else:
+                    sep = ' '          # @instruction/title/intro : continuation de phrase
                 if tag_type == 'title':
-                    result['title'] += ' ' + cont_text
+                    result['title'] += sep + cont_text
                 elif tag_type == 'intro':
-                    result['intro'] += ' ' + cont_text
+                    result['intro'] += sep + cont_text
                 elif tag_type in ('instruction', 'text') and tag_ref is not None:
-                    tag_ref['text'] += ' ' + cont_text
+                    tag_ref['text'] += sep + cont_text
             i += 1
             continue
 

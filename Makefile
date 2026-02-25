@@ -36,7 +36,8 @@ R206_CORRECTION_PDFS = \
 	$(OUTPUT_DIR)/r2.06/td2/td2-correction.pdf \
 	$(OUTPUT_DIR)/r2.06/td3/td3-correction.pdf \
 	$(OUTPUT_DIR)/r2.06/td4/td4-correction.pdf \
-	$(OUTPUT_DIR)/r2.06/td5/td5-correction.pdf
+	$(OUTPUT_DIR)/r2.06/td5/td5-correction.pdf \
+	$(OUTPUT_DIR)/r2.06/td6/td6-correction.pdf
 
 .PHONY: all clean r105 r206 r206-corrections \
 	test-sql-postgresql-local test-sql-postgresql-docker \
@@ -310,6 +311,57 @@ $(OUTPUT_DIR)/r2.06/td5/td5-correction.pdf: docs/r2.06/td5/td5-correction.gen.md
 		--variable=version:$(GIT_VERSION) \
 		--number-sections \
 		td5-correction.gen.md \
+		-o ../../../$@
+
+# --- TD6 : Vues, tables système et rappels SQL (BD Gestion pédagogique) ---
+
+R206_TD6_FIGURES = docs/r2.06/td6/figures/mcd.pdf docs/r2.06/td6/figures/hierarchie-modules.pdf
+
+docs/r2.06/td6/figures/mcd.pdf: docs/r2.06/td6/figures/mcd.tex
+	cd docs/r2.06/td6/figures && TEXINPUTS="$(CURDIR)/$(TEMPLATE_DIR):" $(PDFLATEX) -interaction=nonstopmode mcd.tex
+
+docs/r2.06/td6/figures/hierarchie-modules.pdf: docs/r2.06/td6/figures/hierarchie-modules.tex
+	cd docs/r2.06/td6/figures && TEXINPUTS="$(CURDIR)/$(TEMPLATE_DIR):" $(PDFLATEX) -interaction=nonstopmode hierarchie-modules.tex
+
+# Génération du Markdown depuis le SQL annoté
+R206_TD6_SQL = docs/r2.06/td6/td6-correction.sql
+R206_TD6_TEMPLATE = docs/r2.06/td6/td6.md
+R206_TD6_GEN = scripts/generate-questions.py
+
+docs/r2.06/td6/td6.gen.md: $(R206_TD6_TEMPLATE) $(R206_TD6_SQL) $(R206_TD6_GEN)
+	$(PYTHON) $(R206_TD6_GEN) --mode subject --template $< --output $@ $(word 2,$^)
+
+docs/r2.06/td6/td6-correction.gen.md: $(R206_TD6_TEMPLATE) $(R206_TD6_SQL) $(R206_TD6_GEN)
+	$(PYTHON) $(R206_TD6_GEN) --mode correction --template $< --output $@ $(word 2,$^)
+
+$(OUTPUT_DIR)/r2.06/td6/td6.pdf: docs/r2.06/td6/td6.gen.md $(TEMPLATE_DIR)/template.tex $(FILTER_DIR)/custom-styles.lua $(R206_TD6_FIGURES)
+	@mkdir -p $(OUTPUT_DIR)/r2.06/td6
+	cd docs/r2.06/td6 && $(PANDOC) \
+		--from markdown+footnotes+definition_lists+fenced_divs+bracketed_spans \
+		--pdf-engine=pdflatex \
+		--pdf-engine-opt=-shell-escape \
+		--template=../../../$(TEMPLATE_DIR)/template.tex \
+		--lua-filter=../../../$(FILTER_DIR)/custom-styles.lua \
+		--resource-path=.:../../../$(TEMPLATE_DIR):figures \
+		--variable=license-badge:../../../$(TEMPLATE_DIR)/cc-by-nc-sa \
+		--variable=version:$(GIT_VERSION) \
+		--number-sections \
+		td6.gen.md \
+		-o ../../../$@
+
+$(OUTPUT_DIR)/r2.06/td6/td6-correction.pdf: docs/r2.06/td6/td6-correction.gen.md $(TEMPLATE_DIR)/template.tex $(FILTER_DIR)/custom-styles.lua $(R206_TD6_FIGURES)
+	@mkdir -p $(OUTPUT_DIR)/r2.06/td6
+	cd docs/r2.06/td6 && $(PANDOC) \
+		--from markdown+footnotes+definition_lists+fenced_divs+bracketed_spans \
+		--pdf-engine=pdflatex \
+		--pdf-engine-opt=-shell-escape \
+		--template=../../../$(TEMPLATE_DIR)/template.tex \
+		--lua-filter=../../../$(FILTER_DIR)/custom-styles.lua \
+		--resource-path=.:../../../$(TEMPLATE_DIR):figures \
+		--variable=license-badge:../../../$(TEMPLATE_DIR)/cc-by-nc-sa \
+		--variable=version:$(GIT_VERSION) \
+		--number-sections \
+		td6-correction.gen.md \
 		-o ../../../$@
 
 # ==============================================================================

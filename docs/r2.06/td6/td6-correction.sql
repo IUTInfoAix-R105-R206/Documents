@@ -1,5 +1,11 @@
 -- V1.0.0
 
+-- @title Requêtes avec SQL
+-- @intro Formulez, en SQL, sur la base de données exemple, les requêtes d'interrogation suivantes.
+
+-- @section Création et manipulation de vues
+-- @instruction Répondez aux questions suivantes sous forme de requêtes de création de vues, avant de consulter chaque vue par une requête d'interrogation ou des tentatives d'insertion, une valide et une invalide, pour les vues de mise à jour. Les vues à créer ont pour objectifs de créer de nouvelles relations logiques répondants à des besoins fréquents, d'assurer la prise en compte des contraintes d'intégrité de la base ou de limiter la consultation des données pour certains utilisateurs.
+
 PROMPT "Suppression de toutes les vues";
 
 DROP VIEW IF EXISTS Q1;
@@ -35,6 +41,8 @@ WHERE anneeEt = 2;
 
 SELECT *
 FROM Q1;
+
+-- @instruction Créez des vues supprimant les calculs complexes des questions correspondantes du TD5 : Interrogations avancées en SQL.
 
 -- Q2 - c:1, t:1 (9)
 -- À partir du nombre d'étudiants de chaque groupe d'étudiants de seconde année, donnez le nombre moyen d'étudiants.
@@ -167,6 +175,8 @@ INSERT INTO Q8 (code, libelle, heureCMPrev, heureCMReal, heureTPPrev, heureTPRea
 
 -- Remarque : cette insertion provoque une erreur.
 
+-- @section Requêtes complexes
+
 -- Q9 - c:3, t:19
 -- Quels sont les numéros, noms et prénoms des étudiants ayant eu une note dans le module Principes des BD ou dans un de ses sous-modules direct ou pas ?
 PROMPT "Q9";
@@ -229,6 +239,33 @@ WHERE anneeEt = 2
 										 WHERE anneeEt = 2
 										   AND groupeEt = 3))
 GROUP BY groupeEt;
+
+-- @section Consultation des tables systèmes
+-- @text En lieu et place du schéma relationnel de la base de données exemple, focalisons-nous plutôt à présent sur les vues système suivantes issues du dictionnaire de données Oracle dont un extrait est présenté ci-après :
+-- @text :::: schema-relationnel
+-- @+
+-- @+ `User_Tables` (table\_Name, tablespace\_Name, ...)
+-- @+
+-- @+ `User_Tab_Columns` (table\_Name, column\_Name, data\_Type, ..., data\_Length, ...)
+-- @+
+-- @+ `User_Cons_Columns` (..., constraint\_Name, table\_Name, column\_Name, ...)
+-- @+
+-- @+ `User_Constraints` (..., constraint\_Name, constraint\_Type, table\_Name, ...)
+-- @+
+-- @+ `User_Objects` (object\_Name, ..., object\_Type, ...)
+-- @+
+-- @+ ::::
+-- @text ::: remarques
+-- @+
+-- @+ Les valeurs de l'attribut `data_Type` correspondent aux types de données Oracle : `VARCHAR2`, `NUMBER`, `DATE`, etc.
+-- @+
+-- @+ La valeur de l'attribut `constraint_Type` peut être `P`, pour `PRIMAY KEY`, `R`, pour `REFERENCES`, `C` pour `CHECK`, etc.
+-- @+
+-- @+ La valeur de l'attribut `object_Type` peut être `TABLE`, `VIEW`, `FUNCTION`, `PROCEDURE`, `TRIGGER`, `INDEX`, etc.
+-- @+
+-- @+ :::
+-- @text Effectuez les requêtes sur les relations actuelles, pas celles éventuellement dans la corbeille. N'exécutez qu'une seule requête à la fois.
+-- @instruction En cas de doute ou de curiosité, n'oubliez pas d'utiliser la commande `DESCRIBE`.
 
 -- Q12 - c:1, t:7
 -- Quels sont les noms des attributs de la relation Professeur ?

@@ -69,14 +69,13 @@ Les figures sont des fichiers LaTeX `standalone` compilés séparément en PDF p
 
 ```yaml
 title: "TD3 : Interrogations en SQL"
-version: "V2.0.4"   # Valeur de secours ; écrasée par le Makefile avec la version git
 course: "Exploitation d'une base de données"
 authors:
   - "Rosine Cicchetti"
   - "Lotfi Lakhal"
   - "Mickaël Martin Nevot"
 license: "CC BY-NC-SA"
-license-holder: "Mickaël Martin Nevot"
+license-holder: "Rosine Cicchetti"
 website: "www.mickael-martin-nevot.com"
 ```
 
