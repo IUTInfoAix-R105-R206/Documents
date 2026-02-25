@@ -327,12 +327,20 @@ def generate_td_report_html(td_id, title, reports_data, now):
 </html>"""
 
 
-def generate_report_index_html(td_order, summary, dbms_names, now):
-    """Génère le HTML de l'index des rapports par TD."""
+def generate_report_index_html(td_order, summary, dbms_names, now, titles=None):
+    """Génère le HTML de l'index des rapports par TD.
+
+    Si titles est fourni, les TD sans corrections SQL sont aussi listés.
+    """
+    # Collecter tous les td_ids connus (SQL + docs)
+    all_td_ids = set(td_order)
+    if titles:
+        all_td_ids.update(titles.keys())
+
     # Grouper les TDs par ressource
     resources = {}
     resource_order = []
-    for td_id in td_order:
+    for td_id in sorted(all_td_ids):
         parts = td_id.split("/")
         resource = parts[0] if len(parts) >= 2 else "global"
         if resource not in resources:
@@ -345,31 +353,40 @@ def generate_report_index_html(td_order, summary, dbms_names, now):
         label = RESOURCE_LABELS.get(resource, resource)
         items = []
         for td_id in resources[resource]:
-            s = summary[td_id]
-            title = s["title"]
-            report_file = s["report_file"]
-            total = s["total"]
-            passed = s["pass"]
-            pct = passed * 100 // total if total > 0 else 0
+            if td_id in summary:
+                s = summary[td_id]
+                title = s["title"]
+                report_file = s["report_file"]
+                total = s["total"]
+                passed = s["pass"]
+                pct = passed * 100 // total if total > 0 else 0
 
-            badge = ""
-            if s["has_oracle_only"]:
-                badge = '<span class="badge badge-oracle">Oracle-only</span>'
+                badge = ""
+                if s["has_oracle_only"]:
+                    badge = '<span class="badge badge-oracle">Oracle-only</span>'
 
-            if pct == 100:
-                pct_badge = f'<span class="badge badge-ok">{pct}%</span>'
-            elif pct >= 70:
-                pct_badge = f'<span class="badge badge-warn">{pct}%</span>'
+                if pct == 100:
+                    pct_badge = f'<span class="badge badge-ok">{pct}%</span>'
+                elif pct >= 70:
+                    pct_badge = f'<span class="badge badge-warn">{pct}%</span>'
+                else:
+                    pct_badge = f'<span class="badge badge-fail">{pct}%</span>'
+
+                items.append(
+                    f'<li>'
+                    f'<a href="{report_file}">{title}</a>'
+                    f" {pct_badge}{badge}"
+                    f'<span class="td-stats">{passed}/{total} tests</span>'
+                    f"</li>"
+                )
             else:
-                pct_badge = f'<span class="badge badge-fail">{pct}%</span>'
-
-            items.append(
-                f'<li>'
-                f'<a href="{report_file}">{title}</a>'
-                f" {pct_badge}{badge}"
-                f'<span class="td-stats">{passed}/{total} tests</span>'
-                f"</li>"
-            )
+                title = titles.get(td_id, td_id) if titles else td_id
+                items.append(
+                    f'<li>'
+                    f'<span>{title}</span>'
+                    f'<span class="td-stats">Pas de corrections SQL</span>'
+                    f"</li>"
+                )
 
         sections_html.append(
             f"<h2>{label}</h2>\n"
@@ -472,7 +489,7 @@ def generate_per_td_reports(reports, output_dir, titles):
         }
 
     # Index des rapports
-    index_html = generate_report_index_html(td_order, summary, dbms_names, now)
+    index_html = generate_report_index_html(td_order, summary, dbms_names, now, titles)
     index_path = os.path.join(output_dir, "index.html")
     with open(index_path, "w", encoding="utf-8") as f:
         f.write(index_html)
