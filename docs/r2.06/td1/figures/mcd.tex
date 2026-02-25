@@ -33,7 +33,7 @@
 \tikzset{card/.style={font=\scriptsize\sffamily, fill=white, inner sep=1pt}}
 
 \begin{document}
-\begin{tikzpicture}[node distance=2cm, every edge/.style={link}]
+\begin{tikzpicture}[node distance=1.75cm, every edge/.style={link}]
 
   \node[entity] (voyage) {
     \textbf{Voyage}
@@ -47,26 +47,38 @@
     duree\\
   };
 
-  \node[entity] (optionv) [right=9cm of voyage] {
+  \node[relationship] (carac) [right= of voyage] {Carac}
+    child {node[attributes] {prix}};
+
+  \node[entity] (optionv) [right= of carac] {
     \textbf{OptionV}
     \nodepart{second}
     \key{code}\\
     libelle\\
   };
 
-  \node[relationship] (carac) [right=3.8cm of voyage] {Carac}
-    child {node[attributes] {prix}};
-  \draw[link] (voyage.east) -- node [pos=0.2, above] {(0,n)} (carac.west);
-  \draw[link] (carac.east) -- node [pos=0.8, above] {(0,n)} (optionv.west);
 
-  \node[entity] (planning) [below=7cm of voyage] {
+  \draw[link] (voyage.east) -- node [pos=0.3, above] {(0,n)} (carac.west);
+  \draw[link] (carac.east) -- node [pos=0.7, above] {(0,n)} (optionv.west);
+
+
+  \node[relationship] (assoc_a) [below= of voyage]
+    {A (n$^\circ$1)};
+
+  \node[entity] (planning) [below= of assoc_a] {
     \textbf{Planning}
     \nodepart{second}
     \key{dateDep}\\
     tarif\\
   };
 
-  \node[entity] (client) [right=9cm of planning] {
+  \draw[link] (voyage.south) -- node [pos=0.2, right] {(0,n)} (assoc_a.north);
+  \draw[link] (assoc_a.south) -- node [pos=0.8, right] {(1,1(R))} (planning.north);
+
+  \node[relationship] (reservation) [right= of planning] {Réservation}
+    child {node[attributes] {nbPers\\dateRes}};
+
+  \node[entity] (client) [right= of reservation] {
     \textbf{Client}
     \nodepart{second}
     \key{numCl}\\
@@ -78,15 +90,8 @@
     categorie\\
   };
 
-  \node[relationship] (assoc_a) [left=1.8cm of voyage, yshift=-3.5cm]
-    {A (n$^\circ$1)};
-  \draw[link] (voyage.220) -- node [pos=0.2, right] {(0,n)} (assoc_a.north);
-  \draw[link] (assoc_a.south) -- node [pos=0.8, right] {(1,1(R))} (planning.150);
-
-  \node[relationship] (reservation) [below=7cm of carac] {Réservation}
-    child {node[attributes] {nbPers\\dateRes}};
-  \draw[link] (planning.east) -- node [pos=0.2, above] {(0,n)} (reservation.west);
-  \draw[link] (reservation.east) -- node [pos=0.8, above] {(0,n)} (client.west);
+  \draw[link] (planning.east) -- node [pos=0.3, above] {(0,n)} (reservation.west);
+  \draw[link] (reservation.east) -- node [pos=0.7, above] {(0,n)} (client.west);
 
 \end{tikzpicture}
 \end{document}

@@ -99,9 +99,20 @@ Nous considérons qu'il n'y a pas deux personnes homonymes ayant le même préno
 
 ## MCD
 
-Voici le MCD correspondant (voir `figure~\ref{fig:mcd}`{=latex})
+Le MCD (voir `figure~\ref{fig:mcd}`{=latex}) modélise quatre entités : **Voyage** (les séjours
+proposés par le réseau d'agences), **Client**, **OptionV** (les options proposées pour les voyages)
+et **Planning** (les départs planifiés). L'association identifiante **A** relie un voyage à ses
+plannings : chaque planning est identifié par sa date de départ au sein d'un voyage donné et porte
+le tarif unitaire. L'association **Réservation** relie un planning à un client et porte le nombre de
+personnes ainsi que la date de réservation. Enfin, l'association **Carac** relie un voyage à une
+option et porte le prix de cette option pour ce voyage.
 
-![Modèle conceptuel des données (MCD)](figures/mcd.pdf){#fig:mcd width=85%}
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\linewidth]{figures/mcd.pdf}
+\caption{Modèle conceptuel des données (MCD)}
+\label{fig:mcd}
+\end{figure}
 
 ## Schéma relationnel
 
