@@ -41,7 +41,7 @@ FAILED_LABELS=()
 
 # Initialiser le fichier rapport CSV si demandé
 if [[ -n "$REPORT_FILE" ]]; then
-    echo "label;dbms;status;expected_cols;expected_rows;actual_cols;actual_rows" > "$REPORT_FILE"
+    echo "td_id;label;dbms;status;expected_cols;expected_rows;actual_cols;actual_rows" > "$REPORT_FILE"
 fi
 
 # --- Fonctions utilitaires ---
@@ -96,8 +96,10 @@ test_correction_file() {
     td_name=$(basename "$(dirname "$correction_file")")
     resource_name=$(basename "$(dirname "$(dirname "$correction_file")")")
 
+    local td_id="$resource_name/$td_name"
+
     echo ""
-    echo "=== Testing: $resource_name/$td_name ($(basename "$correction_file")) ==="
+    echo "=== Testing: $td_id ($(basename "$correction_file")) ==="
     echo ""
 
     local current_query=""
@@ -113,9 +115,9 @@ test_correction_file() {
         if [[ "$line" =~ ^--\ Q([0-9]+).*c:([0-9]+).*t:([0-9]+) ]]; then
             # Si on avait une requête en cours, la tester
             if [[ -n "$current_query" && -n "$current_label" ]]; then
-                test_query "$current_label" "$current_query" "$expected_cols" "$expected_rows"
+                test_query "$td_id" "$current_label" "$current_query" "$expected_cols" "$expected_rows"
             fi
-            
+
             current_label="Q${BASH_REMATCH[1]}"
             expected_cols="${BASH_REMATCH[2]}"
             expected_rows="${BASH_REMATCH[3]}"
@@ -128,9 +130,9 @@ test_correction_file() {
         if [[ "$line" =~ ^PROMPT ]]; then
             # Si on avait une requête en cours, la tester
             if [[ -n "$current_query" && -n "$current_label" ]]; then
-                test_query "$current_label" "$current_query" "$expected_cols" "$expected_rows"
+                test_query "$td_id" "$current_label" "$current_query" "$expected_cols" "$expected_rows"
             fi
-            
+
             # Extraire le label du PROMPT
             local prompt_label
             prompt_label=$(echo "$line" | sed 's/PROMPT "\(.*\)";/\1/')
@@ -157,22 +159,23 @@ test_correction_file() {
 
     # Tester la dernière requête
     if [[ -n "$current_query" && -n "$current_label" ]]; then
-        test_query "$current_label" "$current_query" "$expected_cols" "$expected_rows"
+        test_query "$td_id" "$current_label" "$current_query" "$expected_cols" "$expected_rows"
     fi
 }
 
 test_query() {
-    local label="$1"
-    local query="$2"
-    local exp_cols="$3"
-    local exp_rows="$4"
+    local td_id="$1"
+    local label="$2"
+    local query="$3"
+    local exp_cols="$4"
+    local exp_rows="$5"
 
     # Nettoyer la requête
     query=$(echo "$query" | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//')
 
     if [[ -z "$query" ]]; then
         log_skip "$label — requête vide"
-        if [[ -n "$REPORT_FILE" ]]; then echo "$label;$DBMS;skip;$exp_cols;$exp_rows;0;0" >> "$REPORT_FILE"; fi
+        if [[ -n "$REPORT_FILE" ]]; then echo "$td_id;$label;$DBMS;skip;$exp_cols;$exp_rows;0;0" >> "$REPORT_FILE"; fi
         return
     fi
 
@@ -180,7 +183,7 @@ test_query() {
     local result
     result=$(run_sql "$query" 2>&1) || {
         log_fail "$label — erreur d'exécution SQL"
-        if [[ -n "$REPORT_FILE" ]]; then echo "$label;$DBMS;error;$exp_cols;$exp_rows;-1;-1" >> "$REPORT_FILE"; fi
+        if [[ -n "$REPORT_FILE" ]]; then echo "$td_id;$label;$DBMS;error;$exp_cols;$exp_rows;-1;-1" >> "$REPORT_FILE"; fi
         return
     }
 
@@ -195,7 +198,7 @@ test_query() {
     # Vérifier
     if [[ "$actual_rows" -eq "$exp_rows" && "$actual_cols" -eq "$exp_cols" ]]; then
         log_pass "$label — attendu: $expected, reçu: $actual"
-        if [[ -n "$REPORT_FILE" ]]; then echo "$label;$DBMS;pass;$exp_cols;$exp_rows;$actual_cols;$actual_rows" >> "$REPORT_FILE"; fi
+        if [[ -n "$REPORT_FILE" ]]; then echo "$td_id;$label;$DBMS;pass;$exp_cols;$exp_rows;$actual_cols;$actual_rows" >> "$REPORT_FILE"; fi
     else
         local details=""
         if [[ "$actual_cols" -ne "$exp_cols" ]]; then
@@ -205,7 +208,7 @@ test_query() {
             details+=" lignes: attendu=$exp_rows reçu=$actual_rows"
         fi
         log_fail "$label — attendu: $expected, reçu: $actual —$details"
-        if [[ -n "$REPORT_FILE" ]]; then echo "$label;$DBMS;fail;$exp_cols;$exp_rows;$actual_cols;$actual_rows" >> "$REPORT_FILE"; fi
+        if [[ -n "$REPORT_FILE" ]]; then echo "$td_id;$label;$DBMS;fail;$exp_cols;$exp_rows;$actual_cols;$actual_rows" >> "$REPORT_FILE"; fi
     fi
 }
 

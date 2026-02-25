@@ -50,7 +50,7 @@ help: ## Affiche cette aide
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
 		awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-all: $(TD_PDFS) ## Compile tous les TD
+all: r105 r206 ## Compile tous les TD (sujets + corrigés)
 
 # --- Cibles par ressource ---
 

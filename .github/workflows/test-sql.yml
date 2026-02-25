@@ -184,27 +184,56 @@ jobs:
           path: artifacts/
         continue-on-error: true
 
-      - name: Generate HTML report
+      - name: Generate HTML reports
         run: |
-          mkdir -p site
           python3 scripts/generate-sql-report.py \
             artifacts/results-postgres.csv \
             artifacts/results-sqlite.csv \
             artifacts/results-oracle.csv \
-            --output site/index.html
+            --docs-dir docs \
+            --output-dir site
 
-      - name: Upload HTML report
+      - name: Upload HTML reports
         uses: actions/upload-artifact@v4
         with:
-          name: sql-report
-          path: site/index.html
+          name: sql-reports
+          path: site/
           retention-days: 30
 
-      - name: Deploy report to GitHub Pages
+      - name: Deploy reports to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         if: github.ref == 'refs/heads/main'
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./site
           destination_dir: reports
+          keep_files: true
+
+      # Regénérer l'index principal avec les liens vers les rapports
+      - name: Fetch current PDFs listing from gh-pages
+        if: github.ref == 'refs/heads/main'
+        run: |
+          mkdir -p root-site/pdfs/r1.05 root-site/pdfs/r2.06
+          # Lister les PDF déjà déployés sur gh-pages et créer des fichiers marqueurs
+          gh api "repos/${{ github.repository }}/git/trees/gh-pages?recursive=1" \
+            --jq '.tree[] | select(.path | test("^pdfs/r.*\\.pdf$")) | .path' 2>/dev/null \
+            | while read -r pdf; do touch "root-site/$pdf"; done || true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update root index with report links
+        if: github.ref == 'refs/heads/main'
+        run: |
+          python3 scripts/generate-index.py \
+            --docs-dir docs \
+            --pdf-dir root-site/pdfs \
+            --reports-summary site/summary.json \
+            --output root-site/index.html
+
+      - name: Deploy updated index to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        if: github.ref == 'refs/heads/main'
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./root-site
           keep_files: true
