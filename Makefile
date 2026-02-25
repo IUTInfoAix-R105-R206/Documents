@@ -32,6 +32,7 @@ TD_PDFS = $(patsubst docs/%,$(OUTPUT_DIR)/%,$(TD_SOURCES:.md=.pdf))
 
 # Corrections PDF (générées depuis le SQL annoté)
 R105_CORRECTION_PDFS = \
+	$(OUTPUT_DIR)/r1.05/td1/td1-correction.pdf \
 	$(OUTPUT_DIR)/r1.05/td2/td2-correction.pdf \
 	$(OUTPUT_DIR)/r1.05/td6/td6-correction.pdf \
 	$(OUTPUT_DIR)/r1.05/td7/td7-correction.pdf
@@ -374,6 +375,38 @@ $(OUTPUT_DIR)/r2.06/td6/td6-correction.pdf: docs/r2.06/td6/td6-correction.gen.md
 # ==============================================================================
 # R1.05 — Introduction aux bases de données et SQL
 # ==============================================================================
+
+# --- TD1 : L'algèbre relationnelle ---
+
+$(OUTPUT_DIR)/r1.05/td1/td1.pdf: docs/r1.05/td1/td1.md $(TEMPLATE_DIR)/template.tex $(FILTER_DIR)/custom-styles.lua
+	@mkdir -p $(OUTPUT_DIR)/r1.05/td1
+	cd docs/r1.05/td1 && $(PANDOC) \
+		--from markdown+footnotes+definition_lists+fenced_divs+bracketed_spans \
+		--pdf-engine=pdflatex \
+		--pdf-engine-opt=-shell-escape \
+		--template=../../../$(TEMPLATE_DIR)/template.tex \
+		--lua-filter=../../../$(FILTER_DIR)/custom-styles.lua \
+		--resource-path=.:../../../$(TEMPLATE_DIR) \
+		--variable=license-badge:../../../$(TEMPLATE_DIR)/cc-by-nc-sa \
+		--variable=version:$(GIT_VERSION) \
+		--number-sections \
+		td1.md \
+		-o ../../../$@
+
+$(OUTPUT_DIR)/r1.05/td1/td1-correction.pdf: docs/r1.05/td1/td1-correction.md $(TEMPLATE_DIR)/template.tex $(FILTER_DIR)/custom-styles.lua
+	@mkdir -p $(OUTPUT_DIR)/r1.05/td1
+	cd docs/r1.05/td1 && $(PANDOC) \
+		--from markdown+footnotes+definition_lists+fenced_divs+bracketed_spans \
+		--pdf-engine=pdflatex \
+		--pdf-engine-opt=-shell-escape \
+		--template=../../../$(TEMPLATE_DIR)/template.tex \
+		--lua-filter=../../../$(FILTER_DIR)/custom-styles.lua \
+		--resource-path=.:../../../$(TEMPLATE_DIR) \
+		--variable=license-badge:../../../$(TEMPLATE_DIR)/cc-by-nc-sa \
+		--variable=version:$(GIT_VERSION) \
+		--number-sections \
+		td1-correction.md \
+		-o ../../../$@
 
 # --- TD2 : Concepts relationnels et langage algébrique ---
 
