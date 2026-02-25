@@ -257,17 +257,8 @@ Les règles de compilation spécifient explicitement tous les paramètres Pandoc
 - Fichiers : `docs/shared/data/questionnaire/oracle.sql`
 - Adaptations PostgreSQL/SQLite à créer
 
-### Validation locale rapide
-```bash
-# Avec SQLite (Gestion pédagogique)
-sqlite3 /tmp/test.db < docs/shared/data/gestion-pedagogique/schema.sql
-sqlite3 /tmp/test.db < docs/shared/data/gestion-pedagogique/insert.sql
-sqlite3 /tmp/test.db "SELECT COUNT(*) FROM Etudiant;"  # → 56
-
-# Avec PostgreSQL (Gestion pédagogique)
-psql -U test -d gestion_pedagogique -f docs/shared/data/gestion-pedagogique/schema.sql
-psql -U test -d gestion_pedagogique -f docs/shared/data/gestion-pedagogique/insert.sql
-```
+### Validation locale
+La validation locale doit être faite avec oracle dans un conteneur docker car les sujets sont écrits pour lui en premier lieu.
 
 ### État de validation
 Toutes les corrections du TD3 R2.06 (Q1-Q26) ont été validées avec les résultats attendus du sujet.

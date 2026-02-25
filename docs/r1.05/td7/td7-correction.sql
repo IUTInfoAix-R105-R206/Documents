@@ -1,5 +1,10 @@
 -- V1.0.0
 
+-- @title Requêtes avec SQL
+-- @intro Formulez, en SQL, sur la base de données exemple, les requêtes d'interrogation suivantes.
+
+-- @section Expression des projections et sélections
+
 -- Q1 - c:1, t:5
 -- Quelles sont les villes d'arrivée des voyages à destination du Maroc ?
 PROMPT "Q1";
@@ -59,6 +64,9 @@ PROMPT "Q5";
 SELECT numCl, nom
 FROM Client
 WHERE adresse IS NULL;
+
+-- @section Expression des jointures
+-- @instruction Quand cela possible, formulez les requêtes suivantes de trois manières différentes.
 
 -- Q6 - c:1, t:2
 -- Donnez les identifiants des voyages pour lesquels le client Hubert Marin a fait une réservation.
@@ -217,6 +225,9 @@ WHERE C.numCl = R.numCl
   AND R.idV = V.idV
   AND ville = villeDep;
 
+-- @section Formulation de calculs verticaux et horizontaux
+-- @instruction Formulez les requêtes suivantes en gérant les valeurs nulles pour les calculs horizontaux.
+
 -- Q11 - c:1, t:1 (32)
 -- Combien y a-t-il de réservations ?
 PROMPT "Q11";
@@ -329,6 +340,9 @@ INNER JOIN Reservation R ON C.numCl = R.numCl
 INNER JOIN Carac Ca ON R.idV = Ca.idV
 WHERE nom = 'POTIER'
   AND prenom = 'NICOLAS';
+
+-- @section Test d’absence de données
+-- @instruction Formulez les requêtes suivantes de deux manières différentes, en ne faisant pas appel aux opérateurs ensemblistes.
 
 -- Q20 - c:2, t:11
 -- Quels sont les noms et prénoms des clients qui n’ont aucune réservation ?

@@ -31,6 +31,9 @@ TD_SOURCES = $(shell find docs/r*/td* -name 'td*.md' ! -name '*.gen.md' 2>/dev/n
 TD_PDFS = $(patsubst docs/%,$(OUTPUT_DIR)/%,$(TD_SOURCES:.md=.pdf))
 
 # Corrections PDF (générées depuis le SQL annoté)
+R105_CORRECTION_PDFS = \
+	$(OUTPUT_DIR)/r1.05/td7/td7-correction.pdf
+
 R206_CORRECTION_PDFS = \
 	$(OUTPUT_DIR)/r2.06/td1/td1-correction.pdf \
 	$(OUTPUT_DIR)/r2.06/td2/td2-correction.pdf \
@@ -39,7 +42,7 @@ R206_CORRECTION_PDFS = \
 	$(OUTPUT_DIR)/r2.06/td5/td5-correction.pdf \
 	$(OUTPUT_DIR)/r2.06/td6/td6-correction.pdf
 
-.PHONY: all clean r105 r206 r206-corrections \
+.PHONY: all clean r105 r206 r105-corrections r206-corrections \
 	test-sql-postgresql-local test-sql-postgresql-docker \
 	test-sql-sqlite-local    test-sql-sqlite-docker    \
 	test-sql-oracle-local    test-sql-oracle-docker    \
@@ -54,9 +57,11 @@ all: r105 r206 ## Compile tous les TD (sujets + corrigés)
 
 # --- Cibles par ressource ---
 
-r105: $(filter $(OUTPUT_DIR)/r1.05/%,$(TD_PDFS)) ## Compile tous les TD de R1.05
+r105: $(filter $(OUTPUT_DIR)/r1.05/%,$(TD_PDFS)) $(R105_CORRECTION_PDFS) ## Compile tous les TD de R1.05 (sujets + corrigés)
 
 r206: $(filter $(OUTPUT_DIR)/r2.06/%,$(TD_PDFS)) $(R206_CORRECTION_PDFS) ## Compile tous les TD de R2.06 (sujets + corrigés)
+
+r105-corrections: $(R105_CORRECTION_PDFS) ## Compile uniquement les corrigés de R1.05
 
 r206-corrections: $(R206_CORRECTION_PDFS) ## Compile uniquement les corrigés de R2.06
 
@@ -362,6 +367,58 @@ $(OUTPUT_DIR)/r2.06/td6/td6-correction.pdf: docs/r2.06/td6/td6-correction.gen.md
 		--variable=version:$(GIT_VERSION) \
 		--number-sections \
 		td6-correction.gen.md \
+		-o ../../../$@
+
+# ==============================================================================
+# R1.05 — Introduction aux bases de données et SQL
+# ==============================================================================
+
+# --- TD7 : Interrogation en SQL interprété (BD Voyages) ---
+
+R105_TD7_FIGURES = docs/r1.05/td7/figures/mcd.pdf
+
+docs/r1.05/td7/figures/mcd.pdf: docs/r1.05/td7/figures/mcd.tex
+	cd docs/r1.05/td7/figures && TEXINPUTS="$(CURDIR)/$(TEMPLATE_DIR):" $(PDFLATEX) -interaction=nonstopmode mcd.tex
+
+# Génération du Markdown depuis le SQL annoté
+R105_TD7_SQL = docs/r1.05/td7/td7-correction.sql
+R105_TD7_TEMPLATE = docs/r1.05/td7/td7.md
+R105_TD7_GEN = scripts/generate-questions.py
+
+docs/r1.05/td7/td7.gen.md: $(R105_TD7_TEMPLATE) $(R105_TD7_SQL) $(R105_TD7_GEN)
+	$(PYTHON) $(R105_TD7_GEN) --mode subject --template $< --output $@ $(word 2,$^)
+
+docs/r1.05/td7/td7-correction.gen.md: $(R105_TD7_TEMPLATE) $(R105_TD7_SQL) $(R105_TD7_GEN)
+	$(PYTHON) $(R105_TD7_GEN) --mode correction --template $< --output $@ $(word 2,$^)
+
+$(OUTPUT_DIR)/r1.05/td7/td7.pdf: docs/r1.05/td7/td7.gen.md $(TEMPLATE_DIR)/template.tex $(FILTER_DIR)/custom-styles.lua $(R105_TD7_FIGURES)
+	@mkdir -p $(OUTPUT_DIR)/r1.05/td7
+	cd docs/r1.05/td7 && $(PANDOC) \
+		--from markdown+footnotes+definition_lists+fenced_divs+bracketed_spans \
+		--pdf-engine=pdflatex \
+		--pdf-engine-opt=-shell-escape \
+		--template=../../../$(TEMPLATE_DIR)/template.tex \
+		--lua-filter=../../../$(FILTER_DIR)/custom-styles.lua \
+		--resource-path=.:../../../$(TEMPLATE_DIR):figures \
+		--variable=license-badge:../../../$(TEMPLATE_DIR)/cc-by-nc-sa \
+		--variable=version:$(GIT_VERSION) \
+		--number-sections \
+		td7.gen.md \
+		-o ../../../$@
+
+$(OUTPUT_DIR)/r1.05/td7/td7-correction.pdf: docs/r1.05/td7/td7-correction.gen.md $(TEMPLATE_DIR)/template.tex $(FILTER_DIR)/custom-styles.lua $(R105_TD7_FIGURES)
+	@mkdir -p $(OUTPUT_DIR)/r1.05/td7
+	cd docs/r1.05/td7 && $(PANDOC) \
+		--from markdown+footnotes+definition_lists+fenced_divs+bracketed_spans \
+		--pdf-engine=pdflatex \
+		--pdf-engine-opt=-shell-escape \
+		--template=../../../$(TEMPLATE_DIR)/template.tex \
+		--lua-filter=../../../$(FILTER_DIR)/custom-styles.lua \
+		--resource-path=.:../../../$(TEMPLATE_DIR):figures \
+		--variable=license-badge:../../../$(TEMPLATE_DIR)/cc-by-nc-sa \
+		--variable=version:$(GIT_VERSION) \
+		--number-sections \
+		td7-correction.gen.md \
 		-o ../../../$@
 
 # ==============================================================================
