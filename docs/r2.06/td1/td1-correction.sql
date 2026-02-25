@@ -1,13 +1,8 @@
--- V1.0.3
+-- @title Requêtes avec SQL
+-- @intro Formulez, en SQL, sur la base de données exemple, les requêtes d'interrogation suivantes.
 
--- ===============================================================================
--- Généralités
--- ===============================================================================
--- Erreurs/Limitations de Oracle Live :
--- La projection de deux champs de même noms bogue : SELECT * FROM Client C INNER JOIN Reservation R ON C.numCl = R.numCl;
---  * Pas d'affichage des valeurs NULL dans Script output
---  * ALTER SESSION ne dure pas, que le temps d'une requête (statement) : ALTER SESSION SET NLS_DATE_FORMAT = 'DD/MM/YY';
--- ===============================================================================
+-- @section Rappel : expression des jointures
+-- @instruction Quand cela est possible, formulez les requêtes suivantes de trois manières différentes.
 
 -- Q1 - c:3, t:29
 -- Donnez les dates de départ, villes d'arrivée et tarifs des voyages à destination du Maroc.
@@ -50,7 +45,7 @@ INNER JOIN Reservation R ON V.idV = R.idV
 AND numCl IN (SELECT numCl
 			  FROM Client
 			  WHERE ville NOT IN ('PARIS', 'MARSEILLE'));
-			  
+
 -- Remarque : la version imbriquée ne peut pas être effectuée parfaitement car dateDep est un attribut de Reservation et dateDep et tarif sont des attributs de Voyage.
 
 -- Version prédicative.
@@ -134,6 +129,9 @@ WHERE V.idV = R.idV
   AND villeDep = ville
   AND villeArr = 'ISTANBUL';
 
+-- @section Utilisation des opérateurs ensemblistes et équivalences
+-- @instruction Formulez les requêtes suivantes en faisant appel aux opérateurs ensemblistes.
+
 -- Q5 - c:1, t:4
 -- Quelles sont les villes de départ d'un voyage dans lesquelles résident des clients ?
 PROMPT "Q5";
@@ -171,7 +169,7 @@ WHERE idV IN (SELECT idV
 			  FROM Reservation);
 
 -- Q8 - c:1, t:5
--- Quels sont les libellés des options gratuites pour le Voyage d'identifiant 354 et ceux des options payantes pour le Voyage d'identifiant 952 ?
+-- Quels sont les libellés des options gratuites pour le voyage d'identifiant 354 et ceux des options payantes pour le voyage d'identifiant 952 ?
 PROMPT "Q8";
 
 SELECT libelle
@@ -185,6 +183,8 @@ WHERE code IN (SELECT code
 			   FROM Carac
 			   WHERE (prix <> 0 OR prix IS NOT NULL)
 			     AND idV = 952);
+
+-- @instruction Formulez les requêtes suivantes en ne faisant pas appel aux opérateurs ensemblistes.
 
 -- Q9 - c:3, t:1
 -- Quels sont les identifiants, villes d'arrivée et pays d'arrivée des voyages offrant à la fois les options de visite guidée et de piscine ?
@@ -207,7 +207,7 @@ SELECT idV, villeArr, paysArr
 FROM Voyage
 WHERE idV IN (SELECT idV
               FROM Carac
-              WHERE code IN (SELECT code 
+              WHERE code IN (SELECT code
 			                 FROM OptionV
 			                 WHERE libelle = 'PISCINE'))
  AND idV IN (SELECT idV
@@ -254,6 +254,11 @@ WHERE NOT EXISTS (SELECT *
                   FROM Reservation R
                   WHERE R.numCl = C.numCl);
 
+-- @section Création et modification d'attributs
+-- @instruction Formulez les requêtes suivantes en pensant générer, avec la commande `DESCRIBE`, un affichage
+-- @+ permettant de vérifier la validité des réponses et, à la fin de la séance, penser à annuler les
+-- @+ modifications faites pour laisser la base de données dans l'état initial.
+
 -- Q11
 -- Ajoutez les attributs correspondant au tarif enfant et au nombre d'enfants.
 PROMPT "Q11";
@@ -289,7 +294,7 @@ INSERT INTO Client (numCl, nom, prenom, adresse, cp, ville, categorie) VALUES (6
 -- Remarque : cette insertion provoque une erreur.
 
 -- Q14
--- En se basant sur les données actuelles, définissez une contrainte de domaine pour les nombres d'étoiles. Vérifiez en essayant d'ajouter un Voyage ne respectant pas cette contrainte.
+-- En se basant sur les données actuelles, définissez une contrainte de domaine pour les nombres d'étoiles. Vérifiez en essayant d'ajouter un voyage ne respectant pas cette contrainte.
 PROMPT "Q14";
 
 ALTER TABLE Voyage ADD (CONSTRAINT ck_Voyage_nbEtoiles CHECK (nbEtoiles BETWEEN 3 AND 5));
@@ -304,7 +309,7 @@ INSERT INTO Voyage (idV, villeArr, paysArr, villeDep, hotel, nbEtoiles, duree) V
 -- Remarque : cette insertion provoque une erreur.
 
 -- Q15
--- Créez une nouvelle relation Capacite permettant de connaître par hôtel et type de chambre typeC, pouvant être simple, double, double luxe, suite, suite junior et suite prestige, le nombre de chambres nbCh.
+-- Créez une nouvelle relation `Capacite` permettant de connaître par hôtel et type de chambre `typeC`, pouvant être `SIMPLE`, `DOUBLE`, `DOUBLE LUXE`, `SUITE`, `SUITE JUNIOR` et `SUITE PRESTIGE`, le nombre de chambres `nbCh`.
 PROMPT "Q15";
 
 DROP TABLE IF EXISTS Capacite PURGE;
@@ -319,8 +324,13 @@ CREATE TABLE Capacite (
 
 DESCRIBE Capacite;
 
+-- @section Mises à jour des données
+-- @instruction Formulez les requêtes suivantes en pensant générer, avec la commande `SELECT` ou `DESCRIBE`,
+-- @+ un affichage permettant de vérifier la validité des réponses et, à la fin de la séance, penser à
+-- @+ annuler les modifications faites pour laisser la base de données dans l'état initial.
+
 -- Q16 - t:4
--- Le Client numéro 2103 réserve toujours avec ses deux enfants et le Client Thomas Jarolim avec son enfant unique.
+-- Le client numéro 2103 réserve toujours avec ses deux enfants et le client Thomas Jarolim avec son enfant unique.
 PROMPT "Q16";
 
 ALTER TABLE Planning ADD (tarifEnf NUMBER(6, 2));
@@ -338,7 +348,7 @@ WHERE numCl IN (SELECT numCl
                 FROM Client
 				WHERE nom = 'JAROLIM'
 				  AND prenom = 'THOMAS');
-				  
+
 SELECT C.numCl, nom, prenom, idV, dateDep, nbEnf
 FROM Client C
 INNER JOIN Reservation R ON C.numCl = R.numCl
@@ -359,7 +369,24 @@ SELECT *
 FROM Planning;
 
 -- Q18 - t:12
--- Insérez les données suivantes dans la relation Capacite.
+-- Insérez les données suivantes.
+--
+-- : Extension de la relation `Capacite` de la base de données Voyage
+--
+-- | `hotel` | `typeC` | `nbCh` |
+-- |---|---|---|
+-- | ANTIQUE | SIMPLE | 10 |
+-- | ANTIQUE | DOUBLE | 75 |
+-- | ANTIQUE | DOUBLE LUXE | 12 |
+-- | ANTIQUE | SUITE | 5 |
+-- | ELIAS BEACH | DOUBLE | 83 |
+-- | ELIAS BEACH | SUITE | 27 |
+-- | OLD BRIDGE | SIMPLE | 25 |
+-- | OLD BRIDGE | DOUBLE | 75 |
+-- | SAFARI JAMBO | SIMPLE | 32 |
+-- | SAFARI JAMBO | DOUBLE | 100 |
+-- | TRANSATLANTIQUE | DOUBLE | 200 |
+-- | BAMBURI | DOUBLE | 150 |
 PROMPT "Q18";
 
 DROP TABLE IF EXISTS Capacite PURGE;
@@ -390,8 +417,13 @@ INSERT INTO Capacite (hotel, typeC, nbCh) VALUES ('BAMBURI', 'DOUBLE', 150);
 SELECT *
 FROM Capacite;
 
+-- @section Archivage d'information et gestion de transactions
+-- @text Le mécanisme des transactions est ici illustré à travers un exemple d'archivage d'information.
+-- @text Dans un souci d'archivage des données, on désire régulièrement purger la relation `Reservation`,
+-- @+ sans pour autant perdre les informations existantes.
+
 -- Q19
--- Créez une nouvelle relation AncienneReservation permettant d'archiver toutes les réservations programmées passées, la date de réservation étant remplacée par la date d'archivage.
+-- Créez une nouvelle relation `AncienneReservation` permettant d'archiver toutes les réservations programmées passées, la date de réservation étant remplacée par la date d'archivage.
 PROMPT "Q19";
 
 DROP TABLE IF EXISTS AncienneReservation PURGE;
@@ -408,8 +440,8 @@ CREATE TABLE AncienneReservation (
 
 DESCRIBE AncienneReservation;
 
--- Q20 - t:14 (AncienneReservation), 18 (Reservation)
--- A l'aide d'une transaction, archivez les réservations antérieures à 2004.
+-- Q20 - [`AncienneReservation` : 14 tuples]{.expected}, [`Reservation` : 18 tuples]{.expected}
+-- À l'aide d'une transaction, archivez les réservations antérieures à 2004.
 PROMPT "Q20";
 
 ALTER TABLE Reservation ADD (nbEnf NUMBER(2, 0));
@@ -433,7 +465,7 @@ BEGIN
 	SELECT numCl, idV, dateDep, nbPers, SYSDATE, nbEnf
 	FROM Reservation
 	WHERE dateRes < TO_DATE('2004-01-01', 'YYYY-MM-DD');
-	
+
 	DELETE FROM Reservation
 	WHERE dateRes < TO_DATE('2004-01-01', 'YYYY-MM-DD');
 END;
@@ -443,3 +475,4 @@ SELECT *
 FROM AncienneReservation;
 
 SELECT *
+FROM Reservation;

@@ -6,7 +6,7 @@ authors:
   - "Lotfi Lakhal"
   - "Mickaël Martin Nevot"
 license: "CC BY-NC-SA"
-license-holder: "Mickaël Martin Nevot"
+license-holder: "Rosine Cicchetti"
 website: "www.mickael-martin-nevot.com"
 ---
 
@@ -99,7 +99,7 @@ Nous considérons qu'il n'y a pas deux personnes homonymes ayant le même préno
 
 ## MCD
 
-Voici le MCD correspondant (voir `figure~\ref{fig:mcd}`{=latex}) :
+Voici le MCD correspondant (voir `figure~\ref{fig:mcd}`{=latex})
 
 ![Modèle conceptuel des données (MCD)](figures/mcd.pdf){#fig:mcd width=85%}
 
@@ -128,112 +128,5 @@ La clef étrangère composite (`idV`, `dateDep`) dans `Reservation` fait référ
 composite de `Planning`.
 :::
 
-# Requêtes avec SQL
-
-Formulez, en SQL, sur la base de données exemple, les requêtes d'interrogation suivantes.
-
-## Rappel : expression des jointures
-
-**Quand cela est possible, formulez les requêtes suivantes de trois manières différentes.**
-
-Q1
-: Donnez les dates de départ, villes d'arrivée et tarifs des voyages à destination du Maroc. [3 attributs, 29 tuples]{.expected}
-
-Q2
-: Donnez les dates de départ, villes d'arrivée et pays d'arrivée des voyages réservés des clients ne résidant ni à Paris ni à Marseille. [3 attributs, 2 tuples]{.expected}
-
-Q3
-: Quels sont les libellés des options gratuites proposées pour les voyages réservés par le client Nicolas Barbier ? [1 attribut, 3 tuples]{.expected}
-
-Q4
-: Quels sont les noms, prénoms et villes de résidence des clients ayant réservé un voyage à destination d'Istanbul partant de leur ville de résidence ? [3 attributs, 5 tuples]{.expected}
-
-## Utilisation des opérateurs ensemblistes et équivalences
-
-**Formulez les requêtes suivantes en faisant appel aux opérateurs ensemblistes.**
-
-Q5
-: Quelles sont les villes de départ d'un voyage dans lesquelles résident des clients ? [1 attribut, 4 tuples]{.expected}
-
-Q6
-: Quels sont les libellés des options communes aux voyages d'identifiants 354 et 952 ? [1 attribut, 3 tuples]{.expected}
-
-Q7
-: Donnez les identifiants, villes d'arrivée et pays d'arrivée des voyages pour lesquels il n'y a aucune réservation. [3 attributs, 14 tuples]{.expected}
-
-Q8
-: Quels sont les libellés des options gratuites pour le voyage d'identifiant 354 et ceux des options payantes pour le voyage d'identifiant 952 ? [1 attribut, 5 tuples]{.expected}
-
-**Formulez les requêtes suivantes en ne faisant pas appel aux opérateurs ensemblistes.**
-
-Q9
-: Quels sont les identifiants, villes d'arrivée et pays d'arrivée des voyages offrant à la fois les options de visite guidée et de piscine ? [3 attributs, 1 tuple]{.expected}
-
-Q10
-: Donnez les noms et prénoms des clients qui n'ont aucune réservation. [2 attributs, 11 tuples]{.expected}
-
-## Création et modification d'attributs
-
-**Formulez les requêtes suivantes en pensant générer, avec la commande `DESCRIBE`, un affichage
-permettant de vérifier la validité des réponses et, à la fin de la séance, penser à annuler les
-modifications faites pour laisser la base de données dans l'état initial.**
-
-Q11
-: Ajoutez les attributs correspondant au tarif enfant et au nombre d'enfants.
-
-Q12
-: Doublez la taille possible du libellé d'une option.
-
-Q13
-: En se basant sur les données actuelles, définissez une contrainte de domaine pour les catégories. Vérifiez en essayant d'ajouter un client ne respectant pas cette contrainte.
-
-Q14
-: En se basant sur les données actuelles, définissez une contrainte de domaine pour les nombres d'étoiles. Vérifiez en essayant d'ajouter un voyage ne respectant pas cette contrainte.
-
-Q15
-: Créez une nouvelle relation `Capacite` permettant de connaître par hôtel et type de chambre `typeC`, pouvant être `SIMPLE`, `DOUBLE`, `DOUBLE LUXE`, `SUITE`, `SUITE JUNIOR` et `SUITE PRESTIGE`, le nombre de chambres `nbCh`.
-
-## Mises à jour des données
-
-**Formulez les requêtes suivantes en pensant générer, avec la commande `SELECT` ou `DESCRIBE`,
-un affichage permettant de vérifier la validité des réponses et, à la fin de la séance, penser à
-annuler les modifications faites pour laisser la base de données dans l'état initial.**
-
-Q16
-: Le client numéro 2103 réserve toujours avec ses deux enfants et le client Thomas Jarolim avec son enfant unique. [4 tuples]{.expected}
-
-Q17
-: Un tarif enfant est moitié prix du tarif correspondant. [80 tuples]{.expected}
-
-Q18
-: Insérez les données suivantes. [12 tuples]{.expected}
-
-: Extension de la relation `Capacite` de la base de données Voyage
-
-| `hotel` | `typeC` | `nbCh` |
-|---|---|---|
-| ANTIQUE | SIMPLE | 10 |
-| ANTIQUE | DOUBLE | 75 |
-| ANTIQUE | DOUBLE LUXE | 12 |
-| ANTIQUE | SUITE | 5 |
-| ELIAS BEACH | DOUBLE | 83 |
-| ELIAS BEACH | SUITE | 27 |
-| OLD BRIDGE | SIMPLE | 25 |
-| OLD BRIDGE | DOUBLE | 75 |
-| SAFARI JAMBO | SIMPLE | 32 |
-| SAFARI JAMBO | DOUBLE | 100 |
-| TRANSATLANTIQUE | DOUBLE | 200 |
-| BAMBURI | DOUBLE | 150 |
-
-## Archivage d'information et gestion de transactions
-
-Le mécanisme des transactions est ici illustré à travers un exemple d'archivage d'information.
-
-Dans un souci d'archivage des données, on désire régulièrement purger la relation `Reservation`,
-sans pour autant perdre les informations existantes.
-
-Q19
-: Créez une nouvelle relation `AncienneReservation` permettant d'archiver toutes les réservations programmées passées, la date de réservation étant remplacée par la date d'archivage.
-
-Q20
-: À l'aide d'une transaction, archivez les réservations antérieures à 2004. [`AncienneReservation` : 14 tuples]{.expected}, [`Reservation` : 18 tuples]{.expected}
+::: questions
+:::
