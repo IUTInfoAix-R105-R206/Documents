@@ -3,28 +3,28 @@
     "title": "TD6 : Interrogation en SQL",
     "report_file": "r1.05-td6.html",
     "total": 195,
-    "pass": 179,
-    "error": 15,
-    "fail": 1,
+    "pass": 182,
+    "error": 13,
+    "fail": 0,
     "has_oracle_only": true,
     "dbms": {
       "postgres": {
         "total": 65,
-        "pass": 60,
-        "error": 5,
+        "pass": 61,
+        "error": 4,
         "fail": 0
       },
       "sqlite": {
         "total": 65,
-        "pass": 55,
-        "error": 10,
+        "pass": 56,
+        "error": 9,
         "fail": 0
       },
       "oracle": {
         "total": 65,
-        "pass": 64,
+        "pass": 65,
         "error": 0,
-        "fail": 1
+        "fail": 0
       }
     }
   },
