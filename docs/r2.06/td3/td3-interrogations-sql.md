@@ -161,5 +161,8 @@ La clef étrangère `codePere` dans la relation `Module` fait référence à la 
 
 Les autres clefs étrangères font référence aux clefs primaires de même nom.
 
+# Requêtes avec SQL
+Formulez, en SQL, sur la base de données exemple, les requêtes d'interrogation suivantes.
+
 ::: questions
 :::

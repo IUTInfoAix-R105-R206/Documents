@@ -1,8 +1,5 @@
 -- V1.1.0
 
--- @title Requêtes avec SQL
--- @intro Formulez, en SQL, sur la base de données exemple, les requêtes d'interrogation suivantes.
-
 -- @section Expression des jointures
 -- @instruction Quand cela possible, formulez les requêtes suivantes de trois manières différentes.
 
