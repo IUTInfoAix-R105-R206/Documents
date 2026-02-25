@@ -374,6 +374,22 @@ $(OUTPUT_DIR)/r2.06/td6/td6-correction.pdf: docs/r2.06/td6/td6-correction.gen.md
 # R1.05 — Introduction aux bases de données et SQL
 # ==============================================================================
 
+# --- TD5 : Conception avec le modèle Entité/Association ---
+
+$(OUTPUT_DIR)/r1.05/td5/td5.pdf: docs/r1.05/td5/td5.md $(TEMPLATE_DIR)/template.tex $(FILTER_DIR)/custom-styles.lua
+	@mkdir -p $(OUTPUT_DIR)/r1.05/td5
+	cd docs/r1.05/td5 && $(PANDOC) \
+		--from markdown+footnotes+definition_lists+fenced_divs+bracketed_spans \
+		--pdf-engine=pdflatex \
+		--pdf-engine-opt=-shell-escape \
+		--template=../../../$(TEMPLATE_DIR)/template.tex \
+		--lua-filter=../../../$(FILTER_DIR)/custom-styles.lua \
+		--resource-path=.:../../../$(TEMPLATE_DIR) \
+		--variable=license-badge:../../../$(TEMPLATE_DIR)/cc-by-nc-sa \
+		--variable=version:$(GIT_VERSION) \
+		td5.md \
+		-o ../../../$@
+
 # --- TD6 : Interrogation en SQL (BD Airbase) ---
 
 R105_TD6_FIGURES = docs/r1.05/td6/figures/mcd.pdf
