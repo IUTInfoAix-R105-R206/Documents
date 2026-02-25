@@ -1,5 +1,11 @@
 -- V1.1.0
 
+-- @title Requêtes avec SQL
+-- @intro Formulez, en SQL, sur la base de données exemple, les requêtes d'interrogation suivantes.
+
+-- @section Expression des jointures
+-- @instruction Quand cela possible, formulez les requêtes suivantes de trois manières différentes.
+
 -- Q1 - c:2, t:9
 -- Donnez, pour l'étudiant Stéphane Rocchi, les moyennes de test obtenues par ordre décroissant avec le code du module associé. 
 -- Version algébrique.
@@ -180,6 +186,9 @@ WHERE Et.numEt = E.numEt
   AND numProf = resp
 ORDER BY nomEt ASC;
 
+-- @section Formulation de calculs verticaux et horizontaux
+-- @instruction Formulez les requêtes suivantes, en veillant particulièrement à l'évaluation des valeurs nulles pour les calculs horizontaux.
+
 -- Q6 - c:1, t:1 (17)
 -- Combien y-a-t-il de professeurs ?
 PROMPT "Q6";
@@ -299,6 +308,8 @@ WHERE numEt IN (SELECT numEt
                 WHERE moyTest IN (SELECT MAX(moyTest)
                                   FROM Note));
 
+-- @section Utilisation des opérateurs ensemblistes
+
 -- Q15 - c:1, t:6
 -- Donnez les villes de résidence des étudiants et des professeurs.
 PROMPT "Q15";
@@ -332,6 +343,9 @@ WHERE code IN (SELECT code
 			   EXCEPT
 			   SELECT specProf
 			   FROM Professeur);
+
+-- @section Équivalent des opérateurs ensemblistes
+-- @instruction Proposez une nouvelle formulation des requêtes de la section précédente sans faire appel aux opérateurs ensemblistes.
 
 -- Q18 - c:2, t:4 [= Q16]
 -- Quels sont les numéros des professeurs responsables d'un module qu'ils enseignent ainsi que le code du module correspondant ?
@@ -381,6 +395,9 @@ SELECT DISTINCT libelle
 FROM Module 
 LEFT OUTER JOIN Professeur ON code = specProf
 WHERE specProf IS NULL;
+
+-- @section Test d'absence de données
+-- @instruction Formulez les requêtes suivantes de trois manières différentes, sans utiliser d'opérateur ensembliste.
 
 -- Q20 - c:3, t:27
 -- Donnez les numéros, noms et prénoms des étudiants n'ayant aucune note.
@@ -501,6 +518,8 @@ SELECT nomProf, prenomProf
 FROM Professeur
 LEFT OUTER JOIN Module ON numProf = resp
 WHERE resp IS NULL;
+
+-- @section Expression des partitionnements
 
 -- Q23 - c:2, t:5
 -- Donnez, par groupe de seconde année, le nombre d'étudiants.

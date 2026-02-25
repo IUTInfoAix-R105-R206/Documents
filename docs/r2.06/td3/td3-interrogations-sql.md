@@ -98,7 +98,7 @@ susceptibles de recevoir des notes. Certains modules sont associés à une disci
 La hiérarchie des modules de l'extension de la base de données exemple est représentée sous
 forme d'arborescence des codes en `figure~\ref{fig:hierarchie}`{=latex}.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \centering
 \includegraphics[width=\linewidth]{figures/hierarchie-modules.pdf}
 \caption{Hiérarchie des modules}
@@ -122,7 +122,7 @@ référence) et **Responsable** d'un module. Enfin, l'association réflexive **A
 la hiérarchie entre modules (voir `figure~\ref{fig:hierarchie}`{=latex}).
 
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \centering
 \includegraphics[width=\linewidth]{figures/mcd.pdf}
 \caption{Modèle conceptuel des données (MCD)}
@@ -161,121 +161,5 @@ La clef étrangère `codePere` dans la relation `Module` fait référence à la 
 
 Les autres clefs étrangères font référence aux clefs primaires de même nom.
 
-# Requêtes avec SQL
-
-Formulez, en SQL, sur la base de données exemple, les requêtes d'interrogation suivantes.
-
-## Expression des jointures
-
-**Quand cela possible, formulez les requêtes suivantes de trois manières différentes.**
-
-Q1
-: Donnez, pour l'étudiant Stéphane Rocchi, les moyennes de test obtenues par ordre
-décroissant avec le code du module associé. [2 attributs, 9 tuples]{.expected}
-
-Q2
-: Donnez les codes et libellés des modules enseignés par Didier Boitard. [2 attributs, 2 tuples]{.expected}
-
-Q3
-: Quels sont les groupes de seconde année pour lesquels Marc Laporte a effectué un
-enseignement ? [1 attribut, 2 tuples]{.expected}
-
-Q4
-: Donnez les numéros et, par ordre alphabétique, les noms des étudiants ayant suivi un
-enseignement effectué par un professeur, par ailleurs responsable d'un module quelconque. [2 attributs, 18 tuples]{.expected}
-
-Q5
-: Donnez les numéros et, par ordre alphabétique, les noms des étudiants ayant suivi un
-enseignement effectué par le professeur responsable de ce module. [2 attributs, 12 tuples]{.expected}
-
-## Formulation de calculs verticaux et horizontaux
-
-**Formulez les requêtes suivantes, en veillant particulièrement à l'évaluation des valeurs nulles
-pour les calculs horizontaux.**
-
-Q6
-: Combien y-a-t-il de professeurs ? [1 attribut, 1 tuple (17)]{.expected}
-
-Q7
-: Quelle est la moyenne générale des notes de contrôle continu pour le module de code PRL ?
-[1 attribut, 1 tuple (9.7)]{.expected}
-
-Q8
-: Combien de professeurs ont donné un enseignement à l'étudiant Philippe Lyon ? [1 attribut, 1 tuple (7)]{.expected}
-
-Q9
-: Donnez, pour le module Prolog, la note moyenne obtenue par les étudiants en tenant compte
-des coefficients de contrôle continu et de test. [1 attribut, 1 tuple (10.66)]{.expected}
-
-Q10
-: Quel est le coefficient de test le plus faible ? [1 attribut, 1 tuple (0)]{.expected}
-
-Q11
-: Quels sont les libellés des modules dont le coefficient de test est le plus faible ? Proposer
-deux formulations différentes de cette requête. [1 attribut, 1 tuple (ETUDE DE CAS 1)]{.expected}
-
-Q12
-: En supposant que tous les modules sont de même importance, donnez la moyenne générale
-de l'étudiante Sandrine Levy. [1 attribut, 1 tuple (11.13)]{.expected}
-
-Q13
-: Quels sont les codes des modules pour lesquels la meilleure note de test a été obtenue ? [1 attribut, 2 tuples]{.expected}
-
-Q14
-: Quels sont les numéros et noms des étudiants qui ont obtenu, tous modules confondus, la
-meilleure note de test ? Proposer deux formulations différentes de cette requête. [2 attributs, 2 tuples]{.expected}
-
-## Utilisation des opérateurs ensemblistes
-
-Q15
-: Donnez les villes de résidence des étudiants et des professeurs. [1 attribut, 6 tuples]{.expected}
-
-Q16
-: Quels sont les numéros des professeurs responsables d'un module qu'ils enseignent ainsi que
-le code du module correspondant ? [2 attributs, 4 tuples]{.expected}
-
-Q17
-: Donnez les libellés des modules ne correspondant à la spécialité d'aucun professeur. [1 attribut, 23 tuples]{.expected}
-
-## Équivalent des opérateurs ensemblistes
-
-**Proposez une nouvelle formulation des requêtes de la section précédente sans faire appel aux
-opérateurs ensemblistes.**
-
-Q18
-: Quels sont les numéros des professeurs responsables d'un module qu'ils enseignent ainsi que
-le code du module correspondant ? [Q16, 2 attributs, 4 tuples]{.expected}
-
-Q19
-: Donnez les libellés des modules ne correspondant à la spécialité d'aucun professeur. [Q17, 1 attribut, 23 tuples]{.expected}
-
-## Test d'absence de données
-
-**Formulez les requêtes suivantes de trois manières différentes, sans utiliser d'opérateur
-ensembliste.**
-
-Q20
-: Donnez les numéros, noms et prénoms des étudiants n'ayant aucune note. [3 attributs, 27 tuples]{.expected}
-
-Q21
-: Quels sont les noms et prénoms des étudiants n'ayant eu aucun enseignement de Marc
-Laporte ? [2 attributs, 41 tuples]{.expected}
-
-Q22
-: Quels sont les noms et prénoms des professeurs n'étant pas responsables de modules ? [2 attributs, 8 tuples]{.expected}
-
-## Expression des partitionnements
-
-Q23
-: Donnez, par groupe de seconde année, le nombre d'étudiants. [2 attributs, 5 tuples]{.expected}
-
-Q24
-: Donnez, pour chaque numéro d'étudiant, la meilleure note de test. [2 attributs, 29 tuples]{.expected}
-
-Q25
-: Donnez, pour chaque numéro et nom des étudiants de seconde année ainsi que pour chaque
-code de module, le nombre de professeurs. [4 attributs, 71 tuples]{.expected}
-
-Q26
-: Donnez, pour chaque ville de plus de cinq professeurs, le nombre de professeurs y résidant.
-[2 attributs, 2 tuples]{.expected}
+::: questions
+:::
