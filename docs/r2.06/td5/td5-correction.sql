@@ -1,12 +1,17 @@
 -- V1.0.0
 
+-- @title Requêtes avec SQL
+-- @intro Formulez, en SQL, sur la base de données exemple, les requêtes d'interrogation suivantes.
+
+-- @section Expression des partitionnements
+
 -- Q1 - c:4, t:12
 -- Quel est, pour chacun des numéros et noms des professeurs, et pour chacune des années, le nombre d'étudiants auxquels il a enseigné ?
 PROMPT "Q1";
 
 SELECT P.numProf, nomProf, anneeEt, COUNT(DISTINCT Et.numEt)
 FROM Enseigne E
-INNER JOIN Professeur P ON E.numProf = P.numProf 
+INNER JOIN Professeur P ON E.numProf = P.numProf
 INNER JOIN Etudiant Et ON E.numEt = Et.numEt
 GROUP BY P.numProf, nomProf, anneeEt;
 
@@ -53,6 +58,8 @@ WHERE libelle = 'CONCEPTION DE SI'
   AND anneeEt = 2
 GROUP BY groupeEt;
 
+-- @section Calculs complexes
+
 -- Q4 - c:3, t:4
 -- Quels sont les numéros, noms et prénoms des enseignants ayant autant de modules que Bernard Faure ?
 PROMPT "Q4 - V1";
@@ -77,7 +84,7 @@ PROMPT "Q4 - V2";
 WITH T (numProf, nomProf, prenomProf, code) AS (
 	SELECT E.numProf, nomProf, prenomProf, code
 	FROM Enseigne E
-	INNER JOIN Professeur P ON E.numProf = P.numProf 
+	INNER JOIN Professeur P ON E.numProf = P.numProf
 )
 SELECT DISTINCT numProf, nomProf, prenomProf
 FROM T
@@ -122,10 +129,12 @@ SELECT code, libelle, heureCMPrev / total pourcentageDiscipline
 FROM MODULE
 INNER JOIN (SELECT SUM(heureCMPrev) total, discipline
 	        FROM MODULE
-	        GROUP BY discipline) NbH 
+	        GROUP BY discipline) NbH
 ON MODULE.discipline = NbH.discipline
 WHERE heureCMPrev IS NOT NULL
   AND total IS NOT NULL;
+
+-- @section Expression des recherches récursives
 
 -- Q8 - c:3, t:6
 -- Donnez, pour chaque code de module, le nombre de professeurs qui les enseignent et la moyenne de test maximale.
@@ -156,7 +165,7 @@ FROM MODULE
 WHERE codePere IS NULL;
 
 -- Q10 - c:1, t:16
--- Présenter, de manière hiérarchique, les libellés de tous les sous-modules du module Informatique 2DE année.
+-- Présenter, de manière hiérarchique, les libellés de tous les sous-modules du module Informatique 2de année.
 PROMPT "Q10";
 
 SELECT LPAD('-', 2 * LEVEL, '-') || libelle
@@ -195,6 +204,10 @@ WHERE discipline = 'INFORMATIQUE'
 START WITH libelle = 'INFORMATIQUE 2DE ANNEE'
 CONNECT BY codePere = PRIOR code;
 
+-- @section Expression des divisions
+
+-- @instruction Quand cela possible, formulez les requêtes suivantes de deux manières différentes.
+
 -- Q14 - c:2, t:1
 -- Quels sont les noms et prénoms des professeurs ayant enseigné à tous les étudiants de seconde année ?
 PROMPT "Q14 - Version double NOT EXISTS";
@@ -226,7 +239,7 @@ HAVING COUNT(DISTINCT Et.numEt) = (SELECT COUNT(*)
 -- Remarque : cette requête correspond au paraphrasage "Quels sont les noms et prénoms des Professeurs qui ont enseigné à autant d'étudiants de seconde année qu'il en existe ?"
 
 -- Q15 - c:2, t:11
--- Quels sont les noms et prénoms des étudiants dont tous les professeurs ont aussi donné cours à l’étudiant numéro 1102 ?
+-- Quels sont les noms et prénoms des étudiants dont tous les professeurs ont aussi donné cours à l'étudiant numéro 1102 ?
 PROMPT "Q15 - Version double NOT EXISTS";
 
 SELECT nomEt, prenomEt
@@ -239,9 +252,9 @@ WHERE NOT EXISTS (SELECT *
 									WHERE Et.numEt = E2.numEt
 									  AND E.numProf = E2.numProf));
 
--- Remarque : cette requête correspond au paraphrasage "Quels sont les noms et prénoms des étudiants tels qu'il n'existe aucun Professeur ayant eu l’étudiant numéro 1102 qui ne les ait pas eu aussi ?"
+-- Remarque : cette requête correspond au paraphrasage "Quels sont les noms et prénoms des étudiants tels qu'il n'existe aucun Professeur ayant eu l'étudiant numéro 1102 qui ne les ait pas eu aussi ?"
 
--- Remarque : il est impossible de répondre à cette requête avec la version HAVING car il ne suffit pas que les étudiants aient eu le même nombre de Professeurs que l’étudiant numéro 1102, il faut que ces Professeurs soient les mêmes.
+-- Remarque : il est impossible de répondre à cette requête avec la version HAVING car il ne suffit pas que les étudiants aient eu le même nombre de Professeurs que l'étudiant numéro 1102, il faut que ces Professeurs soient les mêmes.
 
 -- Q16 - c:3, t:3
 -- Quels sont les numéros, noms et prénoms des étudiants ayant eu, pour le module Conception de SI, tous les Professeurs enseignant ce module ?
@@ -294,13 +307,13 @@ WHERE NOT EXISTS (SELECT *
 									WHERE M.code = E.code
 									  AND Et.numEt = E.numEt));
 
--- Remarque : cette requête correspond au paraphrasage "Quelles sont les modules tels qu’il n’existe aucun étudiant du groupeEt 2 de seconde année qui ne les suit pas ?"
+-- Remarque : cette requête correspond au paraphrasage "Quelles sont les modules tels qu'il n'existe aucun étudiant du groupeEt 2 de seconde année qui ne les suit pas ?"
 
 PROMPT "Q17 - Version HAVING";
 
 SELECT M.code, libelle
 FROM Etudiant Et
-INNER JOIN Enseigne E ON Et.numEt = E.numEt 
+INNER JOIN Enseigne E ON Et.numEt = E.numEt
 INNER JOIN MODULE M ON E.code = M.code
 WHERE anneeEt = 2
   AND groupeEt = 2
@@ -310,7 +323,9 @@ HAVING COUNT(DISTINCT Et.numEt) = (SELECT COUNT(numEt)
                                     WHERE anneeEt = 2
 									  AND groupeEt = 2);
 
--- Remarque : cette requête correspond au paraphrasage "Quelles sont les modules suivis par autant d’étudiants du groupeEt 2 de seconde année qu’il en existe ?"
+-- Remarque : cette requête correspond au paraphrasage "Quelles sont les modules suivis par autant d'étudiants du groupeEt 2 de seconde année qu'il en existe ?"
+
+-- @section Requêtes complexes
 
 -- Q18 - c:1, t:13
 -- Présenter, de manière hiérarchique, les libellés de tous les sous-modules de la discipline Informatique subordonnés au module Informatique 2de année à l'exception du module Codage et circuits et de tous ses éventuels sous-modules.
@@ -402,7 +417,7 @@ WHERE code = 'ACSI';
 -- Version alternative.
 PROMPT "Q22 - V3";
 
-SELECT numEt, 
+SELECT numEt,
        moyTest - (SELECT MIN(moyTest)
 				   FROM Note
 				   WHERE code ='ACSI') moyMin,
@@ -411,4 +426,3 @@ SELECT numEt,
 				   WHERE code ='ACSI') moyMax
 FROM Note
 WHERE code = 'ACSI';
-
