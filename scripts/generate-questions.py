@@ -32,16 +32,19 @@ import argparse
 # Parsing du fichier SQL annoté
 # ---------------------------------------------------------------------------
 
+# Label question : chiffres + lettre optionnelle (Q3, Q3a, Q12b, etc.)
+QNUM = r'(\d+[a-z]?)'
+
 # Regex pour les lignes QN — essayés dans l'ordre de spécificité décroissante
 RE_QUESTION_FULL = re.compile(
-    r'^--\s+Q(\d+)\s*-\s*c:(\d+),\s*t:(\d+)'
+    r'^--\s+Q' + QNUM + r'\s*-\s*c:(\d+),\s*t:(\d+)'
     r'(?:\s+\(([^)]*)\))?'      # valeur attendue optionnelle entre ()
-    r'(?:\s+\[=\s*Q(\d+)\])?'   # référence optionnelle [= QM]
+    r'(?:\s+\[=\s*Q' + QNUM + r'\])?'   # référence optionnelle [= QM]
     r'\s*$'
 )
-RE_QUESTION_TUPLES = re.compile(r'^--\s+Q(\d+)\s*-\s*t:(\d+)\s*$')
-RE_QUESTION_RAW = re.compile(r'^--\s+Q(\d+)\s*-\s*(.+?)\s*$')
-RE_QUESTION_BARE = re.compile(r'^--\s+Q(\d+)\s*$')
+RE_QUESTION_TUPLES = re.compile(r'^--\s+Q' + QNUM + r'\s*-\s*t:(\d+)\s*$')
+RE_QUESTION_RAW = re.compile(r'^--\s+Q' + QNUM + r'\s*-\s*(.+?)\s*$')
+RE_QUESTION_BARE = re.compile(r'^--\s+Q' + QNUM + r'\s*$')
 
 RE_TAG = re.compile(r'^--\s+@(\w+)\s+(.*?)\s*$')
 RE_TAG_CONT = re.compile(r'^--\s+@\+\s+(.*?)\s*$')
@@ -56,7 +59,7 @@ def match_question(line):
     if m:
         return {
             'type': 'question',
-            'num': int(m.group(1)),
+            'num': m.group(1),
             'cols': int(m.group(2)),
             'rows': int(m.group(3)),
             'value': m.group(4),
@@ -70,7 +73,7 @@ def match_question(line):
     if m:
         return {
             'type': 'question',
-            'num': int(m.group(1)),
+            'num': m.group(1),
             'cols': None,
             'rows': int(m.group(2)),
             'value': None,
@@ -85,7 +88,7 @@ def match_question(line):
     if m:
         return {
             'type': 'question',
-            'num': int(m.group(1)),
+            'num': m.group(1),
             'cols': None,
             'rows': None,
             'value': None,
@@ -99,7 +102,7 @@ def match_question(line):
     if m:
         return {
             'type': 'question',
-            'num': int(m.group(1)),
+            'num': m.group(1),
             'cols': None,
             'rows': None,
             'value': None,
@@ -280,8 +283,8 @@ def parse_sql(path):
             # Extraire le label depuis le PROMPT
             prompt_match = re.match(r'PROMPT\s+"([^"]+)"', line, re.IGNORECASE)
             label = prompt_match.group(1) if prompt_match else ''
-            # Extraire le suffixe après "QN - "
-            label_suffix = re.sub(r'^Q\d+\s*-?\s*', '', label).strip()
+            # Extraire le suffixe après "QN - " (ex: "Q3a - V1" → "V1")
+            label_suffix = re.sub(r'^Q\d+[a-z]?\s*-?\s*', '', label).strip()
             if not label_suffix:
                 label_suffix = None
 
