@@ -32,6 +32,7 @@ TD_PDFS = $(patsubst docs/%,$(OUTPUT_DIR)/%,$(TD_SOURCES:.md=.pdf))
 
 # Corrections PDF (générées depuis le SQL annoté)
 R105_CORRECTION_PDFS = \
+	$(OUTPUT_DIR)/r1.05/td6/td6-correction.pdf \
 	$(OUTPUT_DIR)/r1.05/td7/td7-correction.pdf
 
 R206_CORRECTION_PDFS = \
@@ -372,6 +373,54 @@ $(OUTPUT_DIR)/r2.06/td6/td6-correction.pdf: docs/r2.06/td6/td6-correction.gen.md
 # ==============================================================================
 # R1.05 — Introduction aux bases de données et SQL
 # ==============================================================================
+
+# --- TD6 : Interrogation en SQL (BD Airbase) ---
+
+R105_TD6_FIGURES = docs/r1.05/td6/figures/mcd.pdf
+
+docs/r1.05/td6/figures/mcd.pdf: docs/r1.05/td6/figures/mcd.tex
+	cd docs/r1.05/td6/figures && TEXINPUTS="$(CURDIR)/$(TEMPLATE_DIR):" $(PDFLATEX) -interaction=nonstopmode mcd.tex
+
+# Génération du Markdown depuis le SQL annoté
+R105_TD6_SQL = docs/r1.05/td6/td6-correction.sql
+R105_TD6_TEMPLATE = docs/r1.05/td6/td6.md
+R105_TD6_GEN = scripts/generate-questions.py
+
+docs/r1.05/td6/td6.gen.md: $(R105_TD6_TEMPLATE) $(R105_TD6_SQL) $(R105_TD6_GEN)
+	$(PYTHON) $(R105_TD6_GEN) --mode subject --template $< --output $@ $(word 2,$^)
+
+docs/r1.05/td6/td6-correction.gen.md: $(R105_TD6_TEMPLATE) $(R105_TD6_SQL) $(R105_TD6_GEN)
+	$(PYTHON) $(R105_TD6_GEN) --mode correction --template $< --output $@ $(word 2,$^)
+
+$(OUTPUT_DIR)/r1.05/td6/td6.pdf: docs/r1.05/td6/td6.gen.md $(TEMPLATE_DIR)/template.tex $(FILTER_DIR)/custom-styles.lua $(R105_TD6_FIGURES)
+	@mkdir -p $(OUTPUT_DIR)/r1.05/td6
+	cd docs/r1.05/td6 && $(PANDOC) \
+		--from markdown+footnotes+definition_lists+fenced_divs+bracketed_spans \
+		--pdf-engine=pdflatex \
+		--pdf-engine-opt=-shell-escape \
+		--template=../../../$(TEMPLATE_DIR)/template.tex \
+		--lua-filter=../../../$(FILTER_DIR)/custom-styles.lua \
+		--resource-path=.:../../../$(TEMPLATE_DIR):figures \
+		--variable=license-badge:../../../$(TEMPLATE_DIR)/cc-by-nc-sa \
+		--variable=version:$(GIT_VERSION) \
+		--number-sections \
+		td6.gen.md \
+		-o ../../../$@
+
+$(OUTPUT_DIR)/r1.05/td6/td6-correction.pdf: docs/r1.05/td6/td6-correction.gen.md $(TEMPLATE_DIR)/template.tex $(FILTER_DIR)/custom-styles.lua $(R105_TD6_FIGURES)
+	@mkdir -p $(OUTPUT_DIR)/r1.05/td6
+	cd docs/r1.05/td6 && $(PANDOC) \
+		--from markdown+footnotes+definition_lists+fenced_divs+bracketed_spans \
+		--pdf-engine=pdflatex \
+		--pdf-engine-opt=-shell-escape \
+		--template=../../../$(TEMPLATE_DIR)/template.tex \
+		--lua-filter=../../../$(FILTER_DIR)/custom-styles.lua \
+		--resource-path=.:../../../$(TEMPLATE_DIR):figures \
+		--variable=license-badge:../../../$(TEMPLATE_DIR)/cc-by-nc-sa \
+		--variable=version:$(GIT_VERSION) \
+		--number-sections \
+		td6-correction.gen.md \
+		-o ../../../$@
 
 # --- TD7 : Interrogation en SQL interprété (BD Voyages) ---
 

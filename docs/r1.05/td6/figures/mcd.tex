@@ -1,0 +1,78 @@
+\documentclass[border=10pt]{standalone}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage{tikz-er2}
+
+\usetikzlibrary{decorations.text}
+\usetikzlibrary{decorations.markings}
+\usetikzlibrary{positioning}
+\usetikzlibrary{shadows}
+\usetikzlibrary{backgrounds}
+
+\tikzstyle{every entity} = [top color=white,
+                            bottom color=blue!30,
+                            draw=blue!50!black!100,
+                            drop shadow]
+
+\tikzstyle{every weak entity} = [drop shadow={shadow xshift=.7ex, shadow yshift=-.7ex}]
+
+\tikzstyle{every attribute} = [top color=white,
+                               bottom color=yellow!20,
+                               draw=yellow,
+                               node distance=1cm,
+                               drop shadow]
+
+\tikzstyle{every relationship} = [top color=white,
+                                  bottom color=yellow!20,
+                                  draw=yellow,
+                                  drop shadow]
+
+\tikzstyle{every isa} = [draw=blue!50!black!100]
+
+\tikzset{card/.style={font=\scriptsize\sffamily, fill=white, inner sep=1pt}}
+
+\begin{document}
+\begin{tikzpicture}[node distance=1cm, every edge/.style={link}]
+
+  \node[entity] (pilote) {
+    \textbf{Pilote}
+    \nodepart{second}
+    \key{numPil}\\
+    nomPil\\
+    adresse\\
+    salaire\\
+  };
+
+  \node[relationship] (a1) [right= of pilote]
+    {A (n$^\circ$1)};
+
+  \node[entity] (vol) [right= of a1] {
+    \textbf{Vol}
+    \nodepart{second}
+    \key{numVol}\\
+    villeDep\\
+    villeArr\\
+    heureDep\\
+    heureArr\\
+  };
+
+  \node[relationship] (a2) [right= of vol]
+    {A (n$^\circ$2)};
+
+  \node[entity] (avion) [right= of a2] {
+    \textbf{Avion}
+    \nodepart{second}
+    \key{numAv}\\
+    nomAv\\
+    capacite\\
+    localisation\\
+  };
+
+  \draw[link] (pilote.east) -- node [pos=0.5, above] {(0,n)} (a1.west);
+  \draw[link] (a1.east) -- node [pos=0.5, above] {(1,1)} (vol.west);
+  \draw[link] (vol.east) -- node [pos=0.5, above] {(1,1)} (a2.west);
+  \draw[link] (a2.east) -- node [pos=0.5, above] {(0,n)} (avion.west);
+
+\end{tikzpicture}
+\end{document}

@@ -22,3 +22,4 @@ docs/**/svg-inkscape/
 Thumbs.db
 .vscode/settings.json
 Base De Données/
+.claude/settings.json
