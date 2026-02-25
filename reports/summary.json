@@ -1,0 +1,205 @@
+{
+  "r1.05/td7": {
+    "title": "r1.05/td7",
+    "report_file": "r1.05-td7.html",
+    "total": 126,
+    "pass": 114,
+    "error": 8,
+    "fail": 4,
+    "has_oracle_only": true,
+    "dbms": {
+      "postgres": {
+        "total": 42,
+        "pass": 42,
+        "error": 0,
+        "fail": 0
+      },
+      "sqlite": {
+        "total": 42,
+        "pass": 34,
+        "error": 8,
+        "fail": 0
+      },
+      "oracle": {
+        "total": 42,
+        "pass": 38,
+        "error": 0,
+        "fail": 4
+      }
+    }
+  },
+  "r2.06/td1": {
+    "title": "TD1 : Opérateurs ensemblistes, LDD et LCT",
+    "report_file": "r2.06-td1.html",
+    "total": 99,
+    "pass": 62,
+    "error": 21,
+    "fail": 16,
+    "has_oracle_only": true,
+    "dbms": {
+      "postgres": {
+        "total": 33,
+        "pass": 21,
+        "error": 10,
+        "fail": 2
+      },
+      "sqlite": {
+        "total": 33,
+        "pass": 20,
+        "error": 11,
+        "fail": 2
+      },
+      "oracle": {
+        "total": 33,
+        "pass": 21,
+        "error": 0,
+        "fail": 12
+      }
+    }
+  },
+  "r2.06/td2": {
+    "title": "TD2 : Jointures externes, partitionnement et synthèse des requêtes",
+    "report_file": "r2.06-td2.html",
+    "total": 141,
+    "pass": 135,
+    "error": 6,
+    "fail": 0,
+    "has_oracle_only": true,
+    "dbms": {
+      "postgres": {
+        "total": 47,
+        "pass": 47,
+        "error": 0,
+        "fail": 0
+      },
+      "sqlite": {
+        "total": 47,
+        "pass": 41,
+        "error": 6,
+        "fail": 0
+      },
+      "oracle": {
+        "total": 47,
+        "pass": 47,
+        "error": 0,
+        "fail": 0
+      }
+    }
+  },
+  "r2.06/td3": {
+    "title": "TD3 : Interrogations en SQL",
+    "report_file": "r2.06-td3.html",
+    "total": 153,
+    "pass": 148,
+    "error": 5,
+    "fail": 0,
+    "has_oracle_only": true,
+    "dbms": {
+      "postgres": {
+        "total": 51,
+        "pass": 51,
+        "error": 0,
+        "fail": 0
+      },
+      "sqlite": {
+        "total": 51,
+        "pass": 46,
+        "error": 5,
+        "fail": 0
+      },
+      "oracle": {
+        "total": 51,
+        "pass": 51,
+        "error": 0,
+        "fail": 0
+      }
+    }
+  },
+  "r2.06/td4": {
+    "title": "TD4 : Recherche récursive, division et requêtes complexes",
+    "report_file": "r2.06-td4.html",
+    "total": 111,
+    "pass": 81,
+    "error": 30,
+    "fail": 0,
+    "has_oracle_only": true,
+    "dbms": {
+      "postgres": {
+        "total": 37,
+        "pass": 22,
+        "error": 15,
+        "fail": 0
+      },
+      "sqlite": {
+        "total": 37,
+        "pass": 22,
+        "error": 15,
+        "fail": 0
+      },
+      "oracle": {
+        "total": 37,
+        "pass": 37,
+        "error": 0,
+        "fail": 0
+      }
+    }
+  },
+  "r2.06/td5": {
+    "title": "TD5 : Interrogations avancées en SQL",
+    "report_file": "r2.06-td5.html",
+    "total": 99,
+    "pass": 85,
+    "error": 14,
+    "fail": 0,
+    "has_oracle_only": true,
+    "dbms": {
+      "postgres": {
+        "total": 33,
+        "pass": 26,
+        "error": 7,
+        "fail": 0
+      },
+      "sqlite": {
+        "total": 33,
+        "pass": 26,
+        "error": 7,
+        "fail": 0
+      },
+      "oracle": {
+        "total": 33,
+        "pass": 33,
+        "error": 0,
+        "fail": 0
+      }
+    }
+  },
+  "r2.06/td6": {
+    "title": "TD6 : Vues, tables système et rappels SQL",
+    "report_file": "r2.06-td6.html",
+    "total": 77,
+    "pass": 9,
+    "error": 45,
+    "fail": 23,
+    "has_oracle_only": true,
+    "dbms": {
+      "postgres": {
+        "total": 26,
+        "pass": 2,
+        "error": 22,
+        "fail": 2
+      },
+      "sqlite": {
+        "total": 26,
+        "pass": 2,
+        "error": 23,
+        "fail": 1
+      },
+      "oracle": {
+        "total": 25,
+        "pass": 5,
+        "error": 0,
+        "fail": 20
+      }
+    }
+  }
+}
