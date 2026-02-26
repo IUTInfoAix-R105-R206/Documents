@@ -199,7 +199,7 @@ CONNECT BY PRIOR idT = idTPere;
 -- @section Expression des divisions
 
 -- Q13 - c:3, t:4
--- Donnez les noms et prénoms des étudiants ayant fait toutes les questions du TP numéro 1. Proposer deux formulations différentes, avec double NOT EXISTS et HAVING, de cette requête.
+-- Donnez les numéro, noms et prénoms des étudiants ayant fait toutes les questions du TP numéro 1. Proposer deux formulations différentes, avec double NOT EXISTS et HAVING, de cette requête.
 PROMPT "Q13 - Version double NOT EXISTS";
 
 SELECT numEt, nom, prenom

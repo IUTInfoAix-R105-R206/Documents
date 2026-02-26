@@ -11,8 +11,8 @@ PROMPT "Q1";
 
 SELECT P.numProf, nomProf, anneeEt, COUNT(DISTINCT Et.numEt)
 FROM Enseigne E
-INNER JOIN Professeur P ON E.numProf = P.numProf
-INNER JOIN Etudiant Et ON E.numEt = Et.numEt
+    INNER JOIN Professeur P ON E.numProf = P.numProf
+    INNER JOIN Etudiant Et ON E.numEt = Et.numEt
 GROUP BY P.numProf, nomProf, anneeEt;
 
 -- Q2 - c:3, t:5
@@ -23,8 +23,8 @@ PROMPT "Q2 - Version algébrique";
 
 SELECT P.numProf, nomProf, COUNT(DISTINCT E.code)
 FROM Enseigne E
-INNER JOIN Professeur P ON E.numProf = P.numProf
-INNER JOIN MODULE M ON P.numProf = M.resp
+    INNER JOIN Professeur P ON E.numProf = P.numProf
+    INNER JOIN MODULE M ON P.numProf = M.resp
 GROUP BY P.numProf, nomProf;
 
 -- Version imbriquée.
@@ -32,9 +32,12 @@ PROMPT "Q2 - Version imbriquée";
 
 SELECT P.numProf, nomProf, COUNT(DISTINCT code)
 FROM Enseigne E
-INNER JOIN Professeur P ON E.numProf = P.numProf
-WHERE P.numProf IN (SELECT resp
-                     FROM MODULE)
+    INNER JOIN Professeur P ON E.numProf = P.numProf
+WHERE
+    P.numProf IN (
+        SELECT resp
+        FROM MODULE
+    )
 GROUP BY P.numProf, nomProf;
 
 -- Version prédicative.
@@ -42,8 +45,9 @@ PROMPT "Q2 - Version prédicative";
 
 SELECT P.numProf, nomProf, COUNT(DISTINCT E.code)
 FROM Enseigne E, Professeur P, MODULE M
-WHERE E.numProf = P.numProf
-  AND P.numProf = M.resp
+WHERE
+    E.numProf = P.numProf
+    AND P.numProf = M.resp
 GROUP BY P.numProf, nomProf;
 
 -- Q3 - c:2, t:5
@@ -52,10 +56,11 @@ PROMPT "Q3";
 
 SELECT groupeEt, AVG(moyTest)
 FROM Note N
-INNER JOIN Etudiant Et ON N.numEt = Et.numEt
-INNER JOIN MODULE M ON N.code = M.code
-WHERE libelle = 'CONCEPTION DE SI'
-  AND anneeEt = 2
+    INNER JOIN Etudiant Et ON N.numEt = Et.numEt
+    INNER JOIN MODULE M ON N.code = M.code
+WHERE
+    libelle = 'CONCEPTION DE SI'
+    AND anneeEt = 2
 GROUP BY groupeEt;
 
 -- @section Calculs complexes
@@ -64,47 +69,61 @@ GROUP BY groupeEt;
 -- Quels sont les numéros, noms et prénoms des enseignants ayant autant de modules que Bernard Faure ?
 PROMPT "Q4 - V1";
 
-WITH T (numProf, nomProf, prenomProf, nbCode) AS (
-	SELECT E.numProf, nomProf, prenomProf, COUNT(DISTINCT code)
-	FROM Enseigne E
-	INNER JOIN Professeur P ON E.numProf = P.numProf
-	GROUP BY E.numProf, nomProf, prenomProf
-)
+WITH
+    T (numProf, nomProf, prenomProf, nbCode) AS (
+        SELECT E.numProf, nomProf, prenomProf, COUNT(DISTINCT code)
+        FROM Enseigne E
+            INNER JOIN Professeur P ON E.numProf = P.numProf
+        GROUP BY E.numProf, nomProf, prenomProf
+    )
+
 SELECT DISTINCT numProf, nomProf, prenomProf
 FROM T
-WHERE (nomProf <> 'FAURE' OR prenomProf <> 'BERNARD')
-  AND nbCode IN (SELECT nbCode
-			    FROM T
-			    WHERE nomProf = 'FAURE'
-				  AND prenomProf = 'BERNARD');
+WHERE
+    (nomProf <> 'FAURE' OR prenomProf <> 'BERNARD')
+    AND nbCode IN (
+        SELECT nbCode
+        FROM T
+        WHERE
+            nomProf = 'FAURE'
+            AND prenomProf = 'BERNARD'
+    );
 
 -- Version alternative.
 PROMPT "Q4 - V2";
 
-WITH T (numProf, nomProf, prenomProf, code) AS (
-	SELECT E.numProf, nomProf, prenomProf, code
-	FROM Enseigne E
-	INNER JOIN Professeur P ON E.numProf = P.numProf
-)
-SELECT DISTINCT numProf, nomProf, prenomProf
+WITH
+    T (numProf, nomProf, prenomProf, code) AS (
+        SELECT E.numProf, nomProf, prenomProf, code
+        FROM Enseigne E
+            INNER JOIN Professeur P ON E.numProf = P.numProf
+    )
+
+SELECT numProf, nomProf, prenomProf
 FROM T
-WHERE nomProf <> 'FAURE'
-   OR prenomProf <> 'BERNARD'
+WHERE
+    nomProf <> 'FAURE'
+    OR prenomProf <> 'BERNARD'
 GROUP BY numProf, nomProf, prenomProf
-HAVING COUNT(DISTINCT code) = (SELECT COUNT(DISTINCT code)
-							   FROM T
-							   WHERE nomProf = 'FAURE'
-								 AND prenomProf = 'BERNARD');
+HAVING COUNT(DISTINCT code) = (
+    SELECT COUNT(DISTINCT code)
+    FROM T
+    WHERE
+        nomProf = 'FAURE'
+        AND prenomProf = 'BERNARD'
+);
 
 -- Q5 - c:1, t:1 (9)
 -- Donnez le nombre moyen d'étudiants des groupes de seconde année.
 PROMPT "Q5 - V1";
 
 SELECT AVG(nbEtudiant)
-FROM (SELECT groupeEt, COUNT(*) nbEtudiant
-      FROM Etudiant
-	  WHERE anneeEt = 2
-      GROUP BY groupeEt);
+FROM (
+    SELECT groupeEt, COUNT(*) AS nbEtudiant
+    FROM Etudiant
+    WHERE anneeEt = 2
+    GROUP BY groupeEt
+);
 
 PROMPT "Q5 - V2";
 
@@ -117,22 +136,27 @@ WHERE anneeEt = 2;
 PROMPT "Q6";
 
 SELECT MAX(nbEtudiant)
-FROM (SELECT numProf, COUNT(DISTINCT numEt) nbEtudiant
-      FROM Enseigne
-      GROUP BY numProf);
+FROM (
+    SELECT numProf, COUNT(DISTINCT numEt) AS nbEtudiant
+    FROM Enseigne
+    GROUP BY numProf
+);
 
 -- Q7 - c:3, t:9
 -- Donnez les codes et libellés des modules, et lorsqu'il existe, le pourcentage de la somme d'heures de cours par rapport au total des heures de cours dans la discipline correspondante.
 PROMPT "Q7";
 
-SELECT code, libelle, heureCMPrev / total pourcentageDiscipline
+SELECT code, libelle, heureCMPrev / total AS pourcentageDiscipline
 FROM MODULE
-INNER JOIN (SELECT SUM(heureCMPrev) total, discipline
-	        FROM MODULE
-	        GROUP BY discipline) NbH
-ON MODULE.discipline = NbH.discipline
-WHERE heureCMPrev IS NOT NULL
-  AND total IS NOT NULL;
+    INNER JOIN (
+        SELECT SUM(heureCMPrev) AS total, discipline
+        FROM MODULE
+        GROUP BY discipline
+    ) NbH
+        ON MODULE.discipline = NbH.discipline
+WHERE
+    heureCMPrev IS NOT NULL
+    AND total IS NOT NULL;
 
 -- @section Expression des recherches récursives
 
@@ -141,19 +165,23 @@ WHERE heureCMPrev IS NOT NULL
 PROMPT "Q8 - V1";
 
 SELECT E.code, NB_Prof, moy_max
-FROM (SELECT code, COUNT(DISTINCT numProf) NB_Prof
-	  FROM Enseigne
-	  GROUP BY code) E
-INNER JOIN (SELECT code, MAX(moyTest) moy_max
-		   FROM Note
-		   GROUP BY code) N
-ON E.code= N.code;
+FROM (
+    SELECT code, COUNT(DISTINCT numProf) AS NB_Prof
+    FROM Enseigne
+    GROUP BY code
+) E
+    INNER JOIN (
+        SELECT code, MAX(moyTest) AS moy_max
+        FROM Note
+        GROUP BY code
+    ) N
+        ON E.code = N.code;
 
 PROMPT "Q8 - V2";
 
 SELECT E.code, COUNT(DISTINCT numProf), MAX(moyTest)
 FROM Enseigne E
-INNER JOIN Note N ON E.code = N.code
+    INNER JOIN Note N ON E.code = N.code
 GROUP BY E.code;
 
 -- Q9 - c:2, t:1
@@ -199,8 +227,9 @@ PROMPT "Q13";
 
 SELECT LPAD('-', 2 * LEVEL, '-') || libelle
 FROM MODULE
-WHERE discipline = 'INFORMATIQUE'
-  AND libelle NOT IN ('INFORMATIQUE 2DE ANNEE', 'BASES DE DONNEES')
+WHERE
+    discipline = 'INFORMATIQUE'
+    AND libelle NOT IN ('INFORMATIQUE 2DE ANNEE', 'BASES DE DONNEES')
 START WITH libelle = 'INFORMATIQUE 2DE ANNEE'
 CONNECT BY codePere = PRIOR code;
 
@@ -214,13 +243,19 @@ PROMPT "Q14 - Version double NOT EXISTS";
 
 SELECT nomProf, prenomProf
 FROM Professeur P
-WHERE NOT EXISTS (SELECT *
-				  FROM Etudiant Et
-				  WHERE anneeEt = 2
-				    AND NOT EXISTS (SELECT *
-								    FROM Enseigne E
-								    WHERE P.numProf = E.numProf
-									  AND Et.numEt = E.numEt));
+WHERE NOT EXISTS (
+    SELECT *
+    FROM Etudiant Et
+    WHERE
+        anneeEt = 2
+        AND NOT EXISTS (
+            SELECT *
+            FROM Enseigne E
+            WHERE
+                P.numProf = E.numProf
+                AND Et.numEt = E.numEt
+        )
+);
 
 -- Remarque : cette requête correspond au paraphrasage "Quels sont les noms et prénoms des Professeurs tels qu'il n'existe aucun étudiant de seconde année auquel ces Professeurs n'aient pas enseigné ?"
 
@@ -228,13 +263,15 @@ PROMPT "Q14 - Version HAVING";
 
 SELECT nomProf, prenomProf
 FROM Professeur P
-INNER JOIN Enseigne E ON P.numProf = E.numProf
-INNER JOIN Etudiant Et ON E.numEt = Et.numEt
+    INNER JOIN Enseigne E ON P.numProf = E.numProf
+    INNER JOIN Etudiant Et ON E.numEt = Et.numEt
 WHERE anneeEt = 2
 GROUP BY nomProf, prenomProf
-HAVING COUNT(DISTINCT Et.numEt) = (SELECT COUNT(*)
-								    FROM Etudiant
-								    WHERE anneeEt = 2);
+HAVING COUNT(DISTINCT Et.numEt) = (
+    SELECT COUNT(*)
+    FROM Etudiant
+    WHERE anneeEt = 2
+);
 
 -- Remarque : cette requête correspond au paraphrasage "Quels sont les noms et prénoms des Professeurs qui ont enseigné à autant d'étudiants de seconde année qu'il en existe ?"
 
@@ -244,13 +281,19 @@ PROMPT "Q15 - Version double NOT EXISTS";
 
 SELECT nomEt, prenomEt
 FROM Etudiant Et
-WHERE NOT EXISTS (SELECT *
-				  FROM Enseigne E
-				  WHERE numEt = 1102
-				    AND NOT EXISTS (SELECT *
-									FROM Enseigne E2
-									WHERE Et.numEt = E2.numEt
-									  AND E.numProf = E2.numProf));
+WHERE NOT EXISTS (
+    SELECT *
+    FROM Enseigne E
+    WHERE
+        numEt = 1102
+        AND NOT EXISTS (
+            SELECT *
+            FROM Enseigne E2
+            WHERE
+                Et.numEt = E2.numEt
+                AND E.numProf = E2.numProf
+        )
+);
 
 -- Remarque : cette requête correspond au paraphrasage "Quels sont les noms et prénoms des étudiants tels qu'il n'existe aucun Professeur ayant eu l'étudiant numéro 1102 qui ne les ait pas eu aussi ?"
 
@@ -262,33 +305,43 @@ PROMPT "Q16 - Version double NOT EXISTS";
 
 SELECT numEt, nomEt, prenomEt
 FROM Etudiant Et
-WHERE NOT EXISTS (SELECT *
-				  FROM Enseigne E
-				  INNER JOIN MODULE M ON E.code = M.code
-				  WHERE libelle = 'CONCEPTION DE SI'
-				    AND NOT EXISTS (SELECT *
-									FROM Enseigne E2
-									WHERE Et.numEt = E2.numEt
-									  AND E.code = E2.code
-									  AND E.numProf = E2.numProf));
+WHERE NOT EXISTS (
+    SELECT *
+    FROM Enseigne E
+        INNER JOIN MODULE M ON E.code = M.code
+    WHERE
+        libelle = 'CONCEPTION DE SI'
+        AND NOT EXISTS (
+            SELECT *
+            FROM Enseigne E2
+            WHERE
+                Et.numEt = E2.numEt
+                AND E.code = E2.code
+                AND E.numProf = E2.numProf
+        )
+);
 
 -- Remarque : cette requête correspond au paraphrasage "Quels sont les numéros, étudiants tels qu'il n'existe aucun Professeur enseignant le module Conception de SI qui ne leur ait pas enseigné ce module ?"
 
 PROMPT "Q16 - Version HAVING";
 
-WITH T (numProf, numEt, libelle) AS (
-	SELECT numProf, numEt, libelle
-	FROM Enseigne E
-	INNER JOIN MODULE M ON E.code = M.code
-)
+WITH
+    T (numProf, numEt, libelle) AS (
+        SELECT numProf, numEt, libelle
+        FROM Enseigne E
+            INNER JOIN MODULE M ON E.code = M.code
+    )
+
 SELECT Et.numEt, nomEt, prenomEt
 FROM T
-INNER JOIN Etudiant Et ON T.numEt = Et.numEt
+    INNER JOIN Etudiant Et ON T.numEt = Et.numEt
 WHERE libelle = 'CONCEPTION DE SI'
 GROUP BY Et.numEt, nomEt, prenomEt
-HAVING COUNT(DISTINCT numProf) = (SELECT COUNT(DISTINCT numProf)
-                                   FROM T
-								   WHERE libelle = 'CONCEPTION DE SI');
+HAVING COUNT(DISTINCT numProf) = (
+    SELECT COUNT(DISTINCT numProf)
+    FROM T
+    WHERE libelle = 'CONCEPTION DE SI'
+);
 
 -- Remarque : cette requête correspond au paraphrasage "Quels sont les numéros, noms et prénoms des étudiants dont le nombre de Professeurs en Conception de SI est égal au nombre total de Professeurs enseignant ce module ?"
 
@@ -298,14 +351,20 @@ PROMPT "Q17 - Version double NOT EXISTS";
 
 SELECT code, libelle
 FROM MODULE M
-WHERE NOT EXISTS (SELECT *
-				  FROM Etudiant Et
-				  WHERE anneeEt = 2
-				    AND groupeEt = 2
- 					AND NOT EXISTS (SELECT *
-									FROM Enseigne E
-									WHERE M.code = E.code
-									  AND Et.numEt = E.numEt));
+WHERE NOT EXISTS (
+    SELECT *
+    FROM Etudiant Et
+    WHERE
+        anneeEt = 2
+        AND groupeEt = 2
+        AND NOT EXISTS (
+            SELECT *
+            FROM Enseigne E
+            WHERE
+                M.code = E.code
+                AND Et.numEt = E.numEt
+        )
+);
 
 -- Remarque : cette requête correspond au paraphrasage "Quelles sont les modules tels qu'il n'existe aucun étudiant du groupeEt 2 de seconde année qui ne les suit pas ?"
 
@@ -313,15 +372,19 @@ PROMPT "Q17 - Version HAVING";
 
 SELECT M.code, libelle
 FROM Etudiant Et
-INNER JOIN Enseigne E ON Et.numEt = E.numEt
-INNER JOIN MODULE M ON E.code = M.code
-WHERE anneeEt = 2
-  AND groupeEt = 2
+    INNER JOIN Enseigne E ON Et.numEt = E.numEt
+    INNER JOIN MODULE M ON E.code = M.code
+WHERE
+    anneeEt = 2
+    AND groupeEt = 2
 GROUP BY M.code, libelle
-HAVING COUNT(DISTINCT Et.numEt) = (SELECT COUNT(numEt)
-                                    FROM Etudiant
-                                    WHERE anneeEt = 2
-									  AND groupeEt = 2);
+HAVING COUNT(DISTINCT Et.numEt) = (
+    SELECT COUNT(numEt)
+    FROM Etudiant
+    WHERE
+        anneeEt = 2
+        AND groupeEt = 2
+);
 
 -- Remarque : cette requête correspond au paraphrasage "Quelles sont les modules suivis par autant d'étudiants du groupeEt 2 de seconde année qu'il en existe ?"
 
@@ -336,7 +399,7 @@ FROM MODULE
 WHERE discipline = 'INFORMATIQUE'
 START WITH libelle = 'INFORMATIQUE 2DE ANNEE'
 CONNECT BY codePere = PRIOR code
-       AND libelle <> 'CODAGE ET CIRCUITS';
+AND libelle <> 'CODAGE ET CIRCUITS';
 
 -- Q19 - c:1, t:24
 -- Présenter, de manière hiérarchique, les modules suivis par l'étudiant Jérôme Atlani ?
@@ -344,11 +407,14 @@ PROMPT "Q19";
 
 SELECT LPAD('-', 2 * (MAX(LEVEL) OVER () + 1 - LEVEL), '-') || libelle
 FROM MODULE
-START WITH code IN (SELECT code
-					FROM Enseigne E
-					INNER JOIN Etudiant Et ON E.numEt = Et.numEt
-					WHERE nomEt = 'ATLANI'
-					  AND prenomEt = 'JEROME')
+START WITH code IN (
+    SELECT code
+    FROM Enseigne E
+        INNER JOIN Etudiant Et ON E.numEt = Et.numEt
+    WHERE
+        nomEt = 'ATLANI'
+        AND prenomEt = 'JEROME'
+)
 CONNECT BY code = PRIOR codePere;
 
 -- Remarque : il n'existe pas de manière simple pour présenter, de manière hiérarchique, chacune des arborescences. L'utilisation de la clause ORDER BY aurait pour effet de les mélanger, pas de les trier comme souhaité.
@@ -359,20 +425,23 @@ PROMPT "Q20 - V1";
 
 SELECT Et.numEt, nomEt, prenomEt
 FROM Note N
-INNER JOIN Etudiant Et ON N.numEt = Et.numEt
-WHERE anneeEt = 2
-  AND moyTest >= 10
+    INNER JOIN Etudiant Et ON N.numEt = Et.numEt
+WHERE
+    anneeEt = 2
+    AND moyTest >= 10
 GROUP BY Et.numEt, nomEt, prenomEt
-HAVING COUNT(moyTest) = (SELECT COUNT(moyTest)
-                          FROM Note N2
-                          WHERE Et.numEt = N2.numEt);
+HAVING COUNT(moyTest) = (
+    SELECT COUNT(moyTest)
+    FROM Note N2
+    WHERE Et.numEt = N2.numEt
+);
 
 -- Version alternative.
 PROMPT "Q20 - V2";
 
 SELECT Et.numEt, nomEt, prenomEt
 FROM Note N
-INNER JOIN Etudiant Et ON N.numEt = Et.numEt
+    INNER JOIN Etudiant Et ON N.numEt = Et.numEt
 WHERE anneeEt = 2
 GROUP BY Et.numEt, nomEt, prenomEt
 HAVING MIN(moyTest) >= 10;
@@ -383,46 +452,59 @@ PROMPT "Q21";
 
 SELECT DISTINCT Et.numEt, nomEt, prenomEt
 FROM Etudiant Et
-INNER JOIN Note N ON Et.numEt = N.numEt
-WHERE code IN (SELECT code
-			   FROM MODULE
-			   START WITH libelle = 'PRINCIPES DES BD'
-			   CONNECT BY codePere = PRIOR code);
+    INNER JOIN Note N ON Et.numEt = N.numEt
+WHERE code IN (
+    SELECT code
+    FROM MODULE
+    START WITH libelle = 'PRINCIPES DES BD'
+    CONNECT BY codePere = PRIOR code
+);
 
 -- Q22 - c:3, t:29
 -- Donnez les numéros des étudiants, les écarts entre leurs éventuelles moyennes de test et la moins bonne moyenne de test du module ACSI ainsi que les écarts entre leurs éventuelles moyennes de test et la meilleure moyenne de test du module ACSI.
 
 PROMPT "Q22 - V1";
 
-WITH T1 (moyMin, moyMax) AS (
-	SELECT MIN(moyTest), MAX(moyTest)
-	FROM Note
-	WHERE code = 'ACSI'
-), T2 (numEt, moyTest) AS (
-	SELECT numEt, moyTest
-	FROM Note
-	WHERE code = 'ACSI'
-)
+WITH
+    T1 (moyMin, moyMax) AS (
+        SELECT MIN(moyTest), MAX(moyTest)
+        FROM Note
+        WHERE code = 'ACSI'
+    )
+
+    , T2 (numEt, moyTest) AS (
+        SELECT numEt, moyTest
+        FROM Note
+        WHERE code = 'ACSI'
+    )
+
 SELECT numEt, moyTest - moyMin, moyTest - moyMax
 FROM T1, T2;
 
 PROMPT "Q22 - V2";
 
 SELECT numEt, moyTest - moyMin, moyTest - moyMax
-FROM Note, (SELECT MIN(moyTest) moyMin, MAX(moyTest) moyMax
-				FROM Note
-				WHERE code = 'ACSI') T
+FROM Note, (
+    SELECT MIN(moyTest) AS moyMin, MAX(moyTest) AS moyMax
+    FROM Note
+    WHERE code = 'ACSI'
+) T
 WHERE code = 'ACSI';
 
 -- Version alternative.
 PROMPT "Q22 - V3";
 
-SELECT numEt,
-       moyTest - (SELECT MIN(moyTest)
-				   FROM Note
-				   WHERE code ='ACSI') moyMin,
-       moyTest - (SELECT MAX(moyTest)
-				   FROM Note
-				   WHERE code ='ACSI') moyMax
+SELECT
+    numEt
+    , moyTest - (
+        SELECT MIN(moyTest)
+        FROM Note
+        WHERE code = 'ACSI'
+    ) AS moyMin
+    , moyTest - (
+        SELECT MAX(moyTest)
+        FROM Note
+        WHERE code = 'ACSI'
+    ) AS moyMax
 FROM Note
 WHERE code = 'ACSI';

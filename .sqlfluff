@@ -1,8 +1,10 @@
 [sqlfluff]
+templater = jinja
+processes = -1
 # Dialecte principal du projet (syntaxe Oracle pour les corrections SQL)
 dialect = oracle
 # Largeur max des lignes — les commentaires descriptifs des questions sont souvent longs
-max_line_length = 200
+max_line_length = 250
 # Limite pour les fichiers volumineux (fichiers d'insertion de données)
 large_file_skip_byte_limit = 50000
 
@@ -18,7 +20,8 @@ large_file_skip_byte_limit = 50000
 #   CV12 (convention.join_condition)  — jointures dans le WHERE enseignées comme « version prédicative »
 #   AM08 (ambiguous.join_condition)   — jointures implicites (produit cartésien + WHERE) font partie du programme
 #   ST06 (structure.column_order)     — l'ordre wildcards/simples/agrégats n'est pas pédagogiquement pertinent
-exclude_rules = capitalisation.identifiers, aliasing.unique.table, aliasing.unused, layout.select_targets, structure.subquery, references.qualification, ambiguous.column_count, convention.join_condition, ambiguous.join_condition, structure.column_order
+#   CV08 (convention.left_join)      — RIGHT JOIN enseigné comme alternative pédagogique au LEFT JOIN
+exclude_rules = capitalisation.identifiers, aliasing.unique.table, aliasing.unused, layout.select_targets, structure.subquery, references.qualification, ambiguous.column_count, convention.join_condition, ambiguous.join_condition, structure.column_order, convention.left_join
 
 # ── Indentation ────────────────────────────────────────────────────────────────
 
@@ -51,6 +54,9 @@ extended_capitalisation_policy = upper
 [sqlfluff:rules:layout.long_lines]
 ignore_comment_lines = True
 
+[sqlfluff:layout:type:comma]
+line_position = leading
+
 # ── Alias ──────────────────────────────────────────────────────────────────────
 
 [sqlfluff:rules:aliasing.expression]
@@ -58,6 +64,9 @@ allow_scalar = True
 
 # Alias de colonnes explicites : SELECT COUNT(*) AS total (pas COUNT(*) total)
 [sqlfluff:rules:aliasing.column]
+aliasing = explicit
+
+[sqlfluff:rules:aliasing.table]
 aliasing = explicit
 
 # ── Conventions ────────────────────────────────────────────────────────────────
