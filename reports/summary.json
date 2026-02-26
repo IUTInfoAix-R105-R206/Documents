@@ -89,8 +89,8 @@
   "r2.06/td2": {
     "title": "TD2 : Jointures externes, partitionnement et synthèse des requêtes",
     "report_file": "r2.06-td2.html",
-    "total": 140,
-    "pass": 134,
+    "total": 141,
+    "pass": 135,
     "error": 6,
     "fail": 0,
     "has_oracle_only": true,
@@ -102,8 +102,8 @@
         "fail": 0
       },
       "sqlite": {
-        "total": 46,
-        "pass": 40,
+        "total": 47,
+        "pass": 41,
         "error": 6,
         "fail": 0
       },
@@ -205,10 +205,10 @@
   "r2.06/td6": {
     "title": "TD6 : Vues, tables système et rappels SQL",
     "report_file": "r2.06-td6.html",
-    "total": 80,
-    "pass": 21,
+    "total": 81,
+    "pass": 29,
     "error": 26,
-    "fail": 9,
+    "fail": 2,
     "has_oracle_only": true,
     "dbms": {
       "postgres": {
@@ -224,10 +224,10 @@
         "fail": 1
       },
       "oracle": {
-        "total": 26,
-        "pass": 11,
+        "total": 27,
+        "pass": 19,
         "error": 0,
-        "fail": 7
+        "fail": 0
       }
     }
   }
