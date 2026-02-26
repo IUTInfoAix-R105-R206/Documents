@@ -28,6 +28,18 @@ DBMS_LABELS = {
     "oracle":   "Oracle",
 }
 
+DBMS_SHORT = {
+    "postgres": "PG",
+    "sqlite":   "SQLite",
+    "oracle":   "Oracle",
+}
+
+DBMS_CSS = {
+    "postgres": "pg",
+    "sqlite":   "sqlite",
+    "oracle":   "oracle",
+}
+
 STATUS_ICONS = {
     "pass":  "✓",
     "fail":  "✗",
@@ -72,10 +84,12 @@ CSS = """\
     .td-stats { color: #666; font-size: 0.85rem; margin-left: 1rem; }
     .badge { display: inline-block; font-size: 0.7rem; padding: 0.1rem 0.4rem;
              border-radius: 3px; margin-left: 0.5rem; vertical-align: middle; }
-    .badge-oracle { background: #fff3cd; color: #856404; border: 1px solid #ffc107; }
     .badge-ok { background: #d4edda; color: #155724; border: 1px solid #28a745; }
     .badge-warn { background: #fff3cd; color: #856404; border: 1px solid #ffc107; }
-    .badge-fail { background: #f8d7da; color: #721c24; border: 1px solid #dc3545; }"""
+    .badge-fail { background: #f8d7da; color: #721c24; border: 1px solid #dc3545; }
+    .badge-pg { background: #e3f2fd; color: #1565c0; border: 1px solid #42a5f5; }
+    .badge-sqlite { background: #e0f2f1; color: #00695c; border: 1px solid #26a69a; }
+    .badge-oracle { background: #fff3e0; color: #e65100; border: 1px solid #ff9800; }"""
 
 
 def read_report(filename):
@@ -179,7 +193,10 @@ def compute_stats(data):
     passed = sum(1 for v in data.values() if v["status"] == "pass")
     errors = sum(1 for v in data.values() if v["status"] == "error")
     failed = sum(1 for v in data.values() if v["status"] == "fail")
-    return {"total": total, "pass": passed, "error": errors, "fail": failed}
+    skipped = sum(1 for v in data.values() if v["status"] == "skip")
+    tested = total - skipped
+    return {"total": total, "pass": passed, "error": errors, "fail": failed,
+            "skip": skipped, "tested": tested}
 
 
 def generate_stats_html(reports_data):
@@ -187,17 +204,19 @@ def generate_stats_html(reports_data):
     parts = []
     for dbms, data in reports_data:
         s = compute_stats(data)
-        total = s["total"]
+        tested = s["tested"]
         passed = s["pass"]
         errors = s["error"]
-        pct = passed * 100 // total if total > 0 else 0
+        skipped = s["skip"]
+        pct = passed * 100 // tested if tested > 0 else 0
         label = DBMS_LABELS.get(dbms, dbms)
         parts.append(
             f'<div class="stat-box">'
             f"<strong>{label}</strong><br>"
-            f'<span class="pass">{passed} ✓</span> / {total}'
+            f'<span class="pass">{passed} ✓</span> / {tested}'
             f" ({pct}%)"
             + (f'<br><small class="error">{errors} erreur(s) SQL</small>' if errors else "")
+            + (f'<br><small>{skipped} ignoré(s)</small>' if skipped else "")
             + "</div>"
         )
     return f'<div class="stats">{"".join(parts)}</div>'
@@ -357,26 +376,35 @@ def generate_report_index_html(td_order, summary, dbms_names, now, titles=None):
                 s = summary[td_id]
                 title = s["title"]
                 report_file = s["report_file"]
-                total = s["total"]
+                tested = s["tested"]
                 passed = s["pass"]
-                pct = passed * 100 // total if total > 0 else 0
-
-                badge = ""
-                if s["has_oracle_only"]:
-                    badge = '<span class="badge badge-oracle">Oracle-only</span>'
+                pct = passed * 100 // tested if tested > 0 else 0
 
                 if pct == 100:
-                    pct_badge = f'<span class="badge badge-ok">{pct}%</span>'
+                    pct_badge = f'<span class="badge badge-ok">Global {pct}%</span>'
                 elif pct >= 70:
-                    pct_badge = f'<span class="badge badge-warn">{pct}%</span>'
+                    pct_badge = f'<span class="badge badge-warn">Global {pct}%</span>'
                 else:
-                    pct_badge = f'<span class="badge badge-fail">{pct}%</span>'
+                    pct_badge = f'<span class="badge badge-fail">Global {pct}%</span>'
+
+                # Badges par SGBD
+                dbms_badges = ""
+                for dbms_key, dbms_s in s["dbms"].items():
+                    dbms_tested = dbms_s["tested"]
+                    dbms_passed = dbms_s["pass"]
+                    dbms_pct = dbms_passed * 100 // dbms_tested if dbms_tested > 0 else 0
+                    short = DBMS_SHORT.get(dbms_key, dbms_key)
+                    css_class = f"badge-{DBMS_CSS.get(dbms_key, 'oracle')}"
+                    if dbms_pct == 100:
+                        dbms_badges += f' <span class="badge {css_class}">{short} ✓</span>'
+                    else:
+                        dbms_badges += f' <span class="badge {css_class}">{short} {dbms_pct}%</span>'
 
                 items.append(
                     f'<li>'
                     f'<a href="{report_file}">{title}</a>'
-                    f" {pct_badge}{badge}"
-                    f'<span class="td-stats">{passed}/{total} tests</span>'
+                    f" {pct_badge}{dbms_badges}"
+                    f'<span class="td-stats">{passed}/{tested} tests</span>'
                     f"</li>"
                 )
             else:
@@ -395,9 +423,9 @@ def generate_report_index_html(td_order, summary, dbms_names, now, titles=None):
             + "\n</ul>"
         )
 
-    global_total = sum(s["total"] for s in summary.values())
+    global_tested = sum(s["tested"] for s in summary.values())
     global_pass = sum(s["pass"] for s in summary.values())
-    global_pct = global_pass * 100 // global_total if global_total > 0 else 0
+    global_pct = global_pass * 100 // global_tested if global_tested > 0 else 0
 
     return f"""<!DOCTYPE html>
 <html lang="fr">
@@ -409,7 +437,7 @@ def generate_report_index_html(td_order, summary, dbms_names, now, titles=None):
 </head>
 <body>
   <h1>Rapports des corrections SQL</h1>
-  <p class="subtitle">Comparaison sur {len(dbms_names)} SGBD ({", ".join(dbms_names)}) &mdash; {global_pass}/{global_total} tests ({global_pct}%)</p>
+  <p class="subtitle">Comparaison sur {len(dbms_names)} SGBD ({", ".join(dbms_names)}) &mdash; {global_pass}/{global_tested} tests ({global_pct}%)</p>
   {"".join(sections_html)}
   <p class="footer">Généré le {now}</p>
 </body>
@@ -462,7 +490,8 @@ def generate_per_td_reports(reports, output_dir, titles):
         pass_all = 0
         error_all = 0
         fail_all = 0
-        has_oracle_only = False
+        skip_all = 0
+        tested_all = 0
         dbms_stats = {}
 
         for dbms, data in reports_data:
@@ -472,20 +501,19 @@ def generate_per_td_reports(reports, output_dir, titles):
             pass_all += s["pass"]
             error_all += s["error"]
             fail_all += s["fail"]
-
-            # Détection Oracle-only : erreurs SQL sur un SGBD non-Oracle
-            if dbms != "oracle" and s["error"] > 0:
-                has_oracle_only = True
+            skip_all += s["skip"]
+            tested_all += s["tested"]
 
         summary[td_id] = {
-            "title":           title,
-            "report_file":     report_file,
-            "total":           total_all,
-            "pass":            pass_all,
-            "error":           error_all,
-            "fail":            fail_all,
-            "has_oracle_only": has_oracle_only,
-            "dbms":            dbms_stats,
+            "title":       title,
+            "report_file": report_file,
+            "total":       total_all,
+            "pass":        pass_all,
+            "error":       error_all,
+            "fail":        fail_all,
+            "skip":        skip_all,
+            "tested":      tested_all,
+            "dbms":        dbms_stats,
         }
 
     # Index des rapports
