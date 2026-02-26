@@ -2,27 +2,27 @@
   "r1.05/td6": {
     "title": "TD6 : Interrogation en SQL",
     "report_file": "r1.05-td6.html",
-    "total": 195,
-    "pass": 184,
-    "error": 11,
+    "total": 192,
+    "pass": 187,
+    "error": 5,
     "fail": 0,
     "has_oracle_only": true,
     "dbms": {
       "postgres": {
-        "total": 65,
-        "pass": 62,
-        "error": 3,
+        "total": 64,
+        "pass": 64,
+        "error": 0,
         "fail": 0
       },
       "sqlite": {
-        "total": 65,
-        "pass": 57,
-        "error": 8,
+        "total": 64,
+        "pass": 59,
+        "error": 5,
         "fail": 0
       },
       "oracle": {
-        "total": 65,
-        "pass": 65,
+        "total": 64,
+        "pass": 64,
         "error": 0,
         "fail": 0
       }
@@ -205,8 +205,8 @@
   "r2.06/td6": {
     "title": "TD6 : Vues, tables système et rappels SQL",
     "report_file": "r2.06-td6.html",
-    "total": 80,
-    "pass": 28,
+    "total": 81,
+    "pass": 29,
     "error": 26,
     "fail": 2,
     "has_oracle_only": true,
@@ -224,8 +224,8 @@
         "fail": 1
       },
       "oracle": {
-        "total": 26,
-        "pass": 18,
+        "total": 27,
+        "pass": 19,
         "error": 0,
         "fail": 0
       }
