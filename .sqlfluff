@@ -1,5 +1,4 @@
 [sqlfluff]
-templater = jinja
 processes = -1
 # Dialecte principal du projet (syntaxe Oracle pour les corrections SQL)
 dialect = oracle

@@ -48,22 +48,48 @@ Les clauses concernées sont : `SELECT`, `FROM`, `WHERE`, `GROUP BY`, `HAVING`, 
 
 L'indentation utilise **4 espaces** (jamais de tabulations). Elle s'applique dans les cas suivants.
 
-**Continuations de clause** — quand une clause s'étend sur plusieurs lignes :
+**Conditions composées** — quand une clause (`WHERE`, `ON`, `HAVING`) comporte une **condition unique**, celle-ci reste sur la même ligne que le mot-clé. Quand la clause comporte **plusieurs conditions** (`AND`, `OR`), le mot-clé reste seul sur sa ligne et chaque condition est indentée d'un cran :
+
+Condition unique :
 
 ```sql
 SELECT nomEt, prenomEt
 FROM Etudiant
-WHERE anneeEt = 2
+WHERE anneeEt = 2;
+```
+
+Conditions composées :
+
+```sql
+SELECT nomEt, prenomEt
+FROM Etudiant
+WHERE
+    anneeEt = 2
     AND groupeEt = 3;
 ```
 
-**Jointures** — les `JOIN` sont indentés par rapport au `FROM` et le `ON` est indenté par rapport au `JOIN` :
+Cette règle s'applique de la même manière au `ON` des jointures (cf. ci-dessous) et au `HAVING`.
+
+**Jointures** — les `JOIN` sont indentés par rapport au `FROM` et le `ON` est indenté par rapport au `JOIN`. Pour les conditions du `ON`, la même règle de condition unique / composée s'applique :
+
+Condition unique :
 
 ```sql
 SELECT Et.numEt, nomEt, code
 FROM Etudiant Et
     INNER JOIN Enseigne E
         ON Et.numEt = E.numEt;
+```
+
+Conditions composées :
+
+```sql
+SELECT Et.numEt, Et.nomEt, E.code
+FROM Etudiant Et
+    INNER JOIN Enseigne E
+        ON
+            Et.numEt = E.numEt
+            AND E.code = 'BD';
 ```
 
 **Sous-requêtes** — chaque niveau de sous-requête est indenté d'un cran supplémentaire :
@@ -157,7 +183,8 @@ Ces conventions permettent de distinguer immédiatement la nature de chaque él�
 ```sql
 SELECT nomEt, prenomEt
 FROM Etudiant
-WHERE villeEt = 'MARSEILLE'
+WHERE
+    villeEt = 'MARSEILLE'
     AND anneeEt = 2;
 ```
 
@@ -249,8 +276,9 @@ Pour les auto-jointures, utiliser des alias descriptifs :
 SELECT P1.numPil, P1.nomPil
 FROM Pilote P1
     INNER JOIN Pilote P2
-        ON P1.nomPil = P2.nomPil
-        AND P1.numPil <> P2.numPil;
+        ON
+            P1.nomPil = P2.nomPil
+            AND P1.numPil <> P2.numPil;
 ```
 
 # Jointures
@@ -306,7 +334,8 @@ WHERE Et.numEt IN (
 ```sql
 SELECT DISTINCT Et.numEt, Et.nomEt
 FROM Etudiant Et, Enseigne E, Professeur P
-WHERE Et.numEt = E.numEt
+WHERE
+    Et.numEt = E.numEt
     AND E.numProf = P.numProf
     AND P.nomProf = 'LAPORTE';
 ```
@@ -346,8 +375,10 @@ Exemple problématique — la colonne `resp` contient des `NULL` dans la table `
 -- ATTENTION : cette requête ne retourne aucun résultat !
 SELECT nomProf, prenomProf
 FROM Professeur
-WHERE numProf NOT IN (SELECT resp
-                      FROM Module);
+WHERE numProf NOT IN (
+    SELECT resp
+    FROM Module
+);
 ```
 
 La raison : `NOT IN` évalue `numProf <> NULL` pour chaque `NULL` dans la sous-requête, ce qui donne `UNKNOWN`, et la ligne est rejetée.
@@ -359,9 +390,11 @@ Ajouter `IS NOT NULL` dans la sous-requête :
 ```sql
 SELECT nomProf, prenomProf
 FROM Professeur
-WHERE numProf NOT IN (SELECT resp
-                      FROM Module
-                      WHERE resp IS NOT NULL);
+WHERE numProf NOT IN (
+    SELECT resp
+    FROM Module
+    WHERE resp IS NOT NULL
+);
 ```
 
 Utiliser `NOT EXISTS` (insensible à `NULL`) :

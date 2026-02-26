@@ -1,2 +1,2 @@
-# Fichiers de données (DDL/DML en syntaxe PostgreSQL, pas des corrections étudiantes)
+ignore: PRS
 docs/shared/data/

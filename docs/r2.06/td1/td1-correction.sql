@@ -23,7 +23,8 @@ PROMPT "Q1 - Version prédicative";
 
 SELECT DISTINCT dateDep, tarif, villeArr
 FROM Voyage V, Planning P
-WHERE V.idV = P.idV
+WHERE
+    V.idV = P.idV
     AND paysArr = 'MAROC';
 
 -- Q2 - c:3, t:2
@@ -60,7 +61,8 @@ PROMPT "Q2 - Version prédicative";
 
 SELECT DISTINCT dateDep, villeArr, paysArr
 FROM Voyage V, Reservation R, Client C
-WHERE V.idV = R.idV
+WHERE
+    V.idV = R.idV
     AND R.numCl = C.numCl
     AND ville NOT IN ('PARIS', 'MARSEILLE');
 
@@ -77,7 +79,8 @@ FROM OptionV O
         ON Ca.idV = R.idV
     INNER JOIN Client C
         ON R.numCl = C.numCl
-WHERE prix IS NULL
+WHERE
+    prix IS NULL
     AND prenom = 'NICOLAS'
     AND nom = 'BARBIER';
 
@@ -89,14 +92,16 @@ FROM OptionV
 WHERE code IN (
     SELECT code
     FROM Carac
-    WHERE (prix = 0 OR prix IS NULL)
+    WHERE
+        (prix = 0 OR prix IS NULL)
         AND idV IN (
             SELECT idV
             FROM Reservation
             WHERE numCl IN (
                 SELECT numCl
                 FROM Client
-                WHERE prenom = 'NICOLAS'
+                WHERE
+                    prenom = 'NICOLAS'
                     AND nom = 'BARBIER'
             )
         )
@@ -107,7 +112,8 @@ PROMPT "Q3 - Version prédicative";
 
 SELECT DISTINCT libelle
 FROM OptionV O, Carac Ca, Reservation R, Client C
-WHERE O.code = Ca.code
+WHERE
+    O.code = Ca.code
     AND Ca.idV = R.idV
     AND R.numCl = C.numCl
     AND nom = 'BARBIER'
@@ -150,7 +156,8 @@ PROMPT "Q4 - Version prédicative";
 
 SELECT DISTINCT nom, prenom, ville
 FROM Voyage V, Reservation R, Client C
-WHERE V.idV = R.idV
+WHERE
+    V.idV = R.idV
     AND R.numCl = C.numCl
     AND villeDep = ville
     AND villeArr = 'ISTANBUL';
@@ -207,12 +214,14 @@ FROM OptionV
 WHERE code IN (
     SELECT code
     FROM Carac
-    WHERE (prix = 0 OR prix IS NULL)
+    WHERE
+        (prix = 0 OR prix IS NULL)
         AND idV = 354
     UNION
     SELECT code
     FROM Carac
-    WHERE (prix <> 0 OR prix IS NOT NULL)
+    WHERE
+        (prix <> 0 OR prix IS NOT NULL)
         AND idV = 952
 );
 
@@ -233,7 +242,8 @@ FROM Voyage V
         ON V.idV = C2.idV
     INNER JOIN OptionV O2
         ON C2.code = O2.code
-WHERE O1.libelle = 'VISITE GUIDEE'
+WHERE
+    O1.libelle = 'VISITE GUIDEE'
     AND O2.libelle = 'PISCINE';
 
 -- Version imbriquée.
@@ -241,15 +251,16 @@ PROMPT "Q9 - Version imbriquée";
 
 SELECT idV, villeArr, paysArr
 FROM Voyage
-WHERE idV IN (
-    SELECT idV
-    FROM Carac
-    WHERE code IN (
-        SELECT code
-        FROM OptionV
-        WHERE libelle = 'PISCINE'
+WHERE
+    idV IN (
+        SELECT idV
+        FROM Carac
+        WHERE code IN (
+            SELECT code
+            FROM OptionV
+            WHERE libelle = 'PISCINE'
+        )
     )
-)
     AND idV IN (
         SELECT idV
         FROM Carac
@@ -265,7 +276,8 @@ PROMPT "Q9 - Version prédicative";
 
 SELECT DISTINCT V.idV, villeArr, paysArr
 FROM Voyage V, Carac C1, OptionV O1, Carac C2, OptionV O2
-WHERE V.idV = C1.idV
+WHERE
+    V.idV = C1.idV
     AND C1.code = O1.code
     AND V.idV = C2.idV
     AND C2.code = O2.code
@@ -288,7 +300,7 @@ PROMPT "Q10 - V2";
 
 SELECT nom, prenom
 FROM Client
-WHERE numCl <> ALL (
+WHERE numCl <> ALL (  -- noqa: LT01, LT06
     SELECT numCl
     FROM Reservation
 );
@@ -296,18 +308,20 @@ WHERE numCl <> ALL (
 -- Version alternative.
 PROMPT "Q10 - V3";
 
-SELECT nom, prenom
+SELECT C.nom, C.prenom
 FROM Client C
 WHERE NOT EXISTS (
     SELECT *
     FROM Reservation R
-    WHERE R.numCl = C.numCl
+    WHERE R.numCl = C.numCl  -- noqa: RF03
 );
 
 -- @section Création et modification d'attributs
 -- @instruction Formulez les requêtes suivantes en pensant générer, avec la commande `DESCRIBE`, un affichage
 -- @+ permettant de vérifier la validité des réponses et, à la fin de la séance, penser à annuler les
 -- @+ modifications faites pour laisser la base de données dans l'état initial.
+
+-- noqa: disable=all
 
 -- Q11
 -- Ajoutez les attributs correspondant au tarif enfant et au nombre d'enfants.
@@ -319,7 +333,6 @@ ALTER TABLE Reservation ADD (nbEnf NUMBER(2, 0));
 DESCRIBE Planning;
 
 DESCRIBE Reservation;
-
 -- Q12
 -- Doublez la taille possible du libellé d'une option.
 PROMPT "Q12";
@@ -374,6 +387,7 @@ CREATE TABLE Capacite (
 
 DESCRIBE Capacite;
 
+
 -- @section Mises à jour des données
 -- @instruction Formulez les requêtes suivantes en pensant générer, avec la commande `SELECT` ou `DESCRIBE`,
 -- @+ un affichage permettant de vérifier la validité des réponses et, à la fin de la séance, penser à
@@ -405,7 +419,8 @@ SELECT C.numCl, nom, prenom, idV, dateDep, nbEnf
 FROM Client C
     INNER JOIN Reservation R
         ON C.numCl = R.numCl
-WHERE C.numCl = 2103
+WHERE
+    C.numCl = 2103
     OR (nom = 'JAROLIM' AND prenom = 'THOMAS');
 
 -- Q17 - t:80
@@ -529,3 +544,4 @@ FROM AncienneReservation;
 
 SELECT *
 FROM Reservation;
+-- noqa: enable=all
