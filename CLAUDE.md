@@ -26,9 +26,9 @@ Les sujets sont compilés en PDF via Pandoc + LaTeX. Le but est de remplacer les
 - `make test-sql-sqlite-docker` : valide avec SQLite dans Docker (image `debian:bookworm-slim`)
 - `make test-sql-oracle-local` : valide avec Oracle local (`sqlplus` requis)
 - `make test-sql-oracle-docker` : valide avec Oracle Free via Docker (image `gvenzl/oracle-free`, ~1-2 min de démarrage)
-- `./scripts/test-sql.sh postgres` : test avec PostgreSQL
-- `./scripts/test-sql.sh sqlite` : test avec SQLite
-- `./scripts/test-sql.sh oracle` : test avec Oracle (nécessite Oracle installé)
+- `python3 scripts/test-sql.py postgres` : test avec PostgreSQL
+- `python3 scripts/test-sql.py sqlite` : test avec SQLite
+- `python3 scripts/test-sql.py oracle` : test avec Oracle (nécessite Oracle installé)
 
 ### Figures
 - Compiler une figure standalone : `cd docs/r2.06/td3/figures && TEXINPUTS="$(pwd)/../../../../templates:" pdflatex mcd.tex`
@@ -48,12 +48,12 @@ templates/filters/           → Filtres Lua pour Pandoc (styles personnalisés)
 templates/cc-by-nc-sa.svg    → Badge licence Creative Commons (vectoriel, source)
 templates/tikz-er2.sty       → Package TikZ pour diagrammes ER (ellipses associations)
 templates/pgf-umlcd.sty      → Package TikZ UML class diagrams
-scripts/                     → Scripts utilitaires (test-sql.sh, generate-sql-report.py)
+scripts/                     → Scripts utilitaires (test-sql.py, generate-sql-report.py)
 .github/workflows/           → CI GitHub Actions (build PDF + test SQL)
 output/                      → PDF générés (gitignored)
 ```
 
-Chaque TD avec des corrections SQL possède un lien symbolique `data/` → `../../shared/data/<nom-bd>/` pour que `test-sql.sh` trouve automatiquement le schéma et les données.
+Chaque TD avec des corrections SQL possède un lien symbolique `data/` → `../../shared/data/<nom-bd>/` pour que `test-sql.py` trouve automatiquement le schéma et les données.
 
 ## Pipeline de compilation
 
@@ -185,7 +185,7 @@ Le projet utilise une stratégie multi-SGBD pour équilibrer les contraintes pé
 - Déclenché à chaque modification des fichiers de correction SQL ou données
 - Lance un conteneur PostgreSQL 16
 - Charge le schéma et les données de test
-- Exécute `./scripts/test-sql.sh postgres`
+- Exécute `python3 scripts/test-sql.py postgres`
 - Vérifie que chaque requête retourne le nombre attendu de colonnes et lignes
 
 ## Problèmes résolus et solutions techniques
@@ -295,7 +295,7 @@ Notes :
 - ✅ Badge CC BY-NC-SA vectoriel (SVG via package `svg` + Inkscape)
 - ✅ Versionnage dynamique depuis git (tag ou SHA1 court)
 - ✅ Jeux de données complets (gestion-pedagogique, voyages, questionnaire)
-- ✅ Script de test SQL multi-BD fonctionnel (test-sql.sh)
+- ✅ Script de test SQL multi-BD fonctionnel (test-sql.py)
 - ✅ CI GitHub Actions (build PDF + test SQL PostgreSQL/SQLite/Oracle)
 
 ### À faire

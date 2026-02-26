@@ -100,7 +100,7 @@ SELECT numVol, villeDep
 FROM Vol
 WHERE numPil IN (100, 204);
 
--- Remarque : `= ANY` est synonyme de `IN` sous Oracle même pour les ensemnle de valeurs mais ce n'est pas portable dans d'autres systèmes de gestion de base de données. L'alternative n'est donc pas intéréssantes ici.
+-- Remarque : `= ANY` est synonyme de `IN` sous Oracle même pour les ensembles de valeurs mais ce n'est pas portable dans d'autres systèmes de gestion de base de données. L'alternative n'est donc pas intéréssantes ici.
 
 -- Version alternative (pas au programme mais plus fidèle à la requête correspondante en algèbre relationnelle).
 PROMPT "Q7 - V3";

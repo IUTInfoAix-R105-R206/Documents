@@ -11,7 +11,7 @@ on:
     paths:
       - 'docs/**/*correction*.sql'
       - 'docs/shared/data/**'
-      - 'scripts/test-sql.sh'
+      - 'scripts/test-sql.py'
       - 'scripts/generate-sql-report.py'
       - '.github/workflows/test-sql.yml'
   pull_request:
@@ -52,10 +52,8 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Run SQL tests (PostgreSQL)
-        # || true : certaines requêtes utilisent des syntaxes Oracle-only (MINUS, TO_DATE, etc.)
-        run: |
-          chmod +x scripts/test-sql.sh
-          ./scripts/test-sql.sh postgres --report results-postgres.csv || true
+        # || true : certaines requêtes utilisent des syntaxes Oracle-only (MINUS, etc.)
+        run: python3 scripts/test-sql.py postgres --report results-postgres.csv || true
 
       - name: Upload PostgreSQL results
         uses: actions/upload-artifact@v4
@@ -84,9 +82,8 @@ jobs:
       - name: Run SQL tests (SQLite)
         # || true : certaines requêtes utilisent des syntaxes non supportées par SQLite
         run: |
-          chmod +x scripts/test-sql.sh
           SQLITE_DB=/tmp/gestion_pedagogique.db \
-            ./scripts/test-sql.sh sqlite --report results-sqlite.csv || true
+            python3 scripts/test-sql.py sqlite --report results-sqlite.csv || true
 
       - name: Upload SQLite results
         uses: actions/upload-artifact@v4
@@ -96,8 +93,8 @@ jobs:
           path: results-sqlite.csv
 
   # ── 3. Tests Oracle ────────────────────────────────────────────────────────
-  # Exécute le script directement dans le container Oracle Free (qui inclut sqlplus),
-  # en montant le workspace — même approche que make test-sql-oracle-docker.
+  # Le script Python tourne sur le runner et communique avec sqlplus
+  # dans le conteneur via docker exec (ORACLE_DOCKER_CONTAINER).
   test-oracle:
     runs-on: ubuntu-latest
 
@@ -128,7 +125,6 @@ jobs:
             -e ORACLE_PASSWORD=test \
             -e APP_USER=testuser \
             -e APP_USER_PASSWORD=test \
-            -v "$GITHUB_WORKSPACE:/project" \
             gvenzl/oracle-free:23.5
           echo "En attente du démarrage d'Oracle Free (~2 min)..."
           for i in $(seq 1 40); do
@@ -139,14 +135,12 @@ jobs:
           docker exec oracle-test healthcheck.sh || { echo "Timeout : Oracle ne répond pas."; exit 1; }
 
       - name: Run SQL tests (Oracle)
-        run: |
-          docker exec \
-            -u root \
-            -e ORACLE_USER=testuser \
-            -e ORACLE_PASS=test \
-            -e ORACLE_SID=FREEPDB1 \
-            oracle-test \
-            bash /project/scripts/test-sql.sh oracle --report /project/results-oracle.csv || true
+        env:
+          ORACLE_USER: testuser
+          ORACLE_PASS: test
+          ORACLE_SID: FREEPDB1
+          ORACLE_DOCKER_CONTAINER: oracle-test
+        run: python3 scripts/test-sql.py oracle --report results-oracle.csv || true
 
       - name: Upload Oracle results
         uses: actions/upload-artifact@v4
