@@ -12,6 +12,12 @@ DOCKER_PG_CONTAINER     = exploitation-bd-test-pg
 DOCKER_SQLITE_CONTAINER = exploitation-bd-test-sqlite
 DOCKER_ORACLE_CONTAINER = exploitation-bd-test-oracle
 
+# Variables optionnelles pour les tests SQL (passées sur la ligne de commande)
+# Usage : make test-sql-sqlite-local REPORT=results.csv TD=td3
+REPORT =
+TD =
+_TEST_SQL_FLAGS = $(if $(REPORT),--report $(REPORT)) $(if $(TD),--td $(TD))
+
 # Version : tag exact si le commit courant en a un, sinon SHA1 court
 GIT_VERSION := $(shell git describe --exact-match --tags HEAD 2>/dev/null || git rev-parse --short HEAD)
 
@@ -50,12 +56,16 @@ R206_CORRECTION_PDFS = \
 	test-sql-postgresql-local test-sql-postgresql-docker \
 	test-sql-sqlite-local    test-sql-sqlite-docker    \
 	test-sql-oracle-local    test-sql-oracle-docker    \
-	test-sql-docker \
+	test-sql-local test-sql-docker \
 	help
 
 help: ## Affiche cette aide
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
 		awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+	@echo ""
+	@echo "Variables optionnelles pour les tests SQL :"
+	@echo "  \033[36mREPORT=file.csv\033[0m   Génère un rapport CSV (ex: make test-sql-sqlite-local REPORT=results.csv)"
+	@echo "  \033[36mTD=tdN\033[0m            Filtre sur un TD spécifique (ex: make test-sql-oracle-docker TD=td3)"
 
 all: r105 r206 ## Compile tous les TD (sujets + corrigés)
 
@@ -596,8 +606,8 @@ $(OUTPUT_DIR)/r1.05/td7/td7-correction.pdf: docs/r1.05/td7/td7-correction.gen.md
 # ==============================================================================
 
 test-sql-postgresql-local: ## Exécute les corrections SQL avec PostgreSQL local
-	@echo "=== Validation des corrections SQL ==="
-	python3 scripts/test-sql.py
+	@echo "=== Validation des corrections SQL (PostgreSQL local) ==="
+	$(PYTHON) scripts/test-sql.py postgres $(_TEST_SQL_FLAGS)
 
 test-sql-postgresql-docker: ## Exécute les corrections SQL via un conteneur PostgreSQL Docker (sans PostgreSQL local requis)
 	@command -v docker > /dev/null 2>&1 || { echo "Erreur : Docker n'est pas installé."; exit 1; }; \
@@ -623,14 +633,14 @@ test-sql-postgresql-docker: ## Exécute les corrections SQL via un conteneur Pos
 	PGPASSWORD=test \
 	PGDATABASE=gestion_pedagogique \
 	PG_DOCKER_CONTAINER=$$CONTAINER \
-	python3 scripts/test-sql.py postgres
+	$(PYTHON) scripts/test-sql.py postgres $(_TEST_SQL_FLAGS)
 
 test-sql-sqlite-local: ## Exécute les corrections SQL avec SQLite local (aucune dépendance externe)
 	@command -v sqlite3 > /dev/null 2>&1 || { echo "Erreur : sqlite3 n'est pas installé."; exit 1; }; \
 	echo "=== Validation des corrections SQL (SQLite local) ==="; \
 	SQLITE_DB=$$(mktemp /tmp/gestion_pedagogique_XXXXXX.db); \
 	trap "rm -f $$SQLITE_DB" EXIT; \
-	SQLITE_DB=$$SQLITE_DB python3 scripts/test-sql.py sqlite
+	SQLITE_DB=$$SQLITE_DB $(PYTHON) scripts/test-sql.py sqlite $(_TEST_SQL_FLAGS)
 
 test-sql-sqlite-docker: ## Exécute les corrections SQL avec SQLite dans un conteneur Docker
 	@command -v docker > /dev/null 2>&1 || { echo "Erreur : Docker n'est pas installé."; exit 1; }; \
@@ -642,12 +652,14 @@ test-sql-sqlite-docker: ## Exécute les corrections SQL avec SQLite dans un cont
 	docker exec $$CONTAINER sh -c "apt-get update -qq && apt-get install -y -qq sqlite3 > /dev/null 2>&1"; \
 	SQLITE_DOCKER_CONTAINER=$$CONTAINER \
 	SQLITE_DB=/tmp/gestion_pedagogique.db \
-	python3 scripts/test-sql.py sqlite
+	$(PYTHON) scripts/test-sql.py sqlite $(_TEST_SQL_FLAGS)
 
-test-sql-oracle-local: ## Exécute les corrections SQL avec Oracle local (sqlplus requis)
-	@command -v sqlplus > /dev/null 2>&1 || { echo "Erreur : sqlplus n'est pas installé."; exit 1; }; \
-	echo "=== Validation des corrections SQL (Oracle local) ==="; \
-	python3 scripts/test-sql.py oracle
+test-sql-oracle-local: ## Exécute les corrections SQL avec Oracle (local ou docker exec)
+	@if [ -z "$$ORACLE_DOCKER_CONTAINER" ]; then \
+		command -v sqlplus > /dev/null 2>&1 || { echo "Erreur : sqlplus n'est pas installé."; exit 1; }; \
+	fi; \
+	echo "=== Validation des corrections SQL (Oracle) ==="; \
+	$(PYTHON) scripts/test-sql.py oracle $(_TEST_SQL_FLAGS)
 
 test-sql-oracle-docker: ## Exécute les corrections SQL via un conteneur Oracle Free Docker
 	@command -v docker > /dev/null 2>&1 || { echo "Erreur : Docker n'est pas installé."; exit 1; }; \
@@ -673,7 +685,14 @@ test-sql-oracle-docker: ## Exécute les corrections SQL via un conteneur Oracle 
 	ORACLE_PASS=test \
 	ORACLE_SID=FREEPDB1 \
 	ORACLE_DOCKER_CONTAINER=$$CONTAINER \
-	python3 scripts/test-sql.py oracle
+	$(PYTHON) scripts/test-sql.py oracle $(_TEST_SQL_FLAGS)
+
+test-sql-local: ## Exécute les corrections SQL avec tous les SGBD locaux (continue même en cas d'échec)
+	@rc=0; \
+	$(MAKE) test-sql-postgresql-local || rc=1; \
+	$(MAKE) test-sql-sqlite-local     || rc=1; \
+	$(MAKE) test-sql-oracle-local     || rc=1; \
+	exit $$rc
 
 test-sql-docker: ## Exécute les corrections SQL avec tous les SGBD via Docker (continue même en cas d'échec)
 	@rc=0; \

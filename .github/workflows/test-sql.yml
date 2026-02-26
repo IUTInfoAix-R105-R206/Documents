@@ -53,7 +53,7 @@ jobs:
 
       - name: Run SQL tests (PostgreSQL)
         # || true : certaines requêtes utilisent des syntaxes Oracle-only (MINUS, etc.)
-        run: python3 scripts/test-sql.py postgres --report results-postgres.csv || true
+        run: make test-sql-postgresql-local REPORT=results-postgres.csv || true
 
       - name: Upload PostgreSQL results
         uses: actions/upload-artifact@v4
@@ -81,9 +81,7 @@ jobs:
 
       - name: Run SQL tests (SQLite)
         # || true : certaines requêtes utilisent des syntaxes non supportées par SQLite
-        run: |
-          SQLITE_DB=/tmp/gestion_pedagogique.db \
-            python3 scripts/test-sql.py sqlite --report results-sqlite.csv || true
+        run: make test-sql-sqlite-local REPORT=results-sqlite.csv || true
 
       - name: Upload SQLite results
         uses: actions/upload-artifact@v4
@@ -140,7 +138,7 @@ jobs:
           ORACLE_PASS: test
           ORACLE_SID: FREEPDB1
           ORACLE_DOCKER_CONTAINER: oracle-test
-        run: python3 scripts/test-sql.py oracle --report results-oracle.csv || true
+        run: make test-sql-oracle-local REPORT=results-oracle.csv || true
 
       - name: Upload Oracle results
         uses: actions/upload-artifact@v4

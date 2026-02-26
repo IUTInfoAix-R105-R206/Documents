@@ -24,11 +24,11 @@ Les sujets sont compilés en PDF via Pandoc + LaTeX. Le but est de remplacer les
 - `make test-sql-postgresql-docker` : valide avec PostgreSQL via Docker
 - `make test-sql-sqlite-local` : valide avec SQLite local (aucune dépendance hormis `sqlite3`)
 - `make test-sql-sqlite-docker` : valide avec SQLite dans Docker (image `debian:bookworm-slim`)
-- `make test-sql-oracle-local` : valide avec Oracle local (`sqlplus` requis)
+- `make test-sql-oracle-local` : valide avec Oracle local (`sqlplus` requis, ou `ORACLE_DOCKER_CONTAINER` défini)
 - `make test-sql-oracle-docker` : valide avec Oracle Free via Docker (image `gvenzl/oracle-free`, ~1-2 min de démarrage)
-- `python3 scripts/test-sql.py postgres` : test avec PostgreSQL
-- `python3 scripts/test-sql.py sqlite` : test avec SQLite
-- `python3 scripts/test-sql.py oracle` : test avec Oracle (nécessite Oracle installé)
+- `make test-sql-local` : lance les 3 SGBD locaux (continue même en cas d'échec)
+- `make test-sql-docker` : lance les 3 SGBD via Docker
+- Variables optionnelles : `REPORT=file.csv` (rapport CSV), `TD=tdN` (filtre un TD)
 
 ### Figures
 - Compiler une figure standalone : `cd docs/r2.06/td3/figures && TEXINPUTS="$(pwd)/../../../../templates:" pdflatex mcd.tex`
@@ -183,10 +183,9 @@ Le projet utilise une stratégie multi-SGBD pour équilibrer les contraintes pé
 
 ### Workflow test-sql.yml
 - Déclenché à chaque modification des fichiers de correction SQL ou données
-- Lance un conteneur PostgreSQL 16
-- Charge le schéma et les données de test
-- Exécute `python3 scripts/test-sql.py postgres`
-- Vérifie que chaque requête retourne le nombre attendu de colonnes et lignes
+- Teste sur 3 SGBD en parallèle : PostgreSQL 16 (via `services:`), SQLite, Oracle Free (Docker)
+- Utilise les cibles Make : `make test-sql-*-local REPORT=results-*.csv`
+- Génère un rapport HTML déployé sur GitHub Pages
 
 ## Problèmes résolus et solutions techniques
 
