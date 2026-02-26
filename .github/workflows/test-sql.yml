@@ -13,11 +13,13 @@ on:
       - 'docs/shared/data/**'
       - 'scripts/test-sql.sh'
       - 'scripts/generate-sql-report.py'
+      - '.github/workflows/test-sql.yml'
   pull_request:
     branches: [main]
     paths:
       - 'docs/**/*correction*.sql'
       - 'docs/shared/data/**'
+      - '.github/workflows/test-sql.yml'
 
 jobs:
 
@@ -124,6 +126,8 @@ jobs:
         run: |
           docker run -d --name oracle-test \
             -e ORACLE_PASSWORD=test \
+            -e APP_USER=testuser \
+            -e APP_USER_PASSWORD=test \
             -v "$GITHUB_WORKSPACE:/project" \
             gvenzl/oracle-free:23.5
           echo "En attente du démarrage d'Oracle Free (~2 min)..."
@@ -135,11 +139,10 @@ jobs:
           docker exec oracle-test healthcheck.sh || { echo "Timeout : Oracle ne répond pas."; exit 1; }
 
       - name: Run SQL tests (Oracle)
-        # || true : certaines corrections contiennent des erreurs de syntaxe connues (à corriger)
         run: |
           docker exec \
             -u root \
-            -e ORACLE_USER=system \
+            -e ORACLE_USER=testuser \
             -e ORACLE_PASS=test \
             -e ORACLE_SID=FREEPDB1 \
             oracle-test \
