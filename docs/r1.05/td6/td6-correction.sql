@@ -65,7 +65,8 @@ SELECT *
 FROM Vol
 WHERE villeDep = 'NICE'
   AND villeArr = 'PARIS'
-  AND heureDep > TO_DATE('18', 'HH24');
+  AND heureDep > '18:00';
+--  AND heureDep > TO_DATE('18', 'HH24');
 
 -- Version alternative (pas au programme mais plus fidèle à la requête correspondante en algèbre relationnelle).
 PROMPT "Q6 - V2";
@@ -80,7 +81,8 @@ WHERE villeArr = 'PARIS'
 INTERSECT
 SELECT *
 FROM Vol
-WHERE heureDep > TO_DATE('18', 'HH24');
+WHERE heureDep > '18:00';
+-- WHERE heureDep > TO_DATE('18', 'HH24');
 
 -- Q7 - c:2, t:5
 -- Quels sont les numéros et villes de départ des vols effectués par les pilotes de numéro 100 ou 204 ?
@@ -98,15 +100,11 @@ SELECT numVol, villeDep
 FROM Vol
 WHERE numPil IN (100, 204);
 
--- Version alternative.
-PROMPT "Q7 - V3";
-
-SELECT numVol, villeDep
-FROM Vol
-WHERE numPil = ANY (100, 204);
+-- Version alternative (= ANY est synonyme de IN sous Oracle mais pas portable).
+-- SELECT numVol, villeDep FROM Vol WHERE numPil = ANY (100, 204);
 
 -- Version alternative (pas au programme mais plus fidèle à la requête correspondante en algèbre relationnelle).
-PROMPT "Q7 - V4";
+PROMPT "Q7 - V3";
 
 SELECT numVol, villeDep
 FROM Vol

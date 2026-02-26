@@ -32,8 +32,8 @@ CREATE TABLE Vol (
 	numAv NUMBER(6, 0),
 	villeDep VARCHAR2(20),
 	villeArr VARCHAR2(20),
-	heureDep DATE,
-	heureArr DATE,
+	heureDep VARCHAR2(5),
+	heureArr VARCHAR2(5),
 	CONSTRAINT pk_Vol PRIMARY KEY (numVol),
 	CONSTRAINT fk_Vol_Pilote FOREIGN KEY (numPil) REFERENCES Pilote(numPil),
 	CONSTRAINT fk_Vol_Avion FOREIGN KEY (numAv) REFERENCES Avion(numAv)
@@ -66,20 +66,20 @@ INSERT INTO Avion (numAv, nomAv, capacite, localisation) VALUES (105, 'ATR42', 5
 
 PROMPT "Insertions des données de la table Vol";
 
-INSERT INTO Vol (numVol, numPil, numAv, villeDep, villeArr, heureDep, heureArr) VALUES (1, 100, 100, 'MARSEILLE', 'PARIS', TO_DATE('12:00', 'HH24:MI'), TO_DATE('13:20', 'HH24:MI'));
-INSERT INTO Vol (numVol, numPil, numAv, villeDep, villeArr, heureDep, heureArr) VALUES (2, 100, 101, 'PARIS', 'BORDEAUX', TO_DATE('14:00', 'HH24:MI'), TO_DATE('15:00', 'HH24:MI'));
-INSERT INTO Vol (numVol, numPil, numAv, villeDep, villeArr, heureDep, heureArr) VALUES (3, 101, 100, 'PARIS', 'BORDEAUX', TO_DATE('16:00', 'HH24:MI'), TO_DATE('17:30', 'HH24:MI'));
-INSERT INTO Vol (numVol, numPil, numAv, villeDep, villeArr, heureDep, heureArr) VALUES (4, 204, 105, 'LYON', 'BREST', TO_DATE('06:30', 'HH24:MI'), TO_DATE('08:00', 'HH24:MI'));
-INSERT INTO Vol (numVol, numPil, numAv, villeDep, villeArr, heureDep, heureArr) VALUES (5, 105, 102, 'NICE', 'PARIS', TO_DATE('18:30', 'HH24:MI'), TO_DATE('19:45', 'HH24:MI'));
-INSERT INTO Vol (numVol, numPil, numAv, villeDep, villeArr, heureDep, heureArr) VALUES (6, 104, 103, 'NICE', 'MARSEILLE', TO_DATE('20:00', 'HH24:MI'), TO_DATE('21:00', 'HH24:MI'));
-INSERT INTO Vol (numVol, numPil, numAv, villeDep, villeArr, heureDep, heureArr) VALUES (7, 100, 100, 'MARSEILLE', 'NICE', TO_DATE('08:00', 'HH24:MI'), TO_DATE('09:00', 'HH24:MI'));
-INSERT INTO Vol (numVol, numPil, numAv, villeDep, villeArr, heureDep, heureArr) VALUES (8, 101, 101, 'PARIS', 'NICE', TO_DATE('10:00', 'HH24:MI'), TO_DATE('11:30', 'HH24:MI'));
-INSERT INTO Vol (numVol, numPil, numAv, villeDep, villeArr, heureDep, heureArr) VALUES (9, 102, 104, 'NICE', 'PARIS', TO_DATE('19:00', 'HH24:MI'), TO_DATE('20:15', 'HH24:MI'));
-INSERT INTO Vol (numVol, numPil, numAv, villeDep, villeArr, heureDep, heureArr) VALUES (10, 105, 102, 'NICE', 'LYON', TO_DATE('07:00', 'HH24:MI'), TO_DATE('08:15', 'HH24:MI'));
-INSERT INTO Vol (numVol, numPil, numAv, villeDep, villeArr, heureDep, heureArr) VALUES (11, 106, 105, 'LYON', 'MARSEILLE', TO_DATE('09:00', 'HH24:MI'), TO_DATE('10:00', 'HH24:MI'));
-INSERT INTO Vol (numVol, numPil, numAv, villeDep, villeArr, heureDep, heureArr) VALUES (12, 101, 101, 'NICE', 'MARSEILLE', TO_DATE('15:00', 'HH24:MI'), TO_DATE('16:00', 'HH24:MI'));
-INSERT INTO Vol (numVol, numPil, numAv, villeDep, villeArr, heureDep, heureArr) VALUES (13, 104, 100, 'NICE', 'LYON', TO_DATE('11:00', 'HH24:MI'), TO_DATE('12:15', 'HH24:MI'));
-INSERT INTO Vol (numVol, numPil, numAv, villeDep, villeArr, heureDep, heureArr) VALUES (14, 105, 101, 'NICE', 'BORDEAUX', TO_DATE('17:00', 'HH24:MI'), TO_DATE('18:30', 'HH24:MI'));
-INSERT INTO Vol (numVol, numPil, numAv, villeDep, villeArr, heureDep, heureArr) VALUES (15, 204, 105, 'BREST', 'LYON', TO_DATE('14:00', 'HH24:MI'), TO_DATE('16:00', 'HH24:MI'));
+INSERT INTO Vol (numVol, numPil, numAv, villeDep, villeArr, heureDep, heureArr) VALUES (1, 100, 100, 'MARSEILLE', 'PARIS', '12:00', '13:20');
+INSERT INTO Vol (numVol, numPil, numAv, villeDep, villeArr, heureDep, heureArr) VALUES (2, 100, 101, 'PARIS', 'BORDEAUX', '14:00', '15:00');
+INSERT INTO Vol (numVol, numPil, numAv, villeDep, villeArr, heureDep, heureArr) VALUES (3, 101, 100, 'PARIS', 'BORDEAUX', '16:00', '17:30');
+INSERT INTO Vol (numVol, numPil, numAv, villeDep, villeArr, heureDep, heureArr) VALUES (4, 204, 105, 'LYON', 'BREST', '06:30', '08:00');
+INSERT INTO Vol (numVol, numPil, numAv, villeDep, villeArr, heureDep, heureArr) VALUES (5, 105, 102, 'NICE', 'PARIS', '18:30', '19:45');
+INSERT INTO Vol (numVol, numPil, numAv, villeDep, villeArr, heureDep, heureArr) VALUES (6, 104, 103, 'NICE', 'MARSEILLE', '20:00', '21:00');
+INSERT INTO Vol (numVol, numPil, numAv, villeDep, villeArr, heureDep, heureArr) VALUES (7, 100, 100, 'MARSEILLE', 'NICE', '08:00', '09:00');
+INSERT INTO Vol (numVol, numPil, numAv, villeDep, villeArr, heureDep, heureArr) VALUES (8, 101, 101, 'PARIS', 'NICE', '10:00', '11:30');
+INSERT INTO Vol (numVol, numPil, numAv, villeDep, villeArr, heureDep, heureArr) VALUES (9, 102, 104, 'NICE', 'PARIS', '19:00', '20:15');
+INSERT INTO Vol (numVol, numPil, numAv, villeDep, villeArr, heureDep, heureArr) VALUES (10, 105, 102, 'NICE', 'LYON', '07:00', '08:15');
+INSERT INTO Vol (numVol, numPil, numAv, villeDep, villeArr, heureDep, heureArr) VALUES (11, 106, 105, 'LYON', 'MARSEILLE', '09:00', '10:00');
+INSERT INTO Vol (numVol, numPil, numAv, villeDep, villeArr, heureDep, heureArr) VALUES (12, 101, 101, 'NICE', 'MARSEILLE', '15:00', '16:00');
+INSERT INTO Vol (numVol, numPil, numAv, villeDep, villeArr, heureDep, heureArr) VALUES (13, 104, 100, 'NICE', 'LYON', '11:00', '12:15');
+INSERT INTO Vol (numVol, numPil, numAv, villeDep, villeArr, heureDep, heureArr) VALUES (14, 105, 101, 'NICE', 'BORDEAUX', '17:00', '18:30');
+INSERT INTO Vol (numVol, numPil, numAv, villeDep, villeArr, heureDep, heureArr) VALUES (15, 204, 105, 'BREST', 'LYON', '14:00', '16:00');
 
 PROMPT "Fin de la création de la base de données Airbase";
