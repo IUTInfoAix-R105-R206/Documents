@@ -6,25 +6,32 @@
     "pass": 187,
     "error": 5,
     "fail": 0,
-    "has_oracle_only": true,
+    "skip": 0,
+    "tested": 192,
     "dbms": {
       "postgres": {
         "total": 64,
         "pass": 64,
         "error": 0,
-        "fail": 0
+        "fail": 0,
+        "skip": 0,
+        "tested": 64
       },
       "sqlite": {
         "total": 64,
         "pass": 59,
         "error": 5,
-        "fail": 0
+        "fail": 0,
+        "skip": 0,
+        "tested": 64
       },
       "oracle": {
         "total": 64,
         "pass": 64,
         "error": 0,
-        "fail": 0
+        "fail": 0,
+        "skip": 0,
+        "tested": 64
       }
     }
   },
@@ -35,25 +42,32 @@
     "pass": 118,
     "error": 8,
     "fail": 0,
-    "has_oracle_only": true,
+    "skip": 0,
+    "tested": 126,
     "dbms": {
       "postgres": {
         "total": 42,
         "pass": 42,
         "error": 0,
-        "fail": 0
+        "fail": 0,
+        "skip": 0,
+        "tested": 42
       },
       "sqlite": {
         "total": 42,
         "pass": 34,
         "error": 8,
-        "fail": 0
+        "fail": 0,
+        "skip": 0,
+        "tested": 42
       },
       "oracle": {
         "total": 42,
         "pass": 42,
         "error": 0,
-        "fail": 0
+        "fail": 0,
+        "skip": 0,
+        "tested": 42
       }
     }
   },
@@ -64,25 +78,32 @@
     "pass": 62,
     "error": 1,
     "fail": 0,
-    "has_oracle_only": true,
+    "skip": 36,
+    "tested": 63,
     "dbms": {
       "postgres": {
         "total": 33,
         "pass": 21,
         "error": 0,
-        "fail": 0
+        "fail": 0,
+        "skip": 12,
+        "tested": 21
       },
       "sqlite": {
         "total": 33,
         "pass": 20,
         "error": 1,
-        "fail": 0
+        "fail": 0,
+        "skip": 12,
+        "tested": 21
       },
       "oracle": {
         "total": 33,
         "pass": 21,
         "error": 0,
-        "fail": 0
+        "fail": 0,
+        "skip": 12,
+        "tested": 21
       }
     }
   },
@@ -93,25 +114,32 @@
     "pass": 135,
     "error": 6,
     "fail": 0,
-    "has_oracle_only": true,
+    "skip": 0,
+    "tested": 141,
     "dbms": {
       "postgres": {
         "total": 47,
         "pass": 47,
         "error": 0,
-        "fail": 0
+        "fail": 0,
+        "skip": 0,
+        "tested": 47
       },
       "sqlite": {
         "total": 47,
         "pass": 41,
         "error": 6,
-        "fail": 0
+        "fail": 0,
+        "skip": 0,
+        "tested": 47
       },
       "oracle": {
         "total": 47,
         "pass": 47,
         "error": 0,
-        "fail": 0
+        "fail": 0,
+        "skip": 0,
+        "tested": 47
       }
     }
   },
@@ -122,25 +150,32 @@
     "pass": 148,
     "error": 5,
     "fail": 0,
-    "has_oracle_only": true,
+    "skip": 0,
+    "tested": 153,
     "dbms": {
       "postgres": {
         "total": 51,
         "pass": 51,
         "error": 0,
-        "fail": 0
+        "fail": 0,
+        "skip": 0,
+        "tested": 51
       },
       "sqlite": {
         "total": 51,
         "pass": 46,
         "error": 5,
-        "fail": 0
+        "fail": 0,
+        "skip": 0,
+        "tested": 51
       },
       "oracle": {
         "total": 51,
         "pass": 51,
         "error": 0,
-        "fail": 0
+        "fail": 0,
+        "skip": 0,
+        "tested": 51
       }
     }
   },
@@ -151,25 +186,32 @@
     "pass": 81,
     "error": 30,
     "fail": 0,
-    "has_oracle_only": true,
+    "skip": 0,
+    "tested": 111,
     "dbms": {
       "postgres": {
         "total": 37,
         "pass": 22,
         "error": 15,
-        "fail": 0
+        "fail": 0,
+        "skip": 0,
+        "tested": 37
       },
       "sqlite": {
         "total": 37,
         "pass": 22,
         "error": 15,
-        "fail": 0
+        "fail": 0,
+        "skip": 0,
+        "tested": 37
       },
       "oracle": {
         "total": 37,
         "pass": 37,
         "error": 0,
-        "fail": 0
+        "fail": 0,
+        "skip": 0,
+        "tested": 37
       }
     }
   },
@@ -180,25 +222,32 @@
     "pass": 85,
     "error": 14,
     "fail": 0,
-    "has_oracle_only": true,
+    "skip": 0,
+    "tested": 99,
     "dbms": {
       "postgres": {
         "total": 33,
         "pass": 26,
         "error": 7,
-        "fail": 0
+        "fail": 0,
+        "skip": 0,
+        "tested": 33
       },
       "sqlite": {
         "total": 33,
         "pass": 26,
         "error": 7,
-        "fail": 0
+        "fail": 0,
+        "skip": 0,
+        "tested": 33
       },
       "oracle": {
         "total": 33,
         "pass": 33,
         "error": 0,
-        "fail": 0
+        "fail": 0,
+        "skip": 0,
+        "tested": 33
       }
     }
   },
@@ -209,25 +258,32 @@
     "pass": 29,
     "error": 26,
     "fail": 2,
-    "has_oracle_only": true,
+    "skip": 24,
+    "tested": 57,
     "dbms": {
       "postgres": {
         "total": 27,
         "pass": 8,
         "error": 10,
-        "fail": 1
+        "fail": 1,
+        "skip": 8,
+        "tested": 19
       },
       "sqlite": {
         "total": 27,
         "pass": 2,
         "error": 16,
-        "fail": 1
+        "fail": 1,
+        "skip": 8,
+        "tested": 19
       },
       "oracle": {
         "total": 27,
         "pass": 19,
         "error": 0,
-        "fail": 0
+        "fail": 0,
+        "skip": 8,
+        "tested": 19
       }
     }
   }
