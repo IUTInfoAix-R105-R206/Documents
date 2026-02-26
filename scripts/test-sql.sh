@@ -532,9 +532,9 @@ for correction in "$PROJECT_DIR"/docs/r*/td*/*-correction.sql; do
 done
 
 # Rapport final
-TOTAL=$((PASS + FAIL + SKIP))
-if [[ $TOTAL -gt 0 ]]; then
-    PCT=$(( PASS * 100 / TOTAL ))
+TESTED=$((PASS + FAIL))
+if [[ $TESTED -gt 0 ]]; then
+    PCT=$(( PASS * 100 / TESTED ))
 else
     PCT=0
 fi
@@ -543,9 +543,11 @@ echo ""
 echo "═══════════════════════════════════════════════════════"
 echo -e "  ${GREEN}✓ Passés  :${NC} $PASS"
 echo -e "  ${RED}✗ Échoués :${NC} $FAIL"
-echo -e "  ${YELLOW}⊘ Ignorés :${NC} $SKIP"
 echo    "  ─────────────────────────────────────────────────"
-echo    "  Total     : $TOTAL tests  |  Taux de succès : ${PCT}%"
+echo    "  Testés    : $TESTED  |  Taux de succès : ${PCT}%"
+if [[ $SKIP -gt 0 ]]; then
+    echo -e "  ${YELLOW}⊘ Ignorés :${NC} $SKIP (non comptabilisés)"
+fi
 
 if [[ ${#FAILED_LABELS[@]} -gt 0 ]]; then
     echo ""
