@@ -6,6 +6,8 @@
 -- @section Création et manipulation de vues
 -- @instruction Répondez aux questions suivantes sous forme de requêtes de création de vues, avant de consulter chaque vue par une requête d'interrogation ou des tentatives d'insertion, une valide et une invalide, pour les vues de mise à jour. Les vues à créer ont pour objectifs de créer de nouvelles relations logiques répondants à des besoins fréquents, d'assurer la prise en compte des contraintes d'intégrité de la base ou de limiter la consultation des données pour certains utilisateurs.
 
+-- noqa: disable=all
+
 PROMPT "Suppression de toutes les vues";
 
 DROP VIEW IF EXISTS Q1;
@@ -21,22 +23,27 @@ DROP VIEW IF EXISTS Q8;
 PROMPT "Suppression de toutes les autres éventuelles vues";
 
 BEGIN
-   FOR v IN (SELECT view_name FROM user_views) 
+   FOR v IN (SELECT view_name FROM user_views)
    LOOP
       EXECUTE IMMEDIATE 'DROP VIEW "' || v.view_name || '"';
    END LOOP;
 END;
 /
+-- noqa: enable=all
 
 -- Q1 - c:3, t:9
 -- Quels sont les numéros, noms et prénoms des professeurs de seconde année ?
+-- noqa: disable=all
 PROMPT "Q1";
+-- noqa: enable=all
 
 CREATE OR REPLACE VIEW Q1 (numProf, nomProf, prenomProf) AS
 SELECT DISTINCT P.numProf, nomProf, prenomProf
 FROM Professeur P
-INNER JOIN Enseigne E ON P.numProf = E.numProf 
-INNER JOIN Etudiant Et ON E.numEt = Et.numEt
+    INNER JOIN Enseigne E
+        ON P.numProf = E.numProf
+    INNER JOIN Etudiant Et
+        ON E.numEt = Et.numEt
 WHERE anneeEt = 2;
 
 SELECT *
@@ -46,7 +53,9 @@ FROM Q1;
 
 -- Q2 - c:1, t:1 (9)
 -- À partir du nombre d'étudiants de chaque groupe d'étudiants de seconde année, donnez le nombre moyen d'étudiants.
+-- noqa: disable=all
 PROMPT "Q2";
+-- noqa: enable=all
 
 CREATE OR REPLACE VIEW Q2 (groupeEt, nbEtudiants) AS
 SELECT groupeEt, COUNT(*)
@@ -59,7 +68,9 @@ FROM Q2;
 
 -- Q3 - c:1, t:1 (45)
 -- À partir du nombre d'étudiants à qui chaque professeur enseigne, quel est le plus grand nombre d'étudiants ?
+-- noqa: disable=all
 PROMPT "Q3";
+-- noqa: enable=all
 
 CREATE OR REPLACE VIEW Q3 (numProf, nbEtudiants) AS
 SELECT numProf, COUNT(DISTINCT numEt)
@@ -71,21 +82,26 @@ FROM Q3;
 
 -- Q4 - c:3, t:9
 -- À partir de la somme d'heures de cours pour chaque discipline, donnez les codes et libellés des modules ainsi que le pourcentage de ces sommes d'heures par rapport au total des heures de cours dans la discipline correspondante.
+-- noqa: disable=all
 PROMPT "Q4";
+-- noqa: enable=all
 
 CREATE OR REPLACE VIEW Q4 (discipline, total) AS
 SELECT discipline, SUM(heureCMPrev)
 FROM Module
 GROUP BY discipline;
 
-SELECT code, libelle, heureCMPrev / total pourcentagediscipline
+SELECT code, libelle, heureCMPrev / total AS pourcentagediscipline
 FROM Module M
-INNER JOIN Q4 ON M.discipline = Q4.discipline
+    INNER JOIN Q4
+        ON M.discipline = Q4.discipline
 WHERE heureCMPrev IS NOT NULL;
 
 -- Q5 - c:3, t:6
 -- À partir, du nombre de professeurs qui enseignent chaque module d'une part, et de la moyenne de test maximale de ces modules d'autre part, donnez les codes des modules, le nombre de professeurs qui les enseignent et la moyenne de test maximale de ces Modules.
+-- noqa: disable=all
 PROMPT "Q5";
+-- noqa: enable=all
 
 CREATE OR REPLACE VIEW Q51 (code, nbProfs) AS
 SELECT code, COUNT(DISTINCT numProf)
@@ -99,16 +115,19 @@ GROUP BY code;
 
 SELECT Q51.code, nbProfs, moyMax
 FROM Q51
-INNER JOIN Q52 ON Q51.code= Q52.code;
+    INNER JOIN Q52
+        ON Q51.code = Q52.code;
 
 -- Q6 - c:3, t:29
 -- À partir de la moins bonne et de la meilleure moyenne de test du module ACSI, donnez les numéros des étudiants et les écarts respectifs entre les éventuelles moyennes de test des étudiants et ces moyennes extrêmes.
+-- noqa: disable=all
 PROMPT "Q6";
+-- noqa: enable=all
 
 CREATE OR REPLACE VIEW Q6 (moyMin, moyMax) AS
 SELECT MIN(moyTest), MAX(moyTest)
 FROM Note
-WHERE code ='ACSI';
+WHERE code = 'ACSI';
 
 SELECT numEt, moyTest - moyMin, moyTest - moyMax
 FROM Note, Q6
@@ -116,7 +135,9 @@ WHERE code = 'ACSI';
 
 -- Q7
 -- Créer une vue de mise à jour permettant d'assurer que les discipline insérées ou modifiées ne peuvent être que Gestion, Informatique ou Maths.
+-- noqa: disable=all
 PROMPT "Q7";
+-- noqa: enable=all
 
 CREATE OR REPLACE VIEW Q7 AS
 SELECT *
@@ -127,7 +148,9 @@ WITH CHECK OPTION;
 INSERT INTO Q7 (code, libelle, heureCMPrev, heureCMReal, heureTPPrev, heureTPReal, discipline, coefTest, coefCC, resp, codePere) VALUES ('DRO', 'DROIT', 30, NULL, 10, NULL, 'GESTION', 80, 20, 3, 'EGO');
 
 -- Insertion invalide.
+-- noqa: disable=all
 PROMPT "Q7 - Insertion invalide";
+-- noqa: enable=all
 
 INSERT INTO Q7 (code, libelle, heureCMPrev, heureCMReal, heureTPPrev, heureTPReal, discipline, coefTest, coefCC, resp, codePere) VALUES ('COM', 'COMMUNICATION ECRITE', 20, NULL, 40, NULL, 'COMMUNICATION', 70, 30, 3, 'EGO');
 
@@ -135,41 +158,52 @@ INSERT INTO Q7 (code, libelle, heureCMPrev, heureCMReal, heureTPPrev, heureTPRea
 
 -- Q8
 -- Créer une vue de mise à jour permettant d'assurer que les responsables d'un Module inséré ou modifié doivent enseigner ce Module.
+-- noqa: disable=all
 PROMPT "Q8 - V1";
+-- noqa: enable=all
 
 CREATE OR REPLACE VIEW Q8 AS
 SELECT *
 FROM Module M
-WHERE RESP IN (SELECT numProf
-			   FROM Enseigne E
-			   WHERE M.code = E.code)
+WHERE RESP IN (
+    SELECT numProf
+    FROM Enseigne E
+    WHERE M.code = E.code
+)
 WITH CHECK OPTION;
 
+-- noqa: disable=all
 PROMPT "Q8 - V2";
+-- noqa: enable=all
 
 CREATE OR REPLACE VIEW Q8 AS
 SELECT *
 FROM Module M
-WHERE (code, RESP) IN (SELECT code, numProf
-					   FROM Enseigne)
+WHERE (code, RESP) IN (
+    SELECT code, numProf
+    FROM Enseigne
+)
 WITH CHECK OPTION;
 
+-- noqa: disable=all
 ALTER TABLE Enseigne DROP CONSTRAINT fk_Enseignt_code;
 
-ALTER TABLE Enseigne ADD 
-CONSTRAINT fk_Enseignt_code FOREIGN KEY (code) REFERENCES Module(code) DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE Enseigne ADD CONSTRAINT fk_Enseignt_code FOREIGN KEY (code) REFERENCES Module(code) DEFERRABLE INITIALLY DEFERRED;
 
 BEGIN
-	INSERT INTO Enseigne (code, numProf, numEt) VALUES ('FDD', 3, 2317);
+    INSERT INTO Enseigne (code, numProf, numEt) VALUES ('FDD', 3, 2317);
 
-	INSERT INTO Q8 (code, libelle, heureCMPrev, heureCMReal, heureTPPrev, heureTPReal, discipline, coefTest, coefCC, resp, codePere) VALUES ('FDD', 'FOUILLE DE DONNEES', 20, NULL, 40, NULL, 'INFORMATIQUE', 40, 60, 3, 'OMGL2');
+    INSERT INTO Q8 (code, libelle, heureCMPrev, heureCMReal, heureTPPrev, heureTPReal, discipline, coefTest, coefCC, resp, codePere) VALUES ('FDD', 'FOUILLE DE DONNEES', 20, NULL, 40, NULL, 'INFORMATIQUE', 40, 60, 3, 'OMGL2');
 END;
 /
+-- noqa: enable=all
 
 -- Remarque : il est nécessaire de faire l'insertion de l'enseignement avant l'intertion du module avec le responsable devant enseigner ce Module, et cela n'est possible qu'en faisant une transaction et en modifiant la contrainte de clef étrangère afin qu'elle ne soit vérifiée qu'à la fin de la transaction.
 
 -- Insertion invalide.
+-- noqa: disable=all
 PROMPT "Q8 - Insertion invalide";
+-- noqa: enable=all
 
 INSERT INTO Q8 (code, libelle, heureCMPrev, heureCMReal, heureTPPrev, heureTPReal, discipline, coefTest, coefCC, resp, codePere) VALUES ('EDD', 'ENTREPOTS DE DONNEES', 20, NULL, 40, NULL, 'INFORMATIQUE', 40, 60, 666, 'OMGL2');
 
@@ -179,19 +213,27 @@ INSERT INTO Q8 (code, libelle, heureCMPrev, heureCMReal, heureTPPrev, heureTPRea
 
 -- Q9 - c:3, t:19
 -- Quels sont les numéros, noms et prénoms des étudiants ayant eu une note dans le module Principes des BD ou dans un de ses sous-modules direct ou pas ?
+-- noqa: disable=all
 PROMPT "Q9";
+-- noqa: enable=all
 
 SELECT DISTINCT Et.numEt, nomEt, prenomEt
 FROM Etudiant Et
-INNER JOIN Note N ON Et.numEt = N.numEt
-AND code IN (SELECT code
-			 FROM Module
-			 START WITH libelle = 'PRINCIPES DES BD'
-			 CONNECT BY codePere = PRIOR code);
+    INNER JOIN Note N
+        ON
+            Et.numEt = N.numEt
+            AND code IN (
+                SELECT code
+                FROM Module
+                START WITH libelle = 'PRINCIPES DES BD'
+                CONNECT BY codePere = PRIOR code
+            );
 
 -- Q10 - c:2, t:32
 -- Donnez les libellés des modules et les libellés des modules d'où ils sont directement issus.
+-- noqa: disable=all
 PROMPT "Q10";
+-- noqa: enable=all
 
 SELECT M.libelle, MPere.libelle AS libellePere
 FROM Module M, Module MPere
@@ -199,45 +241,67 @@ WHERE MPere.code = M.codePere;
 
 -- Q11 - c:1, t:1 (4)
 -- Quels sont les groupes de seconde année, dans lesquels un étudiant a obtenu, pour le module Conception de SI, une meilleure note de test que le meilleur étudiant du groupe d'étudiants 3 dans le même Module ?
+-- noqa: disable=all
 PROMPT "Q11 - V1";
+-- noqa: enable=all
 
 WITH T (anneeEt, groupeEt, moyTest, libelle) AS (
-	SELECT anneeEt, groupeEt, moyTest, libelle 
-	FROM Etudiant Et
-	INNER JOIN Note N ON Et.numEt = N.numEt 
-	INNER JOIN Module M ON N.code = M.code
-	WHERE libelle = 'CONCEPTION DE SI'
+    SELECT anneeEt, groupeEt, moyTest, libelle
+    FROM Etudiant Et
+        INNER JOIN Note N
+            ON Et.numEt = N.numEt
+        INNER JOIN Module M
+            ON N.code = M.code
+    WHERE libelle = 'CONCEPTION DE SI'
 )
+
 SELECT groupeEt
 FROM Etudiant
-WHERE anneeEt = 2
-  AND groupeEt IN (SELECT groupeEt
-				 FROM T
-				 WHERE moyTest > (SELECT MAX(moyTest)
-								   FROM T
-								   WHERE anneeEt = 2
-								     AND groupeEt = 3))
+WHERE
+    anneeEt = 2
+    AND groupeEt IN (
+        SELECT groupeEt
+        FROM T
+        WHERE moyTest > (
+            SELECT MAX(moyTest)
+            FROM T
+            WHERE
+                anneeEt = 2
+                AND groupeEt = 3
+        )
+    )
 GROUP BY groupeEt;
 
+-- noqa: disable=all
 PROMPT "Q11 - V2";
+-- noqa: enable=all
 
 WITH T (anneeEt, groupeEt, moyTest, libelle) AS (
-	SELECT anneeEt, groupeEt, moyTest, libelle 
-	FROM Etudiant Et
-	INNER JOIN Note N ON Et.numEt = N.numEt 
-	INNER JOIN Module M ON N.code = M.code
-	WHERE libelle = 'CONCEPTION DE SI'
+    SELECT anneeEt, groupeEt, moyTest, libelle
+    FROM Etudiant Et
+        INNER JOIN Note N
+            ON Et.numEt = N.numEt
+        INNER JOIN Module M
+            ON N.code = M.code
+    WHERE libelle = 'CONCEPTION DE SI'
 )
+
 SELECT groupeEt
 FROM Etudiant
-WHERE anneeEt = 2
-  AND groupeEt IN (SELECT groupeEt
-				 FROM T
-				 GROUP BY groupeEt
-				 HAVING MAX(moyTest) > (SELECT MAX(moyTest)
-										 FROM T
-										 WHERE anneeEt = 2
-										   AND groupeEt = 3))
+WHERE
+    anneeEt = 2
+    AND groupeEt IN (
+        SELECT groupeEt
+        FROM T
+        GROUP BY groupeEt
+        HAVING MAX(moyTest) > (
+            SELECT MAX(moyTest)
+            FROM T
+            WHERE
+                anneeEt = 2
+                AND groupeEt = 3
+        )
+    )
 GROUP BY groupeEt;
 
 -- @section Consultation des tables systèmes
@@ -267,6 +331,7 @@ GROUP BY groupeEt;
 -- @text Effectuez les requêtes sur les relations actuelles, pas celles éventuellement dans la corbeille. N'exécutez qu'une seule requête à la fois.
 -- @instruction En cas de doute ou de curiosité, n'oubliez pas d'utiliser la commande `DESCRIBE`.
 
+-- noqa: disable=all
 -- Nettoyage : supprimer les vues et données créées par les questions précédentes
 -- pour que les requêtes sur les tables systèmes retournent les résultats attendus.
 PROMPT "Nettoyage avant consultation des tables systèmes";
@@ -278,16 +343,21 @@ BEGIN
    END LOOP;
 END;
 /
+-- noqa: enable=all
 
 DELETE FROM Enseigne WHERE code = 'FDD';
 DELETE FROM Module WHERE code IN ('DRO', 'FDD');
 
+-- noqa: disable=all
 ALTER TABLE Enseigne DROP CONSTRAINT fk_Enseignt_code;
 ALTER TABLE Enseigne ADD CONSTRAINT fk_Enseignt_code FOREIGN KEY (code) REFERENCES Module(code);
+-- noqa: enable=all
 
 -- Q12 - c:1, t:7
 -- Quels sont les noms des attributs de la relation Professeur ?
+-- noqa: disable=all
 PROMPT "Q12";
+-- noqa: enable=all
 
 SELECT column_Name
 FROM User_Tab_Columns
@@ -295,12 +365,16 @@ WHERE table_Name = 'PROFESSEUR';
 
 -- Q13 - c:1, t:5
 -- Quelle sont les tables ?
+-- noqa: disable=all
 PROMPT "Q13 - V1";
+-- noqa: enable=all
 
 SELECT table_Name
 FROM User_Tables;
 
+-- noqa: disable=all
 PROMPT "Q13 - V2";
+-- noqa: enable=all
 
 SELECT object_Name
 FROM User_Objects
@@ -308,47 +382,66 @@ WHERE object_Type = 'TABLE';
 
 -- Q14 - c:1, t:20
 -- Quelles sont les noms des contraintes d'intégrité ?
+-- noqa: disable=all
 PROMPT "Q14";
+-- noqa: enable=all
 
 SELECT constraint_Name
 FROM User_Constraints;
 
 -- Q15 - c:1, t:13
 -- Quelles sont les noms des contraintes d'intégrité définies sur des relations ayant au moins un attribut de type VARCHAR2 de 20 caractères ou plus ?
+-- noqa: disable=all
 PROMPT "Q15";
+-- noqa: enable=all
 
 SELECT constraint_Name
 FROM User_Constraints
-WHERE table_Name IN (SELECT table_Name
-					 FROM User_Tab_Columns
-					 WHERE data_Type = 'VARCHAR2'
-					   AND data_Length >= 20);
+WHERE table_Name IN (
+    SELECT table_Name
+    FROM User_Tab_Columns
+    WHERE
+        data_Type = 'VARCHAR2'
+        AND data_Length >= 20
+);
 
 -- Q16 - c:2, t:15
 -- Quelles sont, pour les attributs de type NUMBER, les noms des contraintes et les noms des attributs sur lesquels elles portent ?
+-- noqa: disable=all
 PROMPT "Q16";
+-- noqa: enable=all
 
 SELECT DISTINCT UCC.constraint_Name, UCC.column_Name
 FROM User_Cons_Columns UCC
-INNER JOIN User_Tab_Columns UTC
-ON UCC.column_Name = UTC.column_Name AND UCC.table_Name = UTC.table_Name 
+    INNER JOIN User_Tab_Columns UTC
+        ON
+            UCC.column_Name = UTC.column_Name
+            AND UCC.table_Name = UTC.table_Name
 WHERE data_Type = 'NUMBER';
 
 -- Q17 - c:3, t:26
 -- Quels sont les noms des contraintes, les noms attributs sur lesquels elles portent et le type de ces attributs, pour les relations ayant au moins un attribut de type NUMBER ?
+-- noqa: disable=all
 PROMPT "Q17";
+-- noqa: enable=all
 
 SELECT UCC.constraint_Name, UCC.column_Name, data_Type
 FROM User_Cons_Columns UCC
-INNER JOIN User_Tab_Columns UTC
-ON UCC.column_Name = UTC.column_Name AND UCC.table_Name = UTC.table_Name
-WHERE UCC.table_Name IN (SELECT table_Name
-				         FROM User_Tab_Columns
-						 WHERE data_Type = 'NUMBER');
+    INNER JOIN User_Tab_Columns UTC
+        ON
+            UCC.column_Name = UTC.column_Name
+            AND UCC.table_Name = UTC.table_Name
+WHERE UCC.table_Name IN (
+    SELECT table_Name
+    FROM User_Tab_Columns
+    WHERE data_Type = 'NUMBER'
+);
 
 -- Q18 - c:1, t:5
 -- Quelles sont les noms des contraintes de clefs primaires ?
+-- noqa: disable=all
 PROMPT "Q18";
+-- noqa: enable=all
 
 SELECT constraint_Name
 FROM User_Constraints
@@ -356,10 +449,13 @@ WHERE constraint_Type = 'P';
 
 -- Q19 - c:3, t:7
 -- Quels sont les noms des attributs, et leurs relations correspondantes, d'attributs portant le même nom dans des relations différentes ?
+-- noqa: disable=all
 PROMPT "Q19";
+-- noqa: enable=all
 
 SELECT UTC1.column_Name, UTC1.table_Name AS Relation1, UTC2.table_Name AS Relation2
 FROM User_Tab_Columns UTC1
-INNER JOIN User_Tab_Columns UTC2
-ON UTC1.column_Name = UTC2.column_Name AND UTC1.table_Name < UTC2.table_Name;
-
+    INNER JOIN User_Tab_Columns UTC2
+        ON
+            UTC1.column_Name = UTC2.column_Name
+            AND UTC1.table_Name < UTC2.table_Name;
