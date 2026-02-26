@@ -211,7 +211,7 @@ jobs:
           mkdir -p root-site/pdfs/r1.05 root-site/pdfs/r2.06
           # Lister les PDF déjà déployés sur gh-pages et créer des fichiers marqueurs
           gh api "repos/${{ github.repository }}/git/trees/gh-pages?recursive=1" \
-            --jq '.tree[] | select(.path | test("^pdfs/r.*\\.pdf$")) | .path' 2>/dev/null \
+            --jq '.tree[] | select(.path | test("^pdfs/.*\\.pdf$")) | .path' 2>/dev/null \
             | while read -r pdf; do touch "root-site/$pdf"; done || true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

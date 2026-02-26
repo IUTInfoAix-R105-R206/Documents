@@ -72,6 +72,8 @@ jobs:
           mkdir -p site/pdfs/r1.05 site/pdfs/r2.06
           find output/r1.05 -name "*.pdf" -exec cp {} site/pdfs/r1.05/ \; 2>/dev/null || true
           find output/r2.06 -name "*.pdf" -exec cp {} site/pdfs/r2.06/ \; 2>/dev/null || true
+          # Guides pratiques (PDF à la racine de output/)
+          find output -maxdepth 1 -name "*.pdf" -exec cp {} site/pdfs/ \; 2>/dev/null || true
 
       - name: Fetch test reports summary from gh-pages
         if: github.ref == 'refs/heads/main'

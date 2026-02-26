@@ -52,7 +52,7 @@ R206_CORRECTION_PDFS = \
 	$(OUTPUT_DIR)/r2.06/td5/td5-correction.pdf \
 	$(OUTPUT_DIR)/r2.06/td6/td6-correction.pdf
 
-.PHONY: all clean r105 r206 r105-corrections r206-corrections \
+.PHONY: all clean r105 r206 r105-corrections r206-corrections guide \
 	test-sql-postgresql-local test-sql-postgresql-docker \
 	test-sql-sqlite-local    test-sql-sqlite-docker    \
 	test-sql-oracle-local    test-sql-oracle-docker    \
@@ -67,7 +67,7 @@ help: ## Affiche cette aide
 	@echo "  \033[36mREPORT=file.csv\033[0m   Génère un rapport CSV (ex: make test-sql-sqlite-local REPORT=results.csv)"
 	@echo "  \033[36mTD=tdN\033[0m            Filtre sur un TD spécifique (ex: make test-sql-oracle-docker TD=td3)"
 
-all: r105 r206 ## Compile tous les TD (sujets + corrigés)
+all: r105 r206 guide ## Compile tous les TD (sujets + corrigés) et le guide
 
 # --- Cibles par ressource ---
 
@@ -600,6 +600,27 @@ $(OUTPUT_DIR)/r1.05/td7/td7-correction.pdf: docs/r1.05/td7/td7-correction.gen.md
 		--number-sections \
 		td7-correction.gen.md \
 		-o ../../../$@
+
+# ==============================================================================
+# Guide de bonnes pratiques SQL
+# ==============================================================================
+
+guide: $(OUTPUT_DIR)/guide-bonnes-pratiques-sql.pdf ## Compile le guide de bonnes pratiques SQL
+
+$(OUTPUT_DIR)/guide-bonnes-pratiques-sql.pdf: docs/shared/guide-bonnes-pratiques-sql.md $(TEMPLATE_DIR)/template.tex $(FILTER_DIR)/custom-styles.lua
+	@mkdir -p $(OUTPUT_DIR)
+	cd docs/shared && $(PANDOC) \
+		--from markdown+footnotes+definition_lists+fenced_divs+bracketed_spans \
+		--pdf-engine=pdflatex \
+		--pdf-engine-opt=-shell-escape \
+		--template=../../$(TEMPLATE_DIR)/template.tex \
+		--lua-filter=../../$(FILTER_DIR)/custom-styles.lua \
+		--resource-path=.:../../$(TEMPLATE_DIR) \
+		--variable=license-badge:../../$(TEMPLATE_DIR)/cc-by-nc-sa \
+		--variable=version:$(GIT_VERSION) \
+		--number-sections \
+		guide-bonnes-pratiques-sql.md \
+		-o ../../$@
 
 # ==============================================================================
 # Validation SQL

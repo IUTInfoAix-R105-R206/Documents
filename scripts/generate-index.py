@@ -23,6 +23,10 @@ RESOURCE_LABELS = {
     "r2.06": "R2.06 — Exploitation d'une base de données",
 }
 
+GUIDE_TITLES = {
+    "guide-bonnes-pratiques-sql": "Guide de bonnes pratiques SQL",
+}
+
 RESOURCE_ORDER = ["r1.05", "r2.06"]
 
 CSS = """\
@@ -97,6 +101,22 @@ def scan_pdfs(pdf_dir):
     return tds
 
 
+def scan_guides(pdf_dir):
+    """Scanne les PDF de guides pratiques (fichiers à la racine de pdf_dir)."""
+    guides = {}
+    if not pdf_dir or not os.path.isdir(pdf_dir):
+        return guides
+    pdf_path = Path(pdf_dir)
+    for pdf in sorted(pdf_path.glob("*.pdf")):
+        name = pdf.stem
+        if name in GUIDE_TITLES:
+            guides[name] = {
+                "title": GUIDE_TITLES[name],
+                "path": f"pdfs/{pdf.name}",
+            }
+    return guides
+
+
 def read_summary(summary_path):
     """Lit le summary.json des rapports de test (optionnel)."""
     if not summary_path or not os.path.isfile(summary_path):
@@ -105,7 +125,7 @@ def read_summary(summary_path):
         return json.load(f)
 
 
-def generate_index(titles, pdfs, summary, output_file):
+def generate_index(titles, pdfs, summary, guides, output_file):
     """Génère la page d'index HTML."""
     # Collecter tous les td_ids connus
     all_td_ids = set()
@@ -182,6 +202,21 @@ def generate_index(titles, pdfs, summary, output_file):
             f"<h2>{label}</h2>\n<ul>\n" + "\n".join(items) + "\n</ul>"
         )
 
+    # Section guides pratiques
+    guides_section = ""
+    if guides:
+        items = []
+        for guide_id in sorted(guides.keys()):
+            info = guides[guide_id]
+            items.append(
+                f'<li><a href="{info["path"]}">{info["title"]}</a></li>'
+            )
+        guides_section = (
+            "<h2>Guides pratiques</h2>\n<ul>\n"
+            + "\n".join(items)
+            + "\n</ul>"
+        )
+
     # Section rapport global
     reports_section = ""
     if summary:
@@ -203,6 +238,7 @@ def generate_index(titles, pdfs, summary, output_file):
 <body>
   <h1>Bases de données — Sujets de TD</h1>
   {"".join(sections_html)}
+  {guides_section}
   {reports_section}
   <p class="footer">IUT d'Aix-Marseille — Département Informatique</p>
 </body>
@@ -230,9 +266,10 @@ def main():
 
     titles = read_td_titles(args.docs_dir)
     pdfs = scan_pdfs(args.pdf_dir)
+    guides = scan_guides(args.pdf_dir)
     summary = read_summary(args.reports_summary)
 
-    generate_index(titles, pdfs, summary, args.output)
+    generate_index(titles, pdfs, summary, guides, args.output)
 
 
 if __name__ == "__main__":
