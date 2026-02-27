@@ -256,23 +256,25 @@ jobs:
           keep_files: true
 
       # Regénérer l'index principal avec les liens vers les rapports
+      # NB : les fichiers marqueurs sont créés dans pdf-listing/ (NON déployé)
+      # pour éviter d'écraser les vrais PDF sur gh-pages avec des fichiers vides.
       - name: Fetch current PDFs listing from gh-pages
         if: github.ref == 'refs/heads/main'
         run: |
-          mkdir -p root-site/pdfs/r1.05 root-site/pdfs/r2.06
-          # Lister les PDF déjà déployés sur gh-pages et créer des fichiers marqueurs
+          mkdir -p pdf-listing/pdfs/r1.05 pdf-listing/pdfs/r2.06
           gh api "repos/${{ github.repository }}/git/trees/gh-pages?recursive=1" \
             --jq '.tree[] | select(.path | test("^pdfs/.*\\.pdf$")) | .path' 2>/dev/null \
-            | while read -r pdf; do touch "root-site/$pdf"; done || true
+            | while read -r pdf; do touch "pdf-listing/$pdf"; done || true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update root index with report links
         if: github.ref == 'refs/heads/main'
         run: |
+          mkdir -p root-site
           python3 scripts/generate-index.py \
             --docs-dir docs \
-            --pdf-dir root-site/pdfs \
+            --pdf-dir pdf-listing/pdfs \
             --reports-summary site/summary.json \
             --output root-site/index.html
 

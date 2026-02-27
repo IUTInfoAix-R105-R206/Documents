@@ -90,6 +90,10 @@ def scan_pdfs(pdf_dir):
         filename = parts[1]
         name = filename.removesuffix(".pdf")
 
+        # Ignorer les PDF qui ne correspondent pas au pattern tdN ou tdN-correction
+        if not re.match(r"^td\d+(-correction)?$", name):
+            continue
+
         if name.endswith("-correction"):
             td_name = name.removesuffix("-correction")
             td_id = f"{resource}/{td_name}"
