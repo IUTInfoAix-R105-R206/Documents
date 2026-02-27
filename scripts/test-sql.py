@@ -372,6 +372,10 @@ def parse_correction_file(path: Path, td_id: str) -> list[TestBlock]:
 
         # ── Accumulation des lignes SQL ──
         if in_query:
+            # Ignorer les directives sqlfluff (noqa) qui ne doivent pas
+            # interrompre l'accumulation du bloc SQL
+            if re.match(r"^-- noqa:", line):
+                continue
             if line.startswith("--") or not line.strip():
                 # Un commentaire après du SQL marque la fin du bloc
                 if current_block.strip() and line.startswith("--"):
