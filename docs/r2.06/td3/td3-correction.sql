@@ -442,7 +442,7 @@ FROM Module M
 WHERE NOT EXISTS (
     SELECT *
     FROM Professeur
-    WHERE specProf = M.code
+    WHERE specProf = M.code -- noqa: RF03
 );
 
 -- Version alternative.
@@ -485,7 +485,7 @@ FROM Etudiant E
 WHERE NOT EXISTS (
     SELECT *
     FROM Note N
-    WHERE N.numEt = E.numEt
+    WHERE N.numEt = E.numEt -- noqa: RF03
 );
 
 -- Version alternative.
@@ -589,7 +589,7 @@ FROM Professeur P
 WHERE NOT EXISTS (
     SELECT *
     FROM Module M
-    WHERE M.resp = P.numProf
+    WHERE M.resp = P.numProf -- noqa: RF03
 );
 
 -- Version alternative.
@@ -606,7 +606,7 @@ WHERE resp IS NULL;
 -- Donnez, par groupe de seconde année, le nombre d'étudiants.
 PROMPT "Q23";
 
-SELECT groupeEt, COUNT(*)
+SELECT groupeEt, COUNT(*) AS nbEtudiants
 FROM Etudiant
 WHERE anneeEt = 2
 GROUP BY groupeEt;
@@ -615,7 +615,7 @@ GROUP BY groupeEt;
 -- Donnez, pour chaque numéro d'étudiant, la meilleure note de test.
 PROMPT "Q24";
 
-SELECT numEt, MAX(moyTest)
+SELECT numEt, MAX(moyTest) AS maxMoyTest
 FROM Note
 GROUP BY numEt;
 
@@ -623,7 +623,7 @@ GROUP BY numEt;
 -- Donnez, pour chaque numéro et nom des étudiants de seconde année ainsi que pour chaque code de module, le nombre de professeurs.
 PROMPT "Q25";
 
-SELECT Et.numEt, nomEt, code, COUNT(numProf)
+SELECT Et.numEt, nomEt, code, COUNT(numProf) AS nbProfs
 FROM Etudiant Et
     INNER JOIN Enseigne E ON Et.numEt = E.numEt
 WHERE anneeEt = 2
@@ -635,7 +635,7 @@ GROUP BY Et.numEt, nomEt, code;
 -- Donnez, pour chaque ville de plus de cinq professeurs, le nombre de professeurs y résidant.
 PROMPT "Q26";
 
-SELECT villeProf, COUNT(*)
+SELECT villeProf, COUNT(*) AS nbProfs
 FROM Professeur
 GROUP BY villeProf
 HAVING COUNT(*) > 5;

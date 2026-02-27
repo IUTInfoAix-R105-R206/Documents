@@ -135,7 +135,7 @@ WHERE numCl IS NULL;
 -- Donnez, par pays d'arrivée, le nombre de voyages.
 PROMPT "Q7";
 
-SELECT paysArr, COUNT(*)
+SELECT paysArr, COUNT(*) AS nbVoyages
 FROM Voyage
 GROUP BY paysArr;
 
@@ -143,7 +143,7 @@ GROUP BY paysArr;
 -- Donnez, par pays et ville d'arrivée, le nombre de voyages.
 PROMPT "Q8";
 
-SELECT paysArr, villeArr, COUNT(*)
+SELECT paysArr, villeArr, COUNT(*) AS nbVoyages
 FROM Voyage
 GROUP BY paysArr, villeArr;
 
@@ -151,7 +151,7 @@ GROUP BY paysArr, villeArr;
 -- Donnez, pour chaque pays d'arrivée, le nombre de villes.
 PROMPT "Q9";
 
-SELECT paysArr, COUNT(DISTINCT villeArr)
+SELECT paysArr, COUNT(DISTINCT villeArr) AS nbVilles
 FROM Voyage
 GROUP BY paysArr;
 
@@ -159,7 +159,7 @@ GROUP BY paysArr;
 -- Donnez, pour chaque identifiant et ville d'arrivée de voyage, le nombre de dates planifiées.
 PROMPT "Q10";
 
-SELECT V.idV, villeArr, COUNT(dateDep)
+SELECT V.idV, villeArr, COUNT(dateDep) AS nbDates
 FROM Voyage V
     INNER JOIN Planning P ON V.idV = P.idV
 GROUP BY V.idV, villeArr;
@@ -168,7 +168,7 @@ GROUP BY V.idV, villeArr;
 -- Donnez, pour chaque identifiant et ville d'arrivée de voyage, le nombre d'options gratuites.
 PROMPT "Q11";
 
-SELECT V.idV, villeArr, COUNT(code)
+SELECT V.idV, villeArr, COUNT(code) AS nbOptions
 FROM Voyage V
     INNER JOIN Carac Ca ON V.idV = Ca.idV
 WHERE prix = 0 OR prix IS NULL
@@ -178,7 +178,7 @@ GROUP BY V.idV, villeArr;
 -- Donnez, par catégorie effective, le nombre de clients.
 PROMPT "Q12";
 
-SELECT categorie, COUNT(*)
+SELECT categorie, COUNT(*) AS nbClients
 FROM Client
 WHERE categorie IS NOT NULL
 GROUP BY categorie;
@@ -187,7 +187,7 @@ GROUP BY categorie;
 -- Donnez, par identifiant de voyage et ville d'arrivée, le nombre de voyages réservés et le nombre total de personnes.
 PROMPT "Q13";
 
-SELECT V.idV, villeArr, COUNT(R.idV), SUM(COALESCE(nbPers, 0))
+SELECT V.idV, villeArr, COUNT(R.idV) AS nbReservations, SUM(COALESCE(nbPers, 0)) AS totalPers
 FROM Voyage V
     INNER JOIN Reservation R ON V.idV = R.idV
 GROUP BY V.idV, villeArr;
@@ -196,7 +196,7 @@ GROUP BY V.idV, villeArr;
 -- Donnez, par voyage, le prix moyen effectif des options.
 PROMPT "Q14 - V1";
 
-SELECT idV, AVG(prix)
+SELECT idV, AVG(prix) AS prixMoyen
 FROM Carac
 WHERE (prix <> 0 OR prix IS NOT NULL)
 GROUP BY idV;
@@ -204,7 +204,7 @@ GROUP BY idV;
 -- Version alternative.
 PROMPT "Q14 - V2";
 
-SELECT idV, AVG(prix)
+SELECT idV, AVG(prix) AS prixMoyen
 FROM Carac
 GROUP BY idV
 HAVING AVG(prix) IS NOT NULL;
@@ -213,7 +213,7 @@ HAVING AVG(prix) IS NOT NULL;
 -- Donnez, pour chaque identifiant de voyage et ville d'arrivée, le nombre d'options gratuites et le nombre d'options payantes.
 PROMPT "Q15";
 
-SELECT V.idV, villeArr, COUNT(DISTINCT CaG.code), COUNT(DISTINCT CaP.code)
+SELECT V.idV, villeArr, COUNT(DISTINCT CaG.code) AS nbGratuites, COUNT(DISTINCT CaP.code) AS nbPayantes
 FROM Voyage V
     INNER JOIN Carac CaG ON V.idV = CaG.idV
     INNER JOIN Carac CaP ON V.idV = CaP.idV
@@ -226,7 +226,7 @@ GROUP BY V.idV, villeArr;
 -- Donnez, par ville de résidence, et lorsque son nombre est supérieur à cinq, le nombre de clients.
 PROMPT "Q16";
 
-SELECT ville, COUNT(*)
+SELECT ville, COUNT(*) AS nbClients
 FROM Client
 GROUP BY ville
 HAVING COUNT(*) > 5;
@@ -235,7 +235,7 @@ HAVING COUNT(*) > 5;
 -- Quel est, pour chaque identifiant de voyage et pays d'arrivée, le montant total, tenant compte du nombre de personnes, réglé par les clients ?
 PROMPT "Q17";
 
-SELECT V.idV, paysArr, SUM(tarif * nbPers)
+SELECT V.idV, paysArr, SUM(tarif * nbPers) AS montantTotal
 FROM Voyage V
     INNER JOIN Reservation R ON V.idV = R.idV
     INNER JOIN Planning P ON R.idV = P.idV
@@ -245,7 +245,7 @@ GROUP BY V.idV, paysArr;
 -- Quel est, pour chaque identifiant de voyage et date de départ planifiée, le montant total, tenant compte du nombre de personnes, réglé par les clients ?
 PROMPT "Q18";
 
-SELECT P.idV, P.dateDep, SUM(tarif * nbPers)
+SELECT P.idV, P.dateDep, SUM(tarif * nbPers) AS montantTotal
 FROM Planning P
     INNER JOIN Reservation R
         ON
@@ -315,7 +315,7 @@ WHERE nbRes >= ALL(
 -- Donnez, pour chaque numéro et nom de client ayant fait une réservation pour le Kenya, le nombre total de réservations.
 PROMPT "Q22";
 
-SELECT C.numCl, nom, COUNT(*)
+SELECT C.numCl, nom, COUNT(*) AS nbReservations
 FROM Client C
     INNER JOIN Reservation R ON C.numCl = R.numCl
 WHERE
@@ -331,7 +331,7 @@ GROUP BY C.numCl, nom;
 -- Donnez, pour chaque pays ayant au moins un hôtel classé cinq étoiles, le nombre total d'hôtels, quel que soit leur nombre d'étoiles.
 PROMPT "Q23";
 
-SELECT paysArr, COUNT(DISTINCT Hotel)
+SELECT paysArr, COUNT(DISTINCT Hotel) AS nbHotels
 FROM Voyage
 WHERE
     paysArr IN (
@@ -424,8 +424,8 @@ WHERE NOT EXISTS (
     SELECT *
     FROM Carac Ca
     WHERE
-        Ca.code = O.code
-        AND (prix <> 0 OR prix IS NOT NULL)
+        Ca.code = O.code -- noqa: RF03
+        AND (prix <> 0 OR prix IS NOT NULL) -- noqa: RF03
 );
 
 -- Version alternative.
@@ -480,7 +480,7 @@ WHERE
 -- Donnez le nombre de réservations et le nombre total de personnes pour les clients de la catégorie privilégié.
 PROMPT "Q28";
 
-SELECT COUNT(*), SUM(COALESCE(nbPers, 0))
+SELECT COUNT(*) AS nbReservations, SUM(COALESCE(nbPers, 0)) AS totalPers
 FROM Client C
     INNER JOIN Reservation R ON C.numCl = R.numCl
 WHERE categorie = 'PRIVILEGIE';

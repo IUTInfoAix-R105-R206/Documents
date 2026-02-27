@@ -29,10 +29,13 @@ WHERE idT NOT IN (
 -- Donnez les identifiants et libellés de la hiérarchie des fils du thème Langage de requêtes.
 PROMPT "Q3";
 
+-- noqa: disable=all
+
 SELECT idT, libelle
 FROM Theme
 START WITH libelle = 'LANGAGE DE REQUETES'
 CONNECT BY idTPere = PRIOR idT;
+
 
 -- Q4 - c:2, t:5
 -- Donnez les identifiants et libellés des thèmes subordonnés directement ou pas (l' ensemble des themes plus spécifiques) au thème Jointure à l’exception du sous-thème Jointure imbriquée. 
@@ -220,6 +223,8 @@ SELECT idT, libelle
 FROM Theme
 START WITH libelle = 'JOINTURE'
 CONNECT BY PRIOR idT = idTPere;
+
+-- noqa: enable=all --- IGNORE ---
 
 -- @section Expression des divisions
 

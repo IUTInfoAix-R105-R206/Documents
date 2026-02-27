@@ -9,7 +9,7 @@
 -- Quel est, pour chacun des numéros et noms des professeurs, et pour chacune des années, le nombre d'étudiants auxquels il a enseigné ?
 PROMPT "Q1";
 
-SELECT P.numProf, nomProf, anneeEt, COUNT(DISTINCT Et.numEt)
+SELECT P.numProf, nomProf, anneeEt, COUNT(DISTINCT Et.numEt) AS nbEtudiants
 FROM Enseigne E
     INNER JOIN Professeur P ON E.numProf = P.numProf
     INNER JOIN Etudiant Et ON E.numEt = Et.numEt
@@ -21,7 +21,7 @@ GROUP BY P.numProf, nomProf, anneeEt;
 -- Version algébrique.
 PROMPT "Q2 - Version algébrique";
 
-SELECT P.numProf, nomProf, COUNT(DISTINCT E.code)
+SELECT P.numProf, nomProf, COUNT(DISTINCT E.code) AS nbModules
 FROM Enseigne E
     INNER JOIN Professeur P ON E.numProf = P.numProf
     INNER JOIN MODULE M ON P.numProf = M.resp
@@ -30,7 +30,7 @@ GROUP BY P.numProf, nomProf;
 -- Version imbriquée.
 PROMPT "Q2 - Version imbriquée";
 
-SELECT P.numProf, nomProf, COUNT(DISTINCT code)
+SELECT P.numProf, nomProf, COUNT(DISTINCT code) AS nbModules
 FROM Enseigne E
     INNER JOIN Professeur P ON E.numProf = P.numProf
 WHERE
@@ -43,7 +43,7 @@ GROUP BY P.numProf, nomProf;
 -- Version prédicative.
 PROMPT "Q2 - Version prédicative";
 
-SELECT P.numProf, nomProf, COUNT(DISTINCT E.code)
+SELECT P.numProf, nomProf, COUNT(DISTINCT E.code) AS nbModules
 FROM Enseigne E, Professeur P, MODULE M
 WHERE
     E.numProf = P.numProf
@@ -54,7 +54,7 @@ GROUP BY P.numProf, nomProf;
 -- Donnez la moyenne des moyennes de test par groupe d'étudiants de seconde année pour le module de libellé Conception de SI.
 PROMPT "Q3";
 
-SELECT groupeEt, AVG(moyTest)
+SELECT groupeEt, AVG(moyTest) AS moyMoyTest
 FROM Note N
     INNER JOIN Etudiant Et ON N.numEt = Et.numEt
     INNER JOIN MODULE M ON N.code = M.code
@@ -179,7 +179,7 @@ FROM (
 
 PROMPT "Q8 - V2";
 
-SELECT E.code, COUNT(DISTINCT numProf), MAX(moyTest)
+SELECT E.code, COUNT(DISTINCT numProf) AS nbProfs, MAX(moyTest) AS maxMoyTest
 FROM Enseigne E
     INNER JOIN Note N ON E.code = N.code
 GROUP BY E.code;
@@ -252,7 +252,7 @@ WHERE NOT EXISTS (
             SELECT *
             FROM Enseigne E
             WHERE
-                P.numProf = E.numProf
+                P.numProf = E.numProf -- noqa: RF03
                 AND Et.numEt = E.numEt
         )
 );
@@ -290,7 +290,7 @@ WHERE NOT EXISTS (
             SELECT *
             FROM Enseigne E2
             WHERE
-                Et.numEt = E2.numEt
+                Et.numEt = E2.numEt -- noqa: RF03
                 AND E.numProf = E2.numProf
         )
 );
@@ -315,7 +315,7 @@ WHERE NOT EXISTS (
             SELECT *
             FROM Enseigne E2
             WHERE
-                Et.numEt = E2.numEt
+                Et.numEt = E2.numEt -- noqa: RF03
                 AND E.code = E2.code
                 AND E.numProf = E2.numProf
         )
@@ -361,7 +361,7 @@ WHERE NOT EXISTS (
             SELECT *
             FROM Enseigne E
             WHERE
-                M.code = E.code
+                M.code = E.code -- noqa: RF03
                 AND Et.numEt = E.numEt
         )
 );
@@ -431,9 +431,9 @@ WHERE
     AND moyTest >= 10
 GROUP BY Et.numEt, nomEt, prenomEt
 HAVING COUNT(moyTest) = (
-    SELECT COUNT(moyTest)
+    SELECT COUNT(moyTest) -- noqa: RF03
     FROM Note N2
-    WHERE Et.numEt = N2.numEt
+    WHERE Et.numEt = N2.numEt -- noqa: RF03
 );
 
 -- Version alternative.
@@ -478,12 +478,12 @@ WITH
         WHERE code = 'ACSI'
     )
 
-SELECT numEt, moyTest - moyMin, moyTest - moyMax
+SELECT numEt, moyTest - moyMin AS ecartMin, moyTest - moyMax AS ecartMax
 FROM T1, T2;
 
 PROMPT "Q22 - V2";
 
-SELECT numEt, moyTest - moyMin, moyTest - moyMax
+SELECT numEt, moyTest - moyMin AS ecartMin, moyTest - moyMax AS ecartMax
 FROM Note, (
     SELECT MIN(moyTest) AS moyMin, MAX(moyTest) AS moyMax
     FROM Note
