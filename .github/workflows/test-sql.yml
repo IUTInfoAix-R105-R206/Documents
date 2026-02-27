@@ -13,15 +13,32 @@ on:
       - 'docs/shared/data/**'
       - 'scripts/test-sql.py'
       - 'scripts/generate-sql-report.py'
+      - '.sqlfluff'
+      - '.sqlfluffignore'
       - '.github/workflows/test-sql.yml'
   pull_request:
     branches: [main]
     paths:
       - 'docs/**/*correction*.sql'
       - 'docs/shared/data/**'
+      - '.sqlfluff'
+      - '.sqlfluffignore'
       - '.github/workflows/test-sql.yml'
 
 jobs:
+
+  # ── 0. Lint SQL (SQLFluff) ──────────────────────────────────────────────────
+  lint-sql:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install SQLFluff
+        run: pip install sqlfluff
+
+      - name: Lint SQL corrections
+        run: sqlfluff lint docs/
 
   # ── 1. Tests PostgreSQL ────────────────────────────────────────────────────
   test-postgres:

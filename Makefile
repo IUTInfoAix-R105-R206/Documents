@@ -626,6 +626,16 @@ $(OUTPUT_DIR)/guide-bonnes-pratiques-sql.pdf: docs/shared/guide-bonnes-pratiques
 # Validation SQL
 # ==============================================================================
 
+lint-sql: ## Vérifie le style des corrections SQL avec SQLFluff
+	sqlfluff lint docs/
+
+fix-sql: ## Corrige automatiquement le style des corrections SQL avec SQLFluff
+	sqlfluff fix docs/
+
+install-hooks: ## Installe les hooks Git du projet (pre-commit SQLFluff)
+	git config core.hooksPath .githooks
+	@echo "Hooks Git installés (.githooks/). Le pre-commit lancera sqlfluff fix automatiquement."
+
 test-sql-postgresql-local: ## Exécute les corrections SQL avec PostgreSQL local
 	@echo "=== Validation des corrections SQL (PostgreSQL local) ==="
 	$(PYTHON) scripts/test-sql.py postgres $(_TEST_SQL_FLAGS)

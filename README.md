@@ -188,13 +188,37 @@ make test-sql-oracle-local
 make test-sql-oracle-docker
 ```
 
+## Lint SQL (SQLFluff)
+
+Le projet utilise [SQLFluff](https://sqlfluff.com/) pour garantir un style
+SQL cohérent dans les fichiers de correction. La configuration est dans
+`.sqlfluff` (dialecte Oracle, règles adaptées au contexte pédagogique).
+
+```bash
+# Vérifier le style (utilisé par la CI)
+make lint-sql
+
+# Corriger automatiquement
+make fix-sql
+
+# Installer le hook pre-commit (une seule fois)
+make install-hooks
+```
+
+Le hook pre-commit lance `sqlfluff fix` automatiquement sur les fichiers
+`.sql` stagés avant chaque commit. Si SQLFluff n'est pas installé
+localement, le hook est ignoré sans bloquer.
+
+Installation de SQLFluff : `pip install sqlfluff`
+
 ## Contribuer
 
-1. Modifier le fichier `.md` du TD concerné
-2. Prévisualiser : `make r206` (par exemple)
-3. Comparer le PDF généré avec la version précédente
-4. Poser un tag si c'est une nouvelle version : `git tag V2.x.y`
-5. Commit + push / merge request
+1. Installer les hooks : `make install-hooks`
+2. Modifier le fichier `.md` du TD concerné
+3. Prévisualiser : `make r206` (par exemple)
+4. Comparer le PDF généré avec la version précédente
+5. Poser un tag si c'est une nouvelle version : `git tag V2.x.y`
+6. Commit + push / merge request (le hook corrige le style SQL au commit)
 
 ## Licence
 

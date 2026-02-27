@@ -1,0 +1,26 @@
+#!/bin/sh
+# Pre-commit hook : corrige automatiquement le style SQL avec SQLFluff.
+# Installe avec : make install-hooks
+
+# Vérifier que sqlfluff est installé
+if ! command -v sqlfluff >/dev/null 2>&1; then
+    echo "[pre-commit] sqlfluff non trouvé — hook ignoré (pip install sqlfluff)"
+    exit 0
+fi
+
+# Récupérer les fichiers .sql stagés (hors docs/shared/data/)
+SQL_FILES=$(git diff --cached --name-only --diff-filter=ACM \
+    | grep '\.sql$' \
+    | grep -v '^docs/shared/data/')
+
+if [ -z "$SQL_FILES" ]; then
+    exit 0
+fi
+
+echo "[pre-commit] SQLFluff fix sur $(echo "$SQL_FILES" | wc -l | tr -d ' ') fichier(s)..."
+
+# Corriger et re-stager chaque fichier
+echo "$SQL_FILES" | while read -r file; do
+    sqlfluff fix --force "$file" 2>/dev/null
+    git add "$file"
+done
