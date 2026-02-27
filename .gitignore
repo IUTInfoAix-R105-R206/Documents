@@ -11,6 +11,9 @@ output/
 *.out
 *.toc
 
+node_modules/
+package-lock.json
+yarn.lock
 # Figures PDF générées (compilées depuis les .tex)
 docs/**/figures/*.pdf
 

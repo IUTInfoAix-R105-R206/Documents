@@ -1,0 +1,91 @@
+{
+  "name": "Bases de données — Environnement de développement",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "dev",
+  "workspaceFolder": "/workspace",
+   "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true,
+      "installOhMyZsh": true,
+      "upgradePackages": true,
+      "uid": "1000",
+      "gid": "1000"
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.13",
+      "installTools": "false"
+    },
+    "ghcr.io/devcontainers/features/node:1": {}
+  },
+  "hostRequirements": {
+    "cpus": 4
+  },
+  "waitFor": "onCreateCommand",
+  "onCreateCommand": "python3 -m pip install --upgrade pip",
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "updateContentCommand": "python3 -m pip install -r requirements.txt",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.black-formatter",
+        "ms-python.isort",
+        "ms-python.pylint",
+        "ms-python.flake8",
+        "ms-python.mypy-type-checker",
+        "editorconfig.editorconfig",
+        "mtxr.sqltools",
+        "mtxr.sqltools-driver-pg",
+        "mtxr.sqltools-driver-sqlite",
+        "hurly.sqltools-oracle-driver",
+        "esbenp.prettier-vscode",
+        "github.vscode-github-actions",
+        "github.vscode-pull-request-github"
+      ],
+      "settings": {
+        "python.terminal.activateEnvInCurrentTerminal": true,
+        "terminal.integrated.profiles.linux": {
+          "zsh": {
+            "path": "zsh"
+          }
+        },
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "editor.formatOnSave": true,
+        "editor.formatOnType": true,
+        "sqltools.dependencyManager": {
+          "autoAccept": true
+        },
+        "sqltools.connections": [
+          {
+            "previewLimit": 50,
+            "name": "PostgreSQL — gestion_pedagogique",
+            "driver": "PostgreSQL",
+            "server": "postgres",
+            "port": 5432,
+            "database": "gestion_pedagogique",
+            "username": "test",
+            "password": "test"
+          },
+          {
+            "previewLimit": 50,
+            "name": "SQLite — gestion_pedagogique",
+            "driver": "SQLite",
+            "database": "/workspace/docs/shared/data/gestion-pedagogique/gestion_pedagogique.db"
+          },
+          {
+            "previewLimit": 50,
+            "name": "Oracle — FREEPDB1",
+            "driver": "Oracle",
+            "server": "oracle",
+            "port": 1521,
+            "database": "FREEPDB1",
+            "username": "testuser",
+            "password": "test"
+          }
+        ]
+      }
+    }
+  }
+}
