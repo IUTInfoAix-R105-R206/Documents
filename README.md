@@ -1,5 +1,8 @@
 # Bases de données — Sources des TD
 
+[![Build PDFs](https://github.com/IUTInfoAix-R105-R206/Documents/actions/workflows/build.yml/badge.svg)](https://github.com/IUTInfoAix-R105-R206/Documents/actions/workflows/build.yml)
+[![Test SQL Corrections](https://github.com/IUTInfoAix-R105-R206/Documents/actions/workflows/test-sql.yml/badge.svg)](https://github.com/IUTInfoAix-R105-R206/Documents/actions/workflows/test-sql.yml)
+
 Ce dépôt contient les sources des sujets de travaux dirigés des cours de
 bases de données de l'IUT d'Aix-Marseille :
 
