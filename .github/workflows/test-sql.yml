@@ -147,7 +147,41 @@ jobs:
           name: results-oracle
           path: results-oracle.csv
 
-  # ── 4. Génération du rapport HTML ──────────────────────────────────────────
+  # ── 4. Vérification Oracle (gate) ──────────────────────────────────────────
+  # Oracle est le SGBD cible pédagogique : toute régression doit être bloquante.
+  check-oracle:
+    needs: [test-oracle]
+    if: always()
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download Oracle results
+        uses: actions/download-artifact@v4
+        with:
+          name: results-oracle
+          path: artifacts/
+
+      - name: Check for Oracle failures
+        run: |
+          CSV="artifacts/results-oracle.csv"
+          if [ ! -f "$CSV" ]; then
+            echo "::error::Le rapport Oracle CSV est absent."
+            exit 1
+          fi
+
+          # Extraire les lignes avec status=fail (séparateur ;)
+          FAILURES=$(awk -F';' '$4 == "fail"' "$CSV")
+          if [ -n "$FAILURES" ]; then
+            echo "::error::Des requêtes Oracle ont échoué :"
+            echo "$FAILURES" | while IFS=';' read -r td label dbms st ecols erows acols arows; do
+              echo "::error::  $td $label — attendu ${ecols}c × ${erows}r, reçu ${acols}c × ${arows}r"
+            done
+            exit 1
+          fi
+
+          echo "Aucun échec Oracle détecté."
+
+  # ── 5. Génération du rapport HTML ──────────────────────────────────────────
   generate-report:
     needs: [test-postgres, test-sqlite, test-oracle]
     if: always()
