@@ -54,6 +54,8 @@
         "terminal.integrated.defaultProfile.linux": "zsh",
         "editor.formatOnSave": true,
         "editor.formatOnType": true,
+        
+        "sqltools.useNodeRuntime": true,
         "sqltools.dependencyManager": {
           "autoAccept": true
         },
