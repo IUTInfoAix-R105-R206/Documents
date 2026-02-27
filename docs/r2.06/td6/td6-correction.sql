@@ -211,7 +211,7 @@ PROMPT "Q10";
 
 SELECT M.libelle, MPere.libelle AS libellePere
 FROM Module M, Module MPere
-WHERE MPere.code = M.codePere AND M.code <> 'ACSI';
+WHERE MPere.code = M.codePere;
 
 -- Q11 - c:1, t:1 (4)
 -- Quels sont les groupes de seconde année, dans lesquels un étudiant a obtenu, pour le module Conception de SI, une meilleure note de test que le meilleur étudiant du groupe d'étudiants 3 dans le même Module ?
