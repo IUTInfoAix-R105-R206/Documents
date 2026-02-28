@@ -241,6 +241,8 @@ class OracleEngine(DBEngine):
         )
 
     def execute_query(self, sql: str) -> str:
+        # Oracle supporte les CTE récursives avec WITH (sans RECURSIVE)
+        sql = re.sub(r"\bWITH\s+RECURSIVE\b", "WITH", sql)
         stdin = self._sqlplus_query_settings() + sql + ";\nEXIT\n"
         r = self._run(self._sqlplus(), input=stdin)
         if r.returncode != 0:

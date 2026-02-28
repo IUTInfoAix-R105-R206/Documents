@@ -205,6 +205,27 @@ FROM Etudiant Et
                 CONNECT BY codePere = PRIOR code
             );
 
+-- Version CTE récursive.
+PROMPT "Q9 - Version CTE récursive";
+
+WITH RECURSIVE
+    DescModule (code) AS (
+        SELECT code
+        FROM Module
+        WHERE libelle = 'PRINCIPES DES BD'
+        UNION ALL
+        SELECT M.code
+        FROM Module M
+            INNER JOIN DescModule D ON M.codePere = D.code
+    )
+
+SELECT DISTINCT Et.numEt, nomEt, prenomEt
+FROM Etudiant Et
+    INNER JOIN Note N
+        ON
+            Et.numEt = N.numEt
+            AND code IN (SELECT code FROM DescModule);
+
 -- Q10 - c:2, t:32
 -- Donnez les libellés des modules et les libellés des modules d'où ils sont directement issus.
 PROMPT "Q10";

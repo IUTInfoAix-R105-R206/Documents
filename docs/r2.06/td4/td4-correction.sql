@@ -36,6 +36,20 @@ FROM Theme
 START WITH libelle = 'LANGAGE DE REQUETES'
 CONNECT BY idTPere = PRIOR idT;
 
+-- Version CTE récursive.
+PROMPT "Q3 - Version CTE récursive";
+
+WITH RECURSIVE DescTheme (idT, libelle) AS (
+    SELECT idT, libelle
+    FROM Theme
+    WHERE libelle = 'LANGAGE DE REQUETES'
+    UNION ALL
+    SELECT T.idT, T.libelle
+    FROM Theme T
+        INNER JOIN DescTheme D ON T.idTPere = D.idT
+)
+SELECT idT, libelle
+FROM DescTheme;
 
 -- Q4 - c:2, t:5
 -- Donnez les identifiants et libellés des thèmes subordonnés directement ou pas (l' ensemble des themes plus spécifiques) au thème Jointure à l’exception du sous-thème Jointure imbriquée. 
@@ -46,6 +60,22 @@ FROM Theme
 WHERE libelle <> 'JOINTURE IMBRIQUEE'
 START WITH libelle = 'JOINTURE'
 CONNECT BY idTPere = PRIOR idT;
+
+-- Version CTE récursive.
+PROMPT "Q4 - Version CTE récursive";
+
+WITH RECURSIVE DescTheme (idT, libelle) AS (
+    SELECT idT, libelle
+    FROM Theme
+    WHERE libelle = 'JOINTURE'
+    UNION ALL
+    SELECT T.idT, T.libelle
+    FROM Theme T
+        INNER JOIN DescTheme D ON T.idTPere = D.idT
+)
+SELECT idT, libelle
+FROM DescTheme
+WHERE libelle <> 'JOINTURE IMBRIQUEE';
 
 -- Q5 - c:2, t:4
 -- Donnez les identifiants et libellés des thèmes subordonnés directement ou pas au thème Jointure à l'exception du thème Jointure imbriquée et de ses sous-thèmes.
@@ -58,6 +88,22 @@ CONNECT BY
     idTPere = PRIOR idT
     AND libelle <> 'JOINTURE IMBRIQUEE';
 
+-- Version CTE récursive.
+PROMPT "Q5 - Version CTE récursive";
+
+WITH RECURSIVE DescTheme (idT, libelle) AS (
+    SELECT idT, libelle
+    FROM Theme
+    WHERE libelle = 'JOINTURE'
+    UNION ALL
+    SELECT T.idT, T.libelle
+    FROM Theme T
+        INNER JOIN DescTheme D ON T.idTPere = D.idT
+    WHERE T.libelle <> 'JOINTURE IMBRIQUEE'
+)
+SELECT idT, libelle
+FROM DescTheme;
+
 -- Q6 - c:2, t:4
 -- Donnez les identifiants et libellés généralisant strictement le thème Jointure externe en triant du thème le plus général au thème le plus spécifique.
 PROMPT "Q6";
@@ -68,6 +114,23 @@ WHERE libelle <> 'JOINTURE EXTERNE'
 START WITH libelle = 'JOINTURE EXTERNE'
 CONNECT BY idT = PRIOR idTPere
 ORDER BY LEVEL DESC;
+
+-- Version CTE récursive.
+PROMPT "Q6 - Version CTE récursive";
+
+WITH RECURSIVE AncTheme (idT, libelle, idTPere, lvl) AS (
+    SELECT idT, libelle, idTPere, 1
+    FROM Theme
+    WHERE libelle = 'JOINTURE EXTERNE'
+    UNION ALL
+    SELECT T.idT, T.libelle, T.idTPere, A.lvl + 1
+    FROM Theme T
+        INNER JOIN AncTheme A ON T.idT = A.idTPere
+)
+SELECT idT, libelle
+FROM AncTheme
+WHERE libelle <> 'JOINTURE EXTERNE'
+ORDER BY lvl DESC;
 
 -- Q7 - c:2, t:28
 -- Quels sont les identifiants des questions et numéros de TP se rapportant à un thème subordonné directement ou indirectement au thème Jointure ?
@@ -101,6 +164,24 @@ WHERE idQ IN (
     )
 );
 
+-- Version CTE récursive.
+PROMPT "Q7 - Version CTE récursive";
+
+WITH RECURSIVE DescTheme (idT) AS (
+    SELECT idT
+    FROM Theme
+    WHERE libelle = 'JOINTURE'
+    UNION ALL
+    SELECT T.idT
+    FROM Theme T
+        INNER JOIN DescTheme D ON T.idTPere = D.idT
+)
+SELECT DISTINCT Q.idQ, Q.numTP
+FROM Question Q
+    INNER JOIN Traite TQ
+        ON Q.idQ = TQ.idQ
+WHERE TQ.idT IN (SELECT idT FROM DescTheme);
+
 -- Q8 - c:2, t:5
 -- Quels sont les identifiants et libellés des thèmes généralisant les thèmes Jointure ou Sélection simple ?
 PROMPT "Q8 - V1";
@@ -122,6 +203,21 @@ SELECT idT, libelle
 FROM Theme
 START WITH libelle IN ('SELECTION SIMPLE')
 CONNECT BY idT = PRIOR idTPere;
+
+-- Version CTE récursive.
+PROMPT "Q8 - Version CTE récursive";
+
+WITH RECURSIVE AncTheme (idT, libelle, idTPere) AS (
+    SELECT idT, libelle, idTPere
+    FROM Theme
+    WHERE libelle IN ('JOINTURE', 'SELECTION SIMPLE')
+    UNION ALL
+    SELECT T.idT, T.libelle, T.idTPere
+    FROM Theme T
+        INNER JOIN AncTheme A ON T.idT = A.idTPere
+)
+SELECT DISTINCT idT, libelle
+FROM AncTheme;
 
 -- Q9 - c:2, t:3
 -- Quels sont les identifiants et libellés des thèmes généralisant les thèmes Jointure et Sélection simple ?
@@ -150,6 +246,33 @@ WHERE idT IN (
 )
 START WITH libelle = 'JOINTURE'
 CONNECT BY idT = PRIOR idTPere;
+
+-- Version CTE récursive.
+PROMPT "Q9 - Version CTE récursive";
+
+WITH RECURSIVE AncJointure (idT, libelle, idTPere) AS (
+    SELECT idT, libelle, idTPere
+    FROM Theme
+    WHERE libelle = 'JOINTURE'
+    UNION ALL
+    SELECT T.idT, T.libelle, T.idTPere
+    FROM Theme T
+        INNER JOIN AncJointure A ON T.idT = A.idTPere
+),
+AncSelection (idT, libelle, idTPere) AS (
+    SELECT idT, libelle, idTPere
+    FROM Theme
+    WHERE libelle = 'SELECTION SIMPLE'
+    UNION ALL
+    SELECT T.idT, T.libelle, T.idTPere
+    FROM Theme T
+        INNER JOIN AncSelection A ON T.idT = A.idTPere
+)
+SELECT idT, libelle
+FROM AncJointure
+INTERSECT
+SELECT idT, libelle
+FROM AncSelection;
 
 -- Q10 - c:2, t:3
 -- Quels sont les identifiants et libellés des thèmes subordonnés directement ou indirectement au thème SQL LDD et qui ne sont utilisés par aucune question ?
@@ -190,6 +313,25 @@ WHERE idT IN (
     FROM Traite
 );
 
+-- Version CTE récursive.
+PROMPT "Q10 - Version CTE récursive";
+
+WITH RECURSIVE DescTheme (idT, libelle) AS (
+    SELECT idT, libelle
+    FROM Theme
+    WHERE libelle = 'SQL LDD'
+    UNION ALL
+    SELECT T.idT, T.libelle
+    FROM Theme T
+        INNER JOIN DescTheme D ON T.idTPere = D.idT
+)
+SELECT idT, libelle
+FROM DescTheme
+WHERE idT NOT IN (
+    SELECT idT
+    FROM Traite
+);
+
 -- Q11 - c:2, t:10
 -- Quels sont les identifiants et libellés des thèmes feuilles de la hiérarchie des thèmes qui sont subordonnés directement ou indirectement à la même racine que celle du thème Jointure.
 PROMPT "Q11";
@@ -210,6 +352,38 @@ START WITH idT = (
 )
 CONNECT BY PRIOR idT = idTPere;
 
+-- Version CTE récursive.
+PROMPT "Q11 - Version CTE récursive";
+
+WITH RECURSIVE AncJointure (idT, idTPere) AS (
+    SELECT idT, idTPere
+    FROM Theme
+    WHERE libelle = 'JOINTURE'
+    UNION ALL
+    SELECT T.idT, T.idTPere
+    FROM Theme T
+        INNER JOIN AncJointure A ON T.idT = A.idTPere
+),
+RacineJointure AS (
+    SELECT idT FROM AncJointure WHERE idTPere IS NULL
+),
+DescRacine (idT, libelle) AS (
+    SELECT idT, libelle
+    FROM Theme
+    WHERE idT = (SELECT idT FROM RacineJointure)
+    UNION ALL
+    SELECT T.idT, T.libelle
+    FROM Theme T
+        INNER JOIN DescRacine D ON T.idTPere = D.idT
+)
+SELECT idT, libelle
+FROM DescRacine
+WHERE idT NOT IN (
+    SELECT idTPere
+    FROM Theme
+    WHERE idTPere IS NOT NULL
+);
+
 -- Q12 - c:2, t:9
 -- Quels sont les identifiants et libellés des thèmes se situant dans la branche, au-dessus ou en dessous, du thème Jointure ?
 PROMPT "Q12";
@@ -223,6 +397,31 @@ SELECT idT, libelle
 FROM Theme
 START WITH libelle = 'JOINTURE'
 CONNECT BY PRIOR idT = idTPere;
+
+-- Version CTE récursive.
+PROMPT "Q12 - Version CTE récursive";
+
+WITH RECURSIVE AncJointure (idT, libelle, idTPere) AS (
+    SELECT idT, libelle, idTPere
+    FROM Theme
+    WHERE libelle = 'JOINTURE'
+    UNION ALL
+    SELECT T.idT, T.libelle, T.idTPere
+    FROM Theme T
+        INNER JOIN AncJointure A ON T.idT = A.idTPere
+),
+DescJointure (idT, libelle) AS (
+    SELECT idT, libelle
+    FROM Theme
+    WHERE libelle = 'JOINTURE'
+    UNION ALL
+    SELECT T.idT, T.libelle
+    FROM Theme T
+        INNER JOIN DescJointure D ON T.idTPere = D.idT
+)
+SELECT idT, libelle FROM AncJointure
+UNION
+SELECT idT, libelle FROM DescJointure;
 
 -- noqa: enable=all --- IGNORE ---
 

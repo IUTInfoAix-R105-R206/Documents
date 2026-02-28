@@ -202,6 +202,24 @@ WHERE libelle <> 'INFORMATIQUE 2DE ANNEE'
 START WITH libelle = 'INFORMATIQUE 2DE ANNEE'
 CONNECT BY codePere = PRIOR code;
 
+-- Version CTE récursive.
+PROMPT "Q10 - Version CTE récursive";
+
+WITH RECURSIVE
+    DescModule (code, libelle, lvl) AS (
+        SELECT code, libelle, 1
+        FROM MODULE
+        WHERE libelle = 'INFORMATIQUE 2DE ANNEE'
+        UNION ALL
+        SELECT M.code, M.libelle, D.lvl + 1
+        FROM MODULE M
+            INNER JOIN DescModule D ON M.codePere = D.code
+    )
+
+SELECT LPAD('-', 2 * lvl, '-') || libelle
+FROM DescModule
+WHERE libelle <> 'INFORMATIQUE 2DE ANNEE';
+
 -- Q11 - c:1, t:7
 -- Présenter, de manière hiérarchique, les libellés du module Outils modèles génie logiciel et de tous ses sous-modules.
 PROMPT "Q11";
@@ -210,6 +228,23 @@ SELECT LPAD('-', 2 * LEVEL, '-') || libelle
 FROM MODULE
 START WITH libelle = 'OUTILS MODELES GENIE LOGICIEL'
 CONNECT BY codePere = PRIOR code;
+
+-- Version CTE récursive.
+PROMPT "Q11 - Version CTE récursive";
+
+WITH RECURSIVE
+    DescModule (code, libelle, lvl) AS (
+        SELECT code, libelle, 1
+        FROM MODULE
+        WHERE libelle = 'OUTILS MODELES GENIE LOGICIEL'
+        UNION ALL
+        SELECT M.code, M.libelle, D.lvl + 1
+        FROM MODULE M
+            INNER JOIN DescModule D ON M.codePere = D.code
+    )
+
+SELECT LPAD('-', 2 * lvl, '-') || libelle
+FROM DescModule;
 
 -- Q12 - c:1, t:5
 -- Présenter, de manière hiérarchique, les libellés de tous les modules d'où est issu le module Bases de données.
@@ -220,6 +255,24 @@ FROM MODULE
 START WITH libelle = 'BASES DE DONNEES'
 CONNECT BY code = PRIOR codePere
 ORDER BY LEVEL DESC;
+
+-- Version CTE récursive.
+PROMPT "Q12 - Version CTE récursive";
+
+WITH RECURSIVE
+    AncModule (code, libelle, codePere, lvl) AS (
+        SELECT code, libelle, codePere, 1
+        FROM MODULE
+        WHERE libelle = 'BASES DE DONNEES'
+        UNION ALL
+        SELECT M.code, M.libelle, M.codePere, A.lvl + 1
+        FROM MODULE M
+            INNER JOIN AncModule A ON M.code = A.codePere
+    )
+
+SELECT LPAD('-', 2 * (MAX(lvl) OVER () + 1 - lvl), '-') || libelle
+FROM AncModule
+ORDER BY lvl DESC;
 
 -- Q13 - c:1, t:13
 -- Présenter, de manière hiérarchique, les libellés de tous les sous-modules de la discipline Informatique, subordonnés au module Informatique 2e année, à l'exception du module Bases de données.
@@ -232,6 +285,26 @@ WHERE
     AND libelle NOT IN ('INFORMATIQUE 2DE ANNEE', 'BASES DE DONNEES')
 START WITH libelle = 'INFORMATIQUE 2DE ANNEE'
 CONNECT BY codePere = PRIOR code;
+
+-- Version CTE récursive.
+PROMPT "Q13 - Version CTE récursive";
+
+WITH RECURSIVE
+    DescModule (code, libelle, discipline, lvl) AS (
+        SELECT code, libelle, discipline, 1
+        FROM MODULE
+        WHERE libelle = 'INFORMATIQUE 2DE ANNEE'
+        UNION ALL
+        SELECT M.code, M.libelle, M.discipline, D.lvl + 1
+        FROM MODULE M
+            INNER JOIN DescModule D ON M.codePere = D.code
+    )
+
+SELECT LPAD('-', 2 * lvl, '-') || libelle
+FROM DescModule
+WHERE
+    discipline = 'INFORMATIQUE'
+    AND libelle NOT IN ('INFORMATIQUE 2DE ANNEE', 'BASES DE DONNEES');
 
 -- @section Expression des divisions
 
@@ -401,6 +474,25 @@ START WITH libelle = 'INFORMATIQUE 2DE ANNEE'
 CONNECT BY codePere = PRIOR code
 AND libelle <> 'CODAGE ET CIRCUITS';
 
+-- Version CTE récursive.
+PROMPT "Q18 - Version CTE récursive";
+
+WITH RECURSIVE
+    DescModule (code, libelle, discipline, lvl) AS (
+        SELECT code, libelle, discipline, 1
+        FROM MODULE
+        WHERE libelle = 'INFORMATIQUE 2DE ANNEE'
+        UNION ALL
+        SELECT M.code, M.libelle, M.discipline, D.lvl + 1
+        FROM MODULE M
+            INNER JOIN DescModule D ON M.codePere = D.code
+        WHERE M.libelle <> 'CODAGE ET CIRCUITS'
+    )
+
+SELECT LPAD('-', 2 * lvl, '-') || libelle
+FROM DescModule
+WHERE discipline = 'INFORMATIQUE';
+
 -- Q19 - c:1, t:24
 -- Présenter, de manière hiérarchique, les modules suivis par l'étudiant Jérôme Atlani ?
 PROMPT "Q19";
@@ -416,6 +508,31 @@ START WITH code IN (
         AND prenomEt = 'JEROME'
 )
 CONNECT BY code = PRIOR codePere;
+
+-- Version CTE récursive.
+PROMPT "Q19 - Version CTE récursive";
+
+WITH RECURSIVE
+    AncModule (code, libelle, codePere, lvl) AS (
+        SELECT M.code, M.libelle, M.codePere, 1
+        FROM MODULE M
+        WHERE
+            M.code IN (
+                SELECT E.code
+                FROM Enseigne E
+                    INNER JOIN Etudiant Et ON E.numEt = Et.numEt
+                WHERE
+                    nomEt = 'ATLANI'
+                    AND prenomEt = 'JEROME'
+            )
+        UNION ALL
+        SELECT M.code, M.libelle, M.codePere, A.lvl + 1
+        FROM MODULE M
+            INNER JOIN AncModule A ON M.code = A.codePere
+    )
+
+SELECT LPAD('-', 2 * (MAX(lvl) OVER () + 1 - lvl), '-') || libelle
+FROM AncModule;
 
 -- Remarque : il n'existe pas de manière simple pour présenter, de manière hiérarchique, chacune des arborescences. L'utilisation de la clause ORDER BY aurait pour effet de les mélanger, pas de les trier comme souhaité.
 
@@ -459,6 +576,25 @@ WHERE code IN (
     START WITH libelle = 'PRINCIPES DES BD'
     CONNECT BY codePere = PRIOR code
 );
+
+-- Version CTE récursive.
+PROMPT "Q21 - Version CTE récursive";
+
+WITH RECURSIVE
+    DescModule (code) AS (
+        SELECT code
+        FROM MODULE
+        WHERE libelle = 'PRINCIPES DES BD'
+        UNION ALL
+        SELECT M.code
+        FROM MODULE M
+            INNER JOIN DescModule D ON M.codePere = D.code
+    )
+
+SELECT DISTINCT Et.numEt, nomEt, prenomEt
+FROM Etudiant Et
+    INNER JOIN Note N ON Et.numEt = N.numEt
+WHERE code IN (SELECT code FROM DescModule);
 
 -- Q22 - c:3, t:29
 -- Donnez les numéros des étudiants, les écarts entre leurs éventuelles moyennes de test et la moins bonne moyenne de test du module ACSI ainsi que les écarts entre leurs éventuelles moyennes de test et la meilleure moyenne de test du module ACSI.
