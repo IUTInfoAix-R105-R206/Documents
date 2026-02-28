@@ -83,7 +83,7 @@ WHERE
     AND nomProf = 'BOITARD'
     AND prenomProf = 'DIDIER';
 
--- Remarque : dans la version algébrique et prédicative, il y a autant de tuples résultats que d’étudiants ayant un enseignement de Didier Boitard. Il faut donc utiliser DISTINCT pour éliminer les modules dupliqués. Dans la version imbriquée, le premier bloc n’opère que sur la relation module dont code est la clef primaire. Il ne peut donc pas y avoir de duplicats et DISTINCT n'a donc pas besoin d'être utilisé.
+-- @remark dans la version algébrique et prédicative, il y a autant de tuples résultats que d’étudiants ayant un enseignement de Didier Boitard. Il faut donc utiliser DISTINCT pour éliminer les modules dupliqués. Dans la version imbriquée, le premier bloc n’opère que sur la relation module dont code est la clef primaire. Il ne peut donc pas y avoir de duplicats et DISTINCT n'a donc pas besoin d'être utilisé.
 
 -- Q3 - c:1, t:2
 -- Quels sont les groupes de seconde année pour lesquels Marc Laporte a effectué un enseignement ?
@@ -133,7 +133,7 @@ WHERE
     AND nomProf = 'LAPORTE'
     AND prenomProf = 'MARC';
 
--- Remarque : quelle que soit la version de la requête, il y a autant de valeurs résultats que d’étudiants ayant un enseignement de Marc Laporte. Il faut donc toujours utiliser DISTINCT pour éliminer les numéros de groupeEt dupliqués.
+-- @remark quelle que soit la version de la requête, il y a autant de valeurs résultats que d’étudiants ayant un enseignement de Marc Laporte. Il faut donc toujours utiliser DISTINCT pour éliminer les numéros de groupeEt dupliqués.
 
 -- Q4 - c:2, t:18
 -- Donnez les numéros et, par ordre alphabétique, les noms des étudiants ayant suivi un enseignement effectué par un professeur, par ailleurs responsable d'un module quelconque.
@@ -173,7 +173,7 @@ WHERE
     AND E.numProf = resp
 ORDER BY nomEt ASC;
 
--- Remarque : un étudiant pouvant avoir plusieurs fois le même professeur pour des enseignements différents, le mot-clef DISTINCT est nécessaire pour éliminer les duplicats, cependant pour conserver les homonymes dans le résultat, il convient d'effectuer la projection de l'attribut clef primaire numEt.
+-- @remark un étudiant pouvant avoir plusieurs fois le même professeur pour des enseignements différents, le mot-clef DISTINCT est nécessaire pour éliminer les duplicats, cependant pour conserver les homonymes dans le résultat, il convient d'effectuer la projection de l'attribut clef primaire numEt.
 
 -- Q5 - c:2, t:12
 -- Donnez les numéros et, par ordre alphabétique, les noms des étudiants ayant suivi un enseignement effectué par le professeur responsable de ce module.
@@ -244,7 +244,7 @@ WHERE
     nomEt = 'LYON'
     AND prenomEt = 'PHILIPPE';
 
--- Remarque : sans l’utilisation de DISTINCT, la requête ne retourne pas le résultat voulu mais le nombre d’enseignements reçus par l’étudiant Philippe Lyon. S’il se trouve que cet étudiant n’a pas plusieurs fois le même professeur, la requête sans DISTINCT donnera un résultat juste mais elle est néanmoins logiquement fausse.
+-- @remark sans l’utilisation de DISTINCT, la requête ne retourne pas le résultat voulu mais le nombre d’enseignements reçus par l’étudiant Philippe Lyon. S’il se trouve que cet étudiant n’a pas plusieurs fois le même professeur, la requête sans DISTINCT donnera un résultat juste mais elle est néanmoins logiquement fausse.
 
 -- Q9 - c:1, t:1 (10.66)
 -- Donnez, pour le module Prolog, la note moyenne obtenue par les étudiants en tenant compte des coefficients de contrôle continu et de test.
@@ -255,7 +255,7 @@ FROM Note N
     INNER JOIN Module M ON N.code = M.code
 WHERE libelle = 'PROLOG';
 
--- Remarque : L’alias moyenne spécifié après l’expression de calcul horizontal est introduit pour, notamment, éviter l’affichage de l’expression.
+-- @remark L’alias moyenne spécifié après l’expression de calcul horizontal est introduit pour, notamment, éviter l’affichage de l’expression.
 
 -- Q10 - c:1, t:1 (0)
 -- Quel est le coefficient de test le plus faible ?
@@ -286,7 +286,7 @@ WHERE coefTest <= ALL(
     WHERE coefTest IS NOT NULL
 );
 
--- Remarque : dans la seconde requête, la condition coefTest IS NOT NULL doit être spécifiée. En effet si l’attribut concerné comprend des valeurs nulles, le résultat de la sous-requête est évalué à « inconnu » et la requête principale ne rend aucun tuple.
+-- @remark dans la seconde requête, la condition coefTest IS NOT NULL doit être spécifiée. En effet si l’attribut concerné comprend des valeurs nulles, le résultat de la sous-requête est évalué à « inconnu » et la requête principale ne rend aucun tuple.
 
 -- Q12 - c:1, t:1 (11.13)
 -- En supposant que tous les modules sont de même importance, donnez la moyenne générale de l'étudiante Sandrine Levy.
@@ -323,7 +323,7 @@ WHERE moyTest = (
     FROM Note
 );
 
--- Remarque : Il faut procéder à l'élimination des duplicats (par DISTINCT) car le même étudiant peut avoir obtenu la note maximale dans plusieurs modules différents.
+-- @remark Il faut procéder à l'élimination des duplicats (par DISTINCT) car le même étudiant peut avoir obtenu la note maximale dans plusieurs modules différents.
 
 -- Version alternative.
 PROMPT "Q14 - V2";
@@ -337,7 +337,7 @@ WHERE moyTest >= ALL(
     WHERE moyTest IS NOT NULL
 );
 
--- Remarque : la condition de sélection moyTest IS NOT NULL, dans la requête imbriquée, est nécessaire car il suffit d’une note de test inconnue pour que la requête ne rende aucun résultat.
+-- @remark la condition de sélection moyTest IS NOT NULL, dans la requête imbriquée, est nécessaire car il suffit d’une note de test inconnue pour que la requête ne rende aucun résultat.
 
 -- Version alternative.
 PROMPT "Q14 - V3";
@@ -405,7 +405,7 @@ FROM Module M
             M.resp = E.numProf
             AND M.code = E.code;
 
--- Remarque : le mot clef DISTINCT est obligatoire car un même responsable peut enseigner le même module à des étudiants différents.
+-- @remark le mot clef DISTINCT est obligatoire car un même responsable peut enseigner le même module à des étudiants différents.
 
 -- Version alternative.
 PROMPT "Q18 - V2";
@@ -418,7 +418,7 @@ WHERE (
     FROM Enseigne
 );
 
--- Remarque : il est inutile de contrôler que la sous-requête puisse retourner des valeurs nulles. En effet, ce cas est impossible : numProf et code font partie de la clef primaire de Enseigne.
+-- @remark il est inutile de contrôler que la sous-requête puisse retourner des valeurs nulles. En effet, ce cas est impossible : numProf et code font partie de la clef primaire de Enseigne.
 
 -- Q19 - c:1, t:23 [= Q17]
 -- Donnez les libellés des modules ne correspondant à la spécialité d'aucun professeur.
@@ -432,7 +432,7 @@ WHERE code NOT IN (
     WHERE specProf IS NOT NULL
 );
 
--- Remarque : il faut spécifier la condition NOT NULL, car le prédicat « NOT IN » est évalué à « inconnu » quand l'ensemble retourné par la sous-requête comporte une valeur nulle.
+-- @remark il faut spécifier la condition NOT NULL, car le prédicat « NOT IN » est évalué à « inconnu » quand l'ensemble retourné par la sous-requête comporte une valeur nulle.
 
 -- Version alternative.
 PROMPT "Q19 - V2";
@@ -579,7 +579,7 @@ WHERE numProf <> ALL(
     WHERE resp IS NOT NULL
 );
 
--- Remarque : dans les deux versions précédente de la requête, la condition de sélection « resp IS NOT NULL » est nécessaire. Sans elle, l’attribut resp ayant des valeurs nulles, le résultat de la sous-requête est évalué à « inconnu » et la requête ne rend aucun tuple.
+-- @remark dans les deux versions précédente de la requête, la condition de sélection « resp IS NOT NULL » est nécessaire. Sans elle, l’attribut resp ayant des valeurs nulles, le résultat de la sous-requête est évalué à « inconnu » et la requête ne rend aucun tuple.
 
 -- Version alternative.
 PROMPT "Q22 - V3";
@@ -629,7 +629,7 @@ FROM Etudiant Et
 WHERE anneeEt = 2
 GROUP BY Et.numEt, nomEt, code;
 
--- Remarques : la projection de l'attribut clef primaire numEt assure que des fragments différents sont créées par le partitionnement même en cas d'homonymie des étudiants. il est aussi inutile de préciser DISTINCT avant l'argument de la fonction COUNT. En effet, par définition de la relation Enseigne, pour une matière et un étudiant donnés, un numéro de professeur n'apparaît qu'une seule fois.
+-- @remark la projection de l'attribut clef primaire numEt assure que des fragments différents sont créées par le partitionnement même en cas d'homonymie des étudiants. il est aussi inutile de préciser DISTINCT avant l'argument de la fonction COUNT. En effet, par définition de la relation Enseigne, pour une matière et un étudiant donnés, un numéro de professeur n'apparaît qu'une seule fois.
 
 -- Q26 - c:2, t:2
 -- Donnez, pour chaque ville de plus de cinq professeurs, le nombre de professeurs y résidant.

@@ -20,6 +20,9 @@ docs/**/figures/*.pdf
 # Fichiers temporaires Inkscape (générés par le package svg)
 docs/**/svg-inkscape/
 
+# Python
+__pycache__/
+
 # OS
 .DS_Store
 Thumbs.db

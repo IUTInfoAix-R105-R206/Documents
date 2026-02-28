@@ -131,7 +131,7 @@ WHERE
         WHERE ville = 'MARSEILLE'
     );
 
--- Remarque : il n'est pas possible de faire une version totalement imbriquée pour cette question car les attributs présents dans la projection finale sont issus de relations différentes.
+-- @remark il n'est pas possible de faire une version totalement imbriquée pour cette question car les attributs présents dans la projection finale sont issus de relations différentes.
 
 -- Version prédicative.
 PROMPT "Q7 - Version prédicative";
@@ -241,7 +241,7 @@ FROM Client C
     INNER JOIN Reservation R ON C.numCl = R.numCl
 WHERE (ville, idV) IN (SELECT villeDep, idV FROM Voyage);
 
--- Remarque : la jointure imbriquée doit se faire simultanément sur les attributs ville de la relation Client et idV de la relation Reservation, ces deux relations doivent être spécifiées dans la requête englobante.
+-- @remark la jointure imbriquée doit se faire simultanément sur les attributs ville de la relation Client et idV de la relation Reservation, ces deux relations doivent être spécifiées dans la requête englobante.
 
 -- Version prédicative.
 PROMPT "Q10 - Version prédicative";
@@ -295,7 +295,7 @@ FROM Planning P
     INNER JOIN Voyage V ON P.idV = V.idV
 WHERE V.idV = 122;
 
--- Remarque : il est inutile d'utiliser COALESCE(dateDep, 0) car l'attribut dateDep faisant partie de la clef primaire de la relation Planning, les valeurs nulles ne sont pas acceptées. De même, il est inutile d'utiliser COALESCE(duree, 0)  car l'attribut est non null.
+-- @remark il est inutile d'utiliser COALESCE(dateDep, 0) car l'attribut dateDep faisant partie de la clef primaire de la relation Planning, les valeurs nulles ne sont pas acceptées. De même, il est inutile d'utiliser COALESCE(duree, 0)  car l'attribut est non null.
 
 -- Q16 - c:5, t:1
 -- Quels sont les identifiants, pays d’arrivée, villes d’arrivée et hôtels ainsi que leurs nombres d’étoiles des voyages pour lesquels le tarif est le plus faible ? Donnez deux formulations.
@@ -357,7 +357,7 @@ WHERE
     nom = 'PEYROCHE'
     AND prenom = 'ARNAUD';
 
--- Remarque : si l'un des deux attributs a une valeur nulle, le calcul horizontal rend NULL et la fonction agrégative SUM n'en tient pas compte.
+-- @remark si l'un des deux attributs a une valeur nulle, le calcul horizontal rend NULL et la fonction agrégative SUM n'en tient pas compte.
 
 -- Version alternative.
 PROMPT "Q18 - V2";

@@ -104,7 +104,7 @@ SELECT numVol, villeDep
 FROM Vol
 WHERE numPil IN (100, 204);
 
--- Remarque : `= ANY` est synonyme de `IN` sous Oracle même pour les ensembles de valeurs mais ce n'est pas portable dans d'autres systèmes de gestion de base de données. L'alternative n'est donc pas intéréssantes ici.
+-- @remark `= ANY` est synonyme de `IN` sous Oracle même pour les ensembles de valeurs mais ce n'est pas portable dans d'autres systèmes de gestion de base de données. L'alternative n'est donc pas intéréssantes ici.
 
 -- Version alternative (pas au programme mais plus fidèle à la requête correspondante en algèbre relationnelle).
 PROMPT "Q7 - V3";
@@ -577,7 +577,7 @@ FROM Pilote P1
             AND P1.numPil <> P2.numPil;
 
 -- Version imbriquée.
--- Remarque : la version imbriquée n'est pas possible quand nous utilisons l'opérateur <> comme critère d'une condition de jointure.
+-- @remark la version imbriquée n'est pas possible quand nous utilisons l'opérateur <> comme critère d'une condition de jointure.
 
 -- Version prédicative.
 PROMPT "Q23 - Version prédicative";
@@ -653,7 +653,7 @@ FROM Pilote Px
 WHERE PMar.nomPil = 'MARTIN';
 
 -- Version imbriquée.
--- Remarque : la version imbriquée n'est pas possible quand nous utilisons l'opérateur > comme critère d'une condition de jointure.
+-- @remark la version imbriquée n'est pas possible quand nous utilisons l'opérateur > comme critère d'une condition de jointure.
 
 -- Version prédicative.
 PROMPT "Q26 - Version prédicative";

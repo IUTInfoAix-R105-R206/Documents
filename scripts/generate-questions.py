@@ -15,7 +15,9 @@ Les annotations reconnues dans le SQL :
     -- @section Nom de la section
     -- @instruction Texte d'instruction (rendu en gras)
     -- @text Paragraphe de texte libre dans une section
-    -- @+ Continuation du dernier tag (@instruction ou @text)
+    -- @remark Remarque pédagogique (visible étudiants et enseignants)
+    -- @remark_teacher Remarque enseignant uniquement (masquée en mode subject)
+    -- @+ Continuation du dernier tag (@instruction, @text, @remark, @remark_teacher)
     -- QN - c:X, t:Y [(valeur)] [= QM]   Question avec résultat attendu complet
     -- QN - t:Y                           Question avec nombre de tuples seulement
     -- QN                                 Question sans résultat attendu (DDL)
@@ -117,7 +119,7 @@ def match_question(line):
 
 def is_desc_stopper(text):
     """Vérifie si un texte de commentaire marque la fin d'une description."""
-    return re.match(r'^Version\s', text) or text.startswith('Remarque')
+    return re.match(r'^Version\s', text)
 
 
 def parse_sql(path):
@@ -131,9 +133,12 @@ def parse_sql(path):
     Chaque section contient une liste items de types mélangés :
         {'type': 'instruction', 'text': str}
         {'type': 'text', 'text': str}
+        {'type': 'remark', 'text': str}
+        {'type': 'remark_teacher', 'text': str}
         {'type': 'question', 'num': int, 'cols': int|None, 'rows': int|None,
          'value': str|None, 'ref': str|None, 'raw_expected': str|None,
-         'description': str, 'variants': list of dict (label, sql, remarks)}
+         'description': str, 'variants': list of dict (label, sql, remarks),
+         'post_remarks': list of dict (type, text)}
     """
     with open(path, encoding='utf-8') as f:
         lines = f.readlines()
@@ -147,7 +152,7 @@ def parse_sql(path):
     current_section = None
     current_question = None
     current_variant = None
-    last_tag_target = None   # pour @+ : ('title'|'intro'|'instruction'|'text', item_ref)
+    last_tag_target = None   # pour @+ : ('title'|'intro'|'instruction'|'text'|'remark'|'remark_teacher', item_ref)
     state = 'top'            # top | question_header | variant
 
     def finish_variant():
@@ -196,7 +201,8 @@ def parse_sql(path):
                     result['title'] += sep + cont_text
                 elif tag_type == 'intro':
                     result['intro'] += sep + cont_text
-                elif tag_type in ('instruction', 'text') and tag_ref is not None:
+                elif tag_type in ('instruction', 'text', 'remark', 'remark_teacher') \
+                        and tag_ref is not None:
                     tag_ref['text'] += sep + cont_text
             i += 1
             continue
@@ -228,6 +234,19 @@ def parse_sql(path):
                 item = {'type': 'text', 'text': value}
                 current_section['items'].append(item)
                 last_tag_target = ('text', item)
+            elif tag in ('remark', 'remark_teacher'):
+                remark = {'type': tag, 'text': value}
+                if current_variant is not None:
+                    current_variant['remarks'].append(remark)
+                elif current_question is not None:
+                    # Remarque hors variant mais dans une question
+                    current_question.setdefault('post_remarks', []).append(remark)
+                else:
+                    # Remarque hors question → item de section
+                    if current_section is None:
+                        new_section('')
+                    current_section['items'].append(remark)
+                last_tag_target = (tag, remark)
             i += 1
             continue
 
@@ -305,36 +324,11 @@ def parse_sql(path):
             i += 1
             continue
 
-        # --- Remarque(s) ---
+        # --- Commentaires dans un variant ---
         m_c = RE_COMMENT.match(line)
         if m_c and state == 'variant':
             text = m_c.group(1)
-            if text.startswith('Remarque'):
-                # Collecter tout le texte, en retirant le préfixe
-                remark_text = re.sub(r'^Remarques?\s*:\s*', '', text)
-                j = i + 1
-                while j < len(lines):
-                    next_line = lines[j].rstrip('\n')
-                    m_next = RE_COMMENT.match(next_line)
-                    if m_next and not RE_TAG.match(next_line) \
-                            and not RE_TAG_CONT.match(next_line) \
-                            and match_question(next_line) is None:
-                        next_text = m_next.group(1)
-                        if not next_text:
-                            break
-                        if (next_text.startswith('Version')
-                                or RE_PROMPT.match(next_line)
-                                or next_text.startswith('Remarque')):
-                            break
-                        remark_text += ' ' + next_text
-                        j += 1
-                    else:
-                        break
-                if current_variant:
-                    current_variant['remarks'].append(remark_text)
-                i = j
-                continue
-            elif text.startswith('Version') or text.startswith('V'):
+            if text.startswith('Version') or text.startswith('V'):
                 # Label de version — le PROMPT qui suit le gère
                 i += 1
                 continue
@@ -402,11 +396,27 @@ def format_expected(q):
 # Génération Markdown
 # ---------------------------------------------------------------------------
 
+def _render_remark(remark, mode, out):
+    """Rend une remarque en Markdown si le mode le permet."""
+    rtype = remark['type']
+    if rtype == 'remark' and mode in ('correction', 'teacher'):
+        out.append('::: remarques')
+        out.append(remark['text'])
+        out.append(':::')
+        out.append('')
+    elif rtype == 'remark_teacher' and mode == 'teacher':
+        out.append('::: remarques')
+        out.append(f"**[Enseignant]** {remark['text']}")
+        out.append(':::')
+        out.append('')
+
+
 def generate_markdown(parsed, mode='subject'):
     """Génère le Markdown des questions.
 
     mode = 'subject'    : questions seules
-    mode = 'correction' : questions + SQL + remarques
+    mode = 'correction' : questions + SQL + remarques étudiants
+    mode = 'teacher'    : questions + SQL + toutes les remarques
     """
     out = []
 
@@ -435,6 +445,9 @@ def generate_markdown(parsed, mode='subject'):
                 out.append(item['text'])
                 out.append('')
 
+            elif item['type'] in ('remark', 'remark_teacher'):
+                _render_remark(item, mode, out)
+
             elif item['type'] == 'question':
                 q = item
                 expected = format_expected(q)
@@ -449,7 +462,7 @@ def generate_markdown(parsed, mode='subject'):
                     out.append(desc_line)
                 out.append('')
 
-                if mode == 'correction' and q['variants']:
+                if mode in ('correction', 'teacher') and q['variants']:
                     for variant in q['variants']:
                         # Label de la variante
                         if variant['label']:
@@ -465,10 +478,11 @@ def generate_markdown(parsed, mode='subject'):
 
                         # Remarques
                         for remark in variant['remarks']:
-                            out.append('::: remarques')
-                            out.append(remark)
-                            out.append(':::')
-                            out.append('')
+                            _render_remark(remark, mode, out)
+
+                    # Remarques post-variants (hors PROMPT)
+                    for remark in q.get('post_remarks', []):
+                        _render_remark(remark, mode, out)
 
     return '\n'.join(out)
 
@@ -483,7 +497,7 @@ def main():
     )
     parser.add_argument('sql', metavar='CORRECTION_SQL',
                         help='Fichier SQL de correction annoté')
-    parser.add_argument('--mode', choices=['subject', 'correction'],
+    parser.add_argument('--mode', choices=['subject', 'correction', 'teacher'],
                         default='subject',
                         help='Mode de génération (défaut: subject)')
     parser.add_argument('--template', metavar='TEMPLATE.md', default=None,
@@ -504,11 +518,19 @@ def main():
         with open(args.template, encoding='utf-8') as f:
             template_text = f.read()
 
-        # En mode correction, modifier le titre YAML
+        # En mode correction/teacher, modifier le titre YAML
         if args.mode == 'correction':
             template_text = re.sub(
                 r'^(title:\s*"[^"]*)"',
                 r'\1 — Corrigé"',
+                template_text,
+                count=1,
+                flags=re.MULTILINE,
+            )
+        elif args.mode == 'teacher':
+            template_text = re.sub(
+                r'^(title:\s*"[^"]*)"',
+                r'\1 — Corrigé enseignant"',
                 template_text,
                 count=1,
                 flags=re.MULTILINE,

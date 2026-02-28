@@ -485,7 +485,7 @@ FROM Client C
     INNER JOIN Reservation R ON C.numCl = R.numCl
 WHERE categorie = 'PRIVILEGIE';
 
--- Remarque : Il faut gérer les valeurs nulles dans le calcul horizontal, car si nbPers prend une valeur nulle, sa somme sera à NULL et la fonction agrégative SUM rendra un résultat faux.
+-- @remark Il faut gérer les valeurs nulles dans le calcul horizontal, car si nbPers prend une valeur nulle, sa somme sera à NULL et la fonction agrégative SUM rendra un résultat faux.
 
 -- Q29 - c:3, t:1
 -- Quels sont les numéros, noms et prénoms des clients ayant fait une réservation avec un nombre total maximal de personnes ?
