@@ -17,6 +17,8 @@ Les annotations reconnues dans le SQL :
     -- @text Paragraphe de texte libre dans une section
     -- @remark Remarque pédagogique (visible étudiants et enseignants)
     -- @remark_teacher Remarque enseignant uniquement (masquée en mode subject)
+    -- @difficulty N   Difficulté de la question (0-5), rattachée à la question courante
+    -- @tags t1, t2    Thèmes abordés (liste prédéfinie), rattachés à la question courante
     -- @+ Continuation du dernier tag (@instruction, @text, @remark, @remark_teacher)
     -- QN - c:X, t:Y [(valeur)] [= QM]   Question avec résultat attendu complet
     -- QN - t:Y                           Question avec nombre de tuples seulement
@@ -54,6 +56,14 @@ RE_COMMENT = re.compile(r'^--\s?(.*?)\s*$')
 RE_PROMPT = re.compile(r'^PROMPT\s', re.IGNORECASE)
 RE_EMPTY = re.compile(r'^\s*$')
 
+VALID_TAGS = {
+    'projection', 'sélection', 'jointure', 'jointure-externe',
+    'imbrication', 'agrégation', 'groupement', 'division',
+    'union', 'intersection', 'différence', 'sous-requête',
+    'exists', 'not-exists', 'tri', 'distinct', 'null',
+    'vue', 'ddl', 'dml', 'transaction', 'récursion',
+}
+
 
 def match_question(line):
     """Essaie de reconnaître une ligne QN. Retourne un dict question ou None."""
@@ -69,6 +79,8 @@ def match_question(line):
             'raw_expected': None,
             'description': '',
             'variants': [],
+            'difficulty': None,
+            'tags': [],
         }
 
     m = RE_QUESTION_TUPLES.match(line)
@@ -83,6 +95,8 @@ def match_question(line):
             'raw_expected': None,
             'description': '',
             'variants': [],
+            'difficulty': None,
+            'tags': [],
         }
 
     # Bare QN doit être testé avant RAW pour ne pas capturer « Q11 » comme raw
@@ -98,6 +112,8 @@ def match_question(line):
             'raw_expected': None,
             'description': '',
             'variants': [],
+            'difficulty': None,
+            'tags': [],
         }
 
     m = RE_QUESTION_RAW.match(line)
@@ -112,6 +128,8 @@ def match_question(line):
             'raw_expected': m.group(2),
             'description': '',
             'variants': [],
+            'difficulty': None,
+            'tags': [],
         }
 
     return None
@@ -138,7 +156,8 @@ def parse_sql(path):
         {'type': 'question', 'num': int, 'cols': int|None, 'rows': int|None,
          'value': str|None, 'ref': str|None, 'raw_expected': str|None,
          'description': str, 'variants': list of dict (label, sql, remarks),
-         'post_remarks': list of dict (type, text)}
+         'post_remarks': list of dict (type, text),
+         'difficulty': int|None, 'tags': list of str}
     """
     with open(path, encoding='utf-8') as f:
         lines = f.readlines()
@@ -234,6 +253,24 @@ def parse_sql(path):
                 item = {'type': 'text', 'text': value}
                 current_section['items'].append(item)
                 last_tag_target = ('text', item)
+            elif tag == 'difficulty':
+                if current_question is not None:
+                    level = int(value)
+                    if not 0 <= level <= 5:
+                        print(f"WARNING: {path}: @difficulty {value} hors [0-5]",
+                              file=sys.stderr)
+                    current_question['difficulty'] = level
+                last_tag_target = None
+            elif tag == 'tags':
+                if current_question is not None:
+                    tags = [t.strip() for t in value.split(',')]
+                    unknown = set(tags) - VALID_TAGS
+                    if unknown:
+                        print(f"WARNING: {path}: tags inconnus: "
+                              f"{', '.join(sorted(unknown))}",
+                              file=sys.stderr)
+                    current_question['tags'] = tags
+                last_tag_target = None
             elif tag in ('remark', 'remark_teacher'):
                 remark = {'type': tag, 'text': value}
                 if current_variant is not None:
