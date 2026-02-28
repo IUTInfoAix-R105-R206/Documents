@@ -405,8 +405,8 @@ def _render_remark(remark, mode, out):
         out.append(':::')
         out.append('')
     elif rtype == 'remark_teacher' and mode == 'teacher':
-        out.append('::: remarques')
-        out.append(f"**[Enseignant]** {remark['text']}")
+        out.append('::: remarques-enseignant')
+        out.append(remark['text'])
         out.append(':::')
         out.append('')
 

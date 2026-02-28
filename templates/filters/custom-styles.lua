@@ -64,6 +64,17 @@ function Div(el)
     return result
   end
 
+  -- Bloc remarques enseignant
+  if el.classes:includes("remarques-enseignant") then
+    local result = {}
+    table.insert(result, pandoc.RawBlock("latex", "\\begin{remarques-enseignant}"))
+    for _, block in ipairs(el.content) do
+      table.insert(result, block)
+    end
+    table.insert(result, pandoc.RawBlock("latex", "\\end{remarques-enseignant}"))
+    return result
+  end
+
   -- Bloc schéma relationnel
   if el.classes:includes("schema-relationnel") then
     local result = {}
