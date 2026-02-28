@@ -16,7 +16,7 @@ FROM Voyage V
 WHERE paysArr = 'MAROC';
 
 -- Version imbriquée.
--- @remark la version imbriquée ne peut pas être effectuée utilement car dateDep et tarif sont des attributs de Planning et villeArr est un attribut de Voyage.
+-- @remark La version imbriquée ne peut pas être effectuée utilement car dateDep et tarif sont des attributs de Planning et villeArr est un attribut de Voyage.
 
 -- Version prédicative.
 PROMPT "Q1 - Version prédicative";
@@ -54,7 +54,7 @@ FROM Voyage V
                 WHERE ville NOT IN ('PARIS', 'MARSEILLE')
             );
 
--- @remark la version imbriquée ne peut pas être effectuée parfaitement car dateDep est un attribut de Reservation et dateDep et tarif sont des attributs de Voyage.
+-- @remark La version imbriquée ne peut pas être effectuée parfaitement car dateDep est un attribut de Reservation et dateDep et tarif sont des attributs de Voyage.
 
 -- Version prédicative.
 PROMPT "Q2 - Version prédicative";
@@ -149,7 +149,7 @@ WHERE (numCl, ville) IN (
                 AND villeArr = 'ISTANBUL'
 );
 
--- @remark la version imbriquée ne peut pas être effectuée parfaitement car numCl est un attribut de Reservation et villeDep un attribut de Voyage.
+-- @remark La version imbriquée ne peut pas être effectuée parfaitement car numCl est un attribut de Reservation et villeDep un attribut de Voyage.
 
 -- Version prédicative.
 PROMPT "Q4 - Version prédicative";
@@ -354,7 +354,7 @@ PROMPT "Q13 - Insertion invalide";
 
 INSERT INTO Client (numCl, nom, prenom, adresse, cp, ville, categorie) VALUES (666, 'MARTIN NEVOT', 'MICKAEL', '1 IMPASSE DES DRAGONS', '13600', 'CEYRESTE', 'MAUVAIS');
 
--- @remark cette insertion provoque une erreur.
+-- @remark Cette insertion provoque une erreur.
 
 -- Q14
 -- En se basant sur les données actuelles, définissez une contrainte de domaine pour les nombres d'étoiles. Vérifiez en essayant d'ajouter un voyage ne respectant pas cette contrainte.
@@ -369,7 +369,7 @@ PROMPT "Q14 - Insertion invalide";
 
 INSERT INTO Voyage (idV, villeArr, paysArr, villeDep, hotel, nbEtoiles, duree) VALUES (666, 'DUBLIN', 'IRELAND', 'MARSEILLE', 'TEMPLE BAR HOTEL', '2', '6');
 
--- @remark cette insertion provoque une erreur.
+-- @remark Cette insertion provoque une erreur.
 
 -- Q15
 -- Créez une nouvelle relation `Capacite` permettant de connaître par hôtel et type de chambre `typeC`, pouvant être `SIMPLE`, `DOUBLE`, `DOUBLE LUXE`, `SUITE`, `SUITE JUNIOR` et `SUITE PRESTIGE`, le nombre de chambres `nbCh`.
@@ -400,7 +400,7 @@ PROMPT "Q16";
 ALTER TABLE Planning ADD (tarifEnf NUMBER(6, 2));
 ALTER TABLE Reservation ADD (nbEnf NUMBER(2, 0));
 
--- @remark les commandes précédentes sont nécessaires si les altérations de table n'ont pas été faites précédemment. Elles ne doivent pas être exécutées dans le cas contraire.
+-- @remark Les commandes précédentes sont nécessaires si les altérations de table n'ont pas été faites précédemment. Elles ne doivent pas être exécutées dans le cas contraire.
 
 UPDATE Reservation
 SET nbEnf = 2
@@ -429,7 +429,7 @@ PROMPT "Q17";
 
 ALTER TABLE Planning ADD (tarifEnf NUMBER(6, 2));
 
--- @remark la commande précédente est nécessaire si l'altération de table n'a pas été faite précédemment. Elle ne doit pas être exécutée dans le cas contraire.
+-- @remark La commande précédente est nécessaire si l'altération de table n'a pas été faite précédemment. Elle ne doit pas être exécutée dans le cas contraire.
 
 UPDATE Planning SET tarifEnf = tarif / 2;
 
@@ -467,7 +467,7 @@ CREATE TABLE Capacite (
     CONSTRAINT ck_Capacite_typeC CHECK(typeC IN ('SIMPLE', 'DOUBLE', 'DOUBLE LUXE', 'SUITE', 'SUITE JUNIOR', 'SUITE PRESTIGE'))
 );
 
--- @remark les commandes précédentes sont nécessaires si la création de table n'a pas été faite précédemment. Il est inutile de les exécuter dans le cas contraire.
+-- @remark Les commandes précédentes sont nécessaires si la création de table n'a pas été faite précédemment. Il est inutile de les exécuter dans le cas contraire.
 
 INSERT INTO Capacite (hotel, typeC, nbCh) VALUES ('ANTIQUE', 'SIMPLE', 10);
 INSERT INTO Capacite (hotel, typeC, nbCh) VALUES ('ANTIQUE', 'DOUBLE', 75);
@@ -526,7 +526,7 @@ CREATE TABLE AncienneReservation (
     CONSTRAINT pk_AncienneReservation PRIMARY KEY(numCl, idV, dateDep)
 );
 
--- @remark les commandes précédentes sont nécessaires si l'alteration et la création de table n'ont pas été faites précédemment. L'altération ne doit pas être exécutée, et il est inutile d'exécuter la création dans le cas contraire.
+-- @remark Les commandes précédentes sont nécessaires si l'alteration et la création de table n'ont pas été faites précédemment. L'altération ne doit pas être exécutée, et il est inutile d'exécuter la création dans le cas contraire.
 
 BEGIN
     INSERT INTO AncienneReservation

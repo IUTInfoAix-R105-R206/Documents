@@ -330,7 +330,7 @@ WHERE NOT EXISTS (
         )
 );
 
--- @remark cette requête correspond au paraphrasage "Quels sont les noms et prénoms des Professeurs tels qu'il n'existe aucun étudiant de seconde année auquel ces Professeurs n'aient pas enseigné ?"
+-- @remark Cette requête correspond au paraphrasage "Quels sont les noms et prénoms des Professeurs tels qu'il n'existe aucun étudiant de seconde année auquel ces Professeurs n'aient pas enseigné ?"
 
 PROMPT "Q14 - Version HAVING";
 
@@ -346,7 +346,7 @@ HAVING COUNT(DISTINCT Et.numEt) = (
     WHERE anneeEt = 2
 );
 
--- @remark cette requête correspond au paraphrasage "Quels sont les noms et prénoms des Professeurs qui ont enseigné à autant d'étudiants de seconde année qu'il en existe ?"
+-- @remark Cette requête correspond au paraphrasage "Quels sont les noms et prénoms des Professeurs qui ont enseigné à autant d'étudiants de seconde année qu'il en existe ?"
 
 -- Q15 - c:2, t:11
 -- Quels sont les noms et prénoms des étudiants dont tous les professeurs ont aussi donné cours à l'étudiant numéro 1102 ?
@@ -368,9 +368,9 @@ WHERE NOT EXISTS (
         )
 );
 
--- @remark cette requête correspond au paraphrasage "Quels sont les noms et prénoms des étudiants tels qu'il n'existe aucun Professeur ayant eu l'étudiant numéro 1102 qui ne les ait pas eu aussi ?"
+-- @remark Cette requête correspond au paraphrasage "Quels sont les noms et prénoms des étudiants tels qu'il n'existe aucun Professeur ayant eu l'étudiant numéro 1102 qui ne les ait pas eu aussi ?"
 
--- @remark il est impossible de répondre à cette requête avec la version HAVING car il ne suffit pas que les étudiants aient eu le même nombre de Professeurs que l'étudiant numéro 1102, il faut que ces Professeurs soient les mêmes.
+-- @remark Il est impossible de répondre à cette requête avec la version HAVING car il ne suffit pas que les étudiants aient eu le même nombre de Professeurs que l'étudiant numéro 1102, il faut que ces Professeurs soient les mêmes.
 
 -- Q16 - c:3, t:3
 -- Quels sont les numéros, noms et prénoms des étudiants ayant eu, pour le module Conception de SI, tous les Professeurs enseignant ce module ?
@@ -394,7 +394,7 @@ WHERE NOT EXISTS (
         )
 );
 
--- @remark cette requête correspond au paraphrasage "Quels sont les numéros, étudiants tels qu'il n'existe aucun Professeur enseignant le module Conception de SI qui ne leur ait pas enseigné ce module ?"
+-- @remark Cette requête correspond au paraphrasage "Quels sont les numéros, étudiants tels qu'il n'existe aucun Professeur enseignant le module Conception de SI qui ne leur ait pas enseigné ce module ?"
 
 PROMPT "Q16 - Version HAVING";
 
@@ -416,7 +416,7 @@ HAVING COUNT(DISTINCT numProf) = (
     WHERE libelle = 'CONCEPTION DE SI'
 );
 
--- @remark cette requête correspond au paraphrasage "Quels sont les numéros, noms et prénoms des étudiants dont le nombre de Professeurs en Conception de SI est égal au nombre total de Professeurs enseignant ce module ?"
+-- @remark Cette requête correspond au paraphrasage "Quels sont les numéros, noms et prénoms des étudiants dont le nombre de Professeurs en Conception de SI est égal au nombre total de Professeurs enseignant ce module ?"
 
 -- Q17 - c:2, t:1
 -- Quels sont les codes et libellés des modules suivis par tous les étudiants du groupe d'étudiants 2 de seconde année ?
@@ -439,7 +439,7 @@ WHERE NOT EXISTS (
         )
 );
 
--- @remark cette requête correspond au paraphrasage "Quelles sont les modules tels qu'il n'existe aucun étudiant du groupeEt 2 de seconde année qui ne les suit pas ?"
+-- @remark Cette requête correspond au paraphrasage "Quelles sont les modules tels qu'il n'existe aucun étudiant du groupeEt 2 de seconde année qui ne les suit pas ?"
 
 PROMPT "Q17 - Version HAVING";
 
@@ -459,7 +459,7 @@ HAVING COUNT(DISTINCT Et.numEt) = (
         AND groupeEt = 2
 );
 
--- @remark cette requête correspond au paraphrasage "Quelles sont les modules suivis par autant d'étudiants du groupeEt 2 de seconde année qu'il en existe ?"
+-- @remark Cette requête correspond au paraphrasage "Quelles sont les modules suivis par autant d'étudiants du groupeEt 2 de seconde année qu'il en existe ?"
 
 -- @section Requêtes complexes
 
@@ -534,7 +534,7 @@ WITH RECURSIVE
 SELECT LPAD('-', 2 * (MAX(lvl) OVER () + 1 - lvl), '-') || libelle
 FROM AncModule;
 
--- @remark il n'existe pas de manière simple pour présenter, de manière hiérarchique, chacune des arborescences. L'utilisation de la clause ORDER BY aurait pour effet de les mélanger, pas de les trier comme souhaité.
+-- @remark Il n'existe pas de manière simple pour présenter, de manière hiérarchique, chacune des arborescences. L'utilisation de la clause ORDER BY aurait pour effet de les mélanger, pas de les trier comme souhaité.
 
 -- Q20 - c:3, t:23
 -- Quels sont les numéros, noms et prénoms des étudiants de seconde année dont toutes les moyennes de test sont supérieures ou égales à 10 ?

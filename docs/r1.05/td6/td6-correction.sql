@@ -577,7 +577,7 @@ FROM Pilote P1
             AND P1.numPil <> P2.numPil;
 
 -- Version imbriquée.
--- @remark la version imbriquée n'est pas possible quand nous utilisons l'opérateur <> comme critère d'une condition de jointure.
+-- @remark La version imbriquée n'est pas possible quand nous utilisons l'opérateur <> comme critère d'une condition de jointure.
 
 -- Version prédicative.
 PROMPT "Q23 - Version prédicative";
@@ -653,7 +653,7 @@ FROM Pilote Px
 WHERE PMar.nomPil = 'MARTIN';
 
 -- Version imbriquée.
--- @remark la version imbriquée n'est pas possible quand nous utilisons l'opérateur > comme critère d'une condition de jointure.
+-- @remark La version imbriquée n'est pas possible quand nous utilisons l'opérateur > comme critère d'une condition de jointure.
 
 -- Version prédicative.
 PROMPT "Q26 - Version prédicative";

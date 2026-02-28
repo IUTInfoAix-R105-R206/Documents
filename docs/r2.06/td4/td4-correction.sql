@@ -447,7 +447,7 @@ WHERE NOT EXISTS (
         )
 );
 
--- @remark cette requête correspond au paraphrasage "Quels sont les numéros, noms et prénoms des étudiants ayant fait autant de questions du TP numéro 1 qu’il en existe ?"
+-- @remark Cette requête correspond au paraphrasage "Quels sont les numéros, noms et prénoms des étudiants ayant fait autant de questions du TP numéro 1 qu’il en existe ?"
 
 PROMPT "Q13 - Version HAVING";
 
@@ -465,7 +465,7 @@ HAVING COUNT(*) = (
     WHERE numTP = 1
 );
 
--- @remark cette requête correspond au paraphrasage "Quels sont les numéros, noms et prénoms des étudiants tels qu’il n’existe aucune question du TP numéro 1 qu’ils n’aient pas faite ?"
+-- @remark Cette requête correspond au paraphrasage "Quels sont les numéros, noms et prénoms des étudiants tels qu’il n’existe aucune question du TP numéro 1 qu’ils n’aient pas faite ?"
 
 -- Q14 - c:1, t:3
 -- Quels sont les groupes d'étudiants dans lesquels tous les types de BAC sont représentés ? Proposer deux formulations différentes, avec double NOT EXISTS et HAVING, de cette requête. 
@@ -485,7 +485,7 @@ WHERE NOT EXISTS (
     )
 );
 
--- @remark cette requête correspond au paraphrasage "Quels sont les groupes d'étudiants pour lesquels il n’existe pas de type de BAC qui ne soit pas représenté ?
+-- @remark Cette requête correspond au paraphrasage "Quels sont les groupes d'étudiants pour lesquels il n’existe pas de type de BAC qui ne soit pas représenté ?
 
 PROMPT "Q14 - Version HAVING";
 
@@ -497,7 +497,7 @@ HAVING COUNT(DISTINCT typeBAC) = (
     FROM Etudiant
 );
 
--- @remark cette requête correspond au paraphrasage "Quels sont les groupes d'étudiants ayant autant de Types de BAC qu’il en existe ?"
+-- @remark Cette requête correspond au paraphrasage "Quels sont les groupes d'étudiants ayant autant de Types de BAC qu’il en existe ?"
 
 -- Q15 - c:1, t:2
 -- Quels sont les groupes d'étudiants pour lesquels au moins un étudiant a été évalué pour chaque TP ?
@@ -521,7 +521,7 @@ WHERE NOT EXISTS (
     )
 );
 
--- @remark cette requête correspond au paraphrasage "Quels sont les groupes pour lesquels il y a autant de TP évalués qu’il en existe ?"
+-- @remark Cette requête correspond au paraphrasage "Quels sont les groupes pour lesquels il y a autant de TP évalués qu’il en existe ?"
 
 PROMPT "Q15 - Version HAVING";
 
@@ -537,7 +537,7 @@ HAVING COUNT(DISTINCT numTP) = (
     FROM Question
 );
 
--- @remark cette requête correspond au paraphrasage "Quels sont les groupes tels qu’il n’existe aucun TP pour lequel ils n’aient pas été évalué ?"
+-- @remark Cette requête correspond au paraphrasage "Quels sont les groupes tels qu’il n’existe aucun TP pour lequel ils n’aient pas été évalué ?"
 
 -- @section Requêtes complexes
 

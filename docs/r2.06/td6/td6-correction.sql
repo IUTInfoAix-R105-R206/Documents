@@ -138,7 +138,7 @@ PROMPT "Q7 - Insertion invalide";
 
 INSERT INTO Q7 (code, libelle, heureCMPrev, heureCMReal, heureTPPrev, heureTPReal, discipline, coefTest, coefCC, resp, codePere) VALUES ('COM', 'COMMUNICATION ECRITE', 20, NULL, 40, NULL, 'COMMUNICATION', 70, 30, 3, 'EGO');
 
--- @remark cette insertion provoque une erreur.
+-- @remark Cette insertion provoque une erreur.
 
 -- Q8
 -- Créer une vue de mise à jour permettant d'assurer que les responsables d'un Module inséré ou modifié doivent enseigner ce Module.
@@ -178,14 +178,14 @@ END;
 /
 -- noqa: enable=all
 
--- @remark il est nécessaire de faire l'insertion de l'enseignement avant l'intertion du module avec le responsable devant enseigner ce Module, et cela n'est possible qu'en faisant une transaction et en modifiant la contrainte de clef étrangère afin qu'elle ne soit vérifiée qu'à la fin de la transaction.
+-- @remark Il est nécessaire de faire l'insertion de l'enseignement avant l'intertion du module avec le responsable devant enseigner ce Module, et cela n'est possible qu'en faisant une transaction et en modifiant la contrainte de clef étrangère afin qu'elle ne soit vérifiée qu'à la fin de la transaction.
 
 -- Insertion invalide.
 PROMPT "Q8 - Insertion invalide";
 
 INSERT INTO Q8 (code, libelle, heureCMPrev, heureCMReal, heureTPPrev, heureTPReal, discipline, coefTest, coefCC, resp, codePere) VALUES ('EDD', 'ENTREPOTS DE DONNEES', 20, NULL, 40, NULL, 'INFORMATIQUE', 40, 60, 666, 'OMGL2');
 
--- @remark cette insertion provoque une erreur.
+-- @remark Cette insertion provoque une erreur.
 
 -- @section Requêtes complexes
 
