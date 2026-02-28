@@ -52,7 +52,20 @@ R206_CORRECTION_PDFS = \
 	$(OUTPUT_DIR)/r2.06/td5/td5-correction.pdf \
 	$(OUTPUT_DIR)/r2.06/td6/td6-correction.pdf
 
-.PHONY: all clean r105 r206 r105-corrections r206-corrections guide \
+# Corrigés enseignant (avec remarques @remark_teacher)
+R105_TEACHER_PDFS = \
+	$(OUTPUT_DIR)/r1.05/td6/td6-teacher.pdf \
+	$(OUTPUT_DIR)/r1.05/td7/td7-teacher.pdf
+
+R206_TEACHER_PDFS = \
+	$(OUTPUT_DIR)/r2.06/td1/td1-teacher.pdf \
+	$(OUTPUT_DIR)/r2.06/td2/td2-teacher.pdf \
+	$(OUTPUT_DIR)/r2.06/td3/td3-teacher.pdf \
+	$(OUTPUT_DIR)/r2.06/td4/td4-teacher.pdf \
+	$(OUTPUT_DIR)/r2.06/td5/td5-teacher.pdf \
+	$(OUTPUT_DIR)/r2.06/td6/td6-teacher.pdf
+
+.PHONY: all clean r105 r206 r105-corrections r206-corrections teacher guide \
 	test-sql-postgresql-local test-sql-postgresql-docker \
 	test-sql-sqlite-local    test-sql-sqlite-docker    \
 	test-sql-oracle-local    test-sql-oracle-docker    \
@@ -79,6 +92,8 @@ r105-corrections: $(R105_CORRECTION_PDFS) ## Compile uniquement les corrigés de
 
 r206-corrections: $(R206_CORRECTION_PDFS) ## Compile uniquement les corrigés de R2.06
 
+teacher: $(R105_TEACHER_PDFS) $(R206_TEACHER_PDFS) ## Compile les corrigés enseignant (avec @remark_teacher)
+
 # ==============================================================================
 # R2.06 — Exploitation d'une base de données
 # ==============================================================================
@@ -100,6 +115,9 @@ docs/r2.06/td1/td1.gen.md: $(R206_TD1_TEMPLATE) $(R206_TD1_SQL) $(R206_TD1_GEN)
 
 docs/r2.06/td1/td1-correction.gen.md: $(R206_TD1_TEMPLATE) $(R206_TD1_SQL) $(R206_TD1_GEN)
 	$(PYTHON) $(R206_TD1_GEN) --mode correction --template $< --output $@ $(word 2,$^)
+
+docs/r2.06/td1/td1-teacher.gen.md: $(R206_TD1_TEMPLATE) $(R206_TD1_SQL) $(R206_TD1_GEN)
+	$(PYTHON) $(R206_TD1_GEN) --mode teacher --template $< --output $@ $(word 2,$^)
 
 $(OUTPUT_DIR)/r2.06/td1/td1.pdf: docs/r2.06/td1/td1.gen.md $(TEMPLATE_DIR)/template.tex $(FILTER_DIR)/custom-styles.lua $(R206_TD1_FIGURES)
 	@mkdir -p $(OUTPUT_DIR)/r2.06/td1
@@ -131,6 +149,21 @@ $(OUTPUT_DIR)/r2.06/td1/td1-correction.pdf: docs/r2.06/td1/td1-correction.gen.md
 		td1-correction.gen.md \
 		-o ../../../$@
 
+$(OUTPUT_DIR)/r2.06/td1/td1-teacher.pdf: docs/r2.06/td1/td1-teacher.gen.md $(TEMPLATE_DIR)/template.tex $(FILTER_DIR)/custom-styles.lua $(R206_TD1_FIGURES)
+	@mkdir -p $(OUTPUT_DIR)/r2.06/td1
+	cd docs/r2.06/td1 && $(PANDOC) \
+		--from markdown+footnotes+definition_lists+fenced_divs+bracketed_spans \
+		--pdf-engine=pdflatex \
+		--pdf-engine-opt=-shell-escape \
+		--template=../../../$(TEMPLATE_DIR)/template.tex \
+		--lua-filter=../../../$(FILTER_DIR)/custom-styles.lua \
+		--resource-path=.:../../../$(TEMPLATE_DIR):figures \
+		--variable=license-badge:../../../$(TEMPLATE_DIR)/cc-by-nc-sa \
+		--variable=version:$(GIT_VERSION) \
+		--number-sections \
+		td1-teacher.gen.md \
+		-o ../../../$@
+
 # --- TD2 : Jointures externes, partitionnement et synthèse (BD Voyages) ---
 
 R206_TD2_FIGURES = docs/r2.06/td2/figures/mcd.pdf
@@ -148,6 +181,9 @@ docs/r2.06/td2/td2.gen.md: $(R206_TD2_TEMPLATE) $(R206_TD2_SQL) $(R206_TD2_GEN)
 
 docs/r2.06/td2/td2-correction.gen.md: $(R206_TD2_TEMPLATE) $(R206_TD2_SQL) $(R206_TD2_GEN)
 	$(PYTHON) $(R206_TD2_GEN) --mode correction --template $< --output $@ $(word 2,$^)
+
+docs/r2.06/td2/td2-teacher.gen.md: $(R206_TD2_TEMPLATE) $(R206_TD2_SQL) $(R206_TD2_GEN)
+	$(PYTHON) $(R206_TD2_GEN) --mode teacher --template $< --output $@ $(word 2,$^)
 
 $(OUTPUT_DIR)/r2.06/td2/td2.pdf: docs/r2.06/td2/td2.gen.md $(TEMPLATE_DIR)/template.tex $(FILTER_DIR)/custom-styles.lua $(R206_TD2_FIGURES)
 	@mkdir -p $(OUTPUT_DIR)/r2.06/td2
@@ -179,6 +215,21 @@ $(OUTPUT_DIR)/r2.06/td2/td2-correction.pdf: docs/r2.06/td2/td2-correction.gen.md
 		td2-correction.gen.md \
 		-o ../../../$@
 
+$(OUTPUT_DIR)/r2.06/td2/td2-teacher.pdf: docs/r2.06/td2/td2-teacher.gen.md $(TEMPLATE_DIR)/template.tex $(FILTER_DIR)/custom-styles.lua $(R206_TD2_FIGURES)
+	@mkdir -p $(OUTPUT_DIR)/r2.06/td2
+	cd docs/r2.06/td2 && $(PANDOC) \
+		--from markdown+footnotes+definition_lists+fenced_divs+bracketed_spans \
+		--pdf-engine=pdflatex \
+		--pdf-engine-opt=-shell-escape \
+		--template=../../../$(TEMPLATE_DIR)/template.tex \
+		--lua-filter=../../../$(FILTER_DIR)/custom-styles.lua \
+		--resource-path=.:../../../$(TEMPLATE_DIR):figures \
+		--variable=license-badge:../../../$(TEMPLATE_DIR)/cc-by-nc-sa \
+		--variable=version:$(GIT_VERSION) \
+		--number-sections \
+		td2-teacher.gen.md \
+		-o ../../../$@
+
 # --- TD3 : Interrogations en SQL (BD Gestion pédagogique) ---
 
 R206_TD3_FIGURES = docs/r2.06/td3/figures/hierarchie-modules.pdf docs/r2.06/td3/figures/mcd.pdf
@@ -199,6 +250,9 @@ docs/r2.06/td3/td3.gen.md: $(R206_TD3_TEMPLATE) $(R206_TD3_SQL) $(R206_TD3_GEN)
 
 docs/r2.06/td3/td3-correction.gen.md: $(R206_TD3_TEMPLATE) $(R206_TD3_SQL) $(R206_TD3_GEN)
 	$(PYTHON) $(R206_TD3_GEN) --mode correction --template $< --output $@ $(word 2,$^)
+
+docs/r2.06/td3/td3-teacher.gen.md: $(R206_TD3_TEMPLATE) $(R206_TD3_SQL) $(R206_TD3_GEN)
+	$(PYTHON) $(R206_TD3_GEN) --mode teacher --template $< --output $@ $(word 2,$^)
 
 $(OUTPUT_DIR)/r2.06/td3/td3.pdf: docs/r2.06/td3/td3.gen.md $(TEMPLATE_DIR)/template.tex $(FILTER_DIR)/custom-styles.lua $(R206_TD3_FIGURES)
 	@mkdir -p $(OUTPUT_DIR)/r2.06/td3
@@ -230,6 +284,21 @@ $(OUTPUT_DIR)/r2.06/td3/td3-correction.pdf: docs/r2.06/td3/td3-correction.gen.md
 		td3-correction.gen.md \
 		-o ../../../$@
 
+$(OUTPUT_DIR)/r2.06/td3/td3-teacher.pdf: docs/r2.06/td3/td3-teacher.gen.md $(TEMPLATE_DIR)/template.tex $(FILTER_DIR)/custom-styles.lua $(R206_TD3_FIGURES)
+	@mkdir -p $(OUTPUT_DIR)/r2.06/td3
+	cd docs/r2.06/td3 && $(PANDOC) \
+		--from markdown+footnotes+definition_lists+fenced_divs+bracketed_spans \
+		--pdf-engine=pdflatex \
+		--pdf-engine-opt=-shell-escape \
+		--template=../../../$(TEMPLATE_DIR)/template.tex \
+		--lua-filter=../../../$(FILTER_DIR)/custom-styles.lua \
+		--resource-path=.:../../../$(TEMPLATE_DIR):figures \
+		--variable=license-badge:../../../$(TEMPLATE_DIR)/cc-by-nc-sa \
+		--variable=version:$(GIT_VERSION) \
+		--number-sections \
+		td3-teacher.gen.md \
+		-o ../../../$@
+
 # --- TD4 : Recherche récursive, division et requêtes complexes (BD Questionnaire) ---
 
 R206_TD4_FIGURES = docs/r2.06/td4/figures/mcd.pdf docs/r2.06/td4/figures/hierarchie-themes.pdf
@@ -250,6 +319,9 @@ docs/r2.06/td4/td4.gen.md: $(R206_TD4_TEMPLATE) $(R206_TD4_SQL) $(R206_TD4_GEN)
 
 docs/r2.06/td4/td4-correction.gen.md: $(R206_TD4_TEMPLATE) $(R206_TD4_SQL) $(R206_TD4_GEN)
 	$(PYTHON) $(R206_TD4_GEN) --mode correction --template $< --output $@ $(word 2,$^)
+
+docs/r2.06/td4/td4-teacher.gen.md: $(R206_TD4_TEMPLATE) $(R206_TD4_SQL) $(R206_TD4_GEN)
+	$(PYTHON) $(R206_TD4_GEN) --mode teacher --template $< --output $@ $(word 2,$^)
 
 $(OUTPUT_DIR)/r2.06/td4/td4.pdf: docs/r2.06/td4/td4.gen.md $(TEMPLATE_DIR)/template.tex $(FILTER_DIR)/custom-styles.lua $(R206_TD4_FIGURES)
 	@mkdir -p $(OUTPUT_DIR)/r2.06/td4
@@ -281,6 +353,21 @@ $(OUTPUT_DIR)/r2.06/td4/td4-correction.pdf: docs/r2.06/td4/td4-correction.gen.md
 		td4-correction.gen.md \
 		-o ../../../$@
 
+$(OUTPUT_DIR)/r2.06/td4/td4-teacher.pdf: docs/r2.06/td4/td4-teacher.gen.md $(TEMPLATE_DIR)/template.tex $(FILTER_DIR)/custom-styles.lua $(R206_TD4_FIGURES)
+	@mkdir -p $(OUTPUT_DIR)/r2.06/td4
+	cd docs/r2.06/td4 && $(PANDOC) \
+		--from markdown+footnotes+definition_lists+fenced_divs+bracketed_spans \
+		--pdf-engine=pdflatex \
+		--pdf-engine-opt=-shell-escape \
+		--template=../../../$(TEMPLATE_DIR)/template.tex \
+		--lua-filter=../../../$(FILTER_DIR)/custom-styles.lua \
+		--resource-path=.:../../../$(TEMPLATE_DIR):figures \
+		--variable=license-badge:../../../$(TEMPLATE_DIR)/cc-by-nc-sa \
+		--variable=version:$(GIT_VERSION) \
+		--number-sections \
+		td4-teacher.gen.md \
+		-o ../../../$@
+
 # --- TD5 : Interrogations avancées en SQL (BD Gestion pédagogique) ---
 
 R206_TD5_FIGURES = docs/r2.06/td5/figures/mcd.pdf docs/r2.06/td5/figures/hierarchie-modules.pdf
@@ -301,6 +388,9 @@ docs/r2.06/td5/td5.gen.md: $(R206_TD5_TEMPLATE) $(R206_TD5_SQL) $(R206_TD5_GEN)
 
 docs/r2.06/td5/td5-correction.gen.md: $(R206_TD5_TEMPLATE) $(R206_TD5_SQL) $(R206_TD5_GEN)
 	$(PYTHON) $(R206_TD5_GEN) --mode correction --template $< --output $@ $(word 2,$^)
+
+docs/r2.06/td5/td5-teacher.gen.md: $(R206_TD5_TEMPLATE) $(R206_TD5_SQL) $(R206_TD5_GEN)
+	$(PYTHON) $(R206_TD5_GEN) --mode teacher --template $< --output $@ $(word 2,$^)
 
 $(OUTPUT_DIR)/r2.06/td5/td5.pdf: docs/r2.06/td5/td5.gen.md $(TEMPLATE_DIR)/template.tex $(FILTER_DIR)/custom-styles.lua $(R206_TD5_FIGURES)
 	@mkdir -p $(OUTPUT_DIR)/r2.06/td5
@@ -332,6 +422,21 @@ $(OUTPUT_DIR)/r2.06/td5/td5-correction.pdf: docs/r2.06/td5/td5-correction.gen.md
 		td5-correction.gen.md \
 		-o ../../../$@
 
+$(OUTPUT_DIR)/r2.06/td5/td5-teacher.pdf: docs/r2.06/td5/td5-teacher.gen.md $(TEMPLATE_DIR)/template.tex $(FILTER_DIR)/custom-styles.lua $(R206_TD5_FIGURES)
+	@mkdir -p $(OUTPUT_DIR)/r2.06/td5
+	cd docs/r2.06/td5 && $(PANDOC) \
+		--from markdown+footnotes+definition_lists+fenced_divs+bracketed_spans \
+		--pdf-engine=pdflatex \
+		--pdf-engine-opt=-shell-escape \
+		--template=../../../$(TEMPLATE_DIR)/template.tex \
+		--lua-filter=../../../$(FILTER_DIR)/custom-styles.lua \
+		--resource-path=.:../../../$(TEMPLATE_DIR):figures \
+		--variable=license-badge:../../../$(TEMPLATE_DIR)/cc-by-nc-sa \
+		--variable=version:$(GIT_VERSION) \
+		--number-sections \
+		td5-teacher.gen.md \
+		-o ../../../$@
+
 # --- TD6 : Vues, tables système et rappels SQL (BD Gestion pédagogique) ---
 
 R206_TD6_FIGURES = docs/r2.06/td6/figures/mcd.pdf docs/r2.06/td6/figures/hierarchie-modules.pdf
@@ -352,6 +457,9 @@ docs/r2.06/td6/td6.gen.md: $(R206_TD6_TEMPLATE) $(R206_TD6_SQL) $(R206_TD6_GEN)
 
 docs/r2.06/td6/td6-correction.gen.md: $(R206_TD6_TEMPLATE) $(R206_TD6_SQL) $(R206_TD6_GEN)
 	$(PYTHON) $(R206_TD6_GEN) --mode correction --template $< --output $@ $(word 2,$^)
+
+docs/r2.06/td6/td6-teacher.gen.md: $(R206_TD6_TEMPLATE) $(R206_TD6_SQL) $(R206_TD6_GEN)
+	$(PYTHON) $(R206_TD6_GEN) --mode teacher --template $< --output $@ $(word 2,$^)
 
 $(OUTPUT_DIR)/r2.06/td6/td6.pdf: docs/r2.06/td6/td6.gen.md $(TEMPLATE_DIR)/template.tex $(FILTER_DIR)/custom-styles.lua $(R206_TD6_FIGURES)
 	@mkdir -p $(OUTPUT_DIR)/r2.06/td6
@@ -381,6 +489,21 @@ $(OUTPUT_DIR)/r2.06/td6/td6-correction.pdf: docs/r2.06/td6/td6-correction.gen.md
 		--variable=version:$(GIT_VERSION) \
 		--number-sections \
 		td6-correction.gen.md \
+		-o ../../../$@
+
+$(OUTPUT_DIR)/r2.06/td6/td6-teacher.pdf: docs/r2.06/td6/td6-teacher.gen.md $(TEMPLATE_DIR)/template.tex $(FILTER_DIR)/custom-styles.lua $(R206_TD6_FIGURES)
+	@mkdir -p $(OUTPUT_DIR)/r2.06/td6
+	cd docs/r2.06/td6 && $(PANDOC) \
+		--from markdown+footnotes+definition_lists+fenced_divs+bracketed_spans \
+		--pdf-engine=pdflatex \
+		--pdf-engine-opt=-shell-escape \
+		--template=../../../$(TEMPLATE_DIR)/template.tex \
+		--lua-filter=../../../$(FILTER_DIR)/custom-styles.lua \
+		--resource-path=.:../../../$(TEMPLATE_DIR):figures \
+		--variable=license-badge:../../../$(TEMPLATE_DIR)/cc-by-nc-sa \
+		--variable=version:$(GIT_VERSION) \
+		--number-sections \
+		td6-teacher.gen.md \
 		-o ../../../$@
 
 # ==============================================================================
@@ -523,6 +646,9 @@ docs/r1.05/td6/td6.gen.md: $(R105_TD6_TEMPLATE) $(R105_TD6_SQL) $(R105_TD6_GEN)
 docs/r1.05/td6/td6-correction.gen.md: $(R105_TD6_TEMPLATE) $(R105_TD6_SQL) $(R105_TD6_GEN)
 	$(PYTHON) $(R105_TD6_GEN) --mode correction --template $< --output $@ $(word 2,$^)
 
+docs/r1.05/td6/td6-teacher.gen.md: $(R105_TD6_TEMPLATE) $(R105_TD6_SQL) $(R105_TD6_GEN)
+	$(PYTHON) $(R105_TD6_GEN) --mode teacher --template $< --output $@ $(word 2,$^)
+
 $(OUTPUT_DIR)/r1.05/td6/td6.pdf: docs/r1.05/td6/td6.gen.md $(TEMPLATE_DIR)/template.tex $(FILTER_DIR)/custom-styles.lua $(R105_TD6_FIGURES)
 	@mkdir -p $(OUTPUT_DIR)/r1.05/td6
 	cd docs/r1.05/td6 && $(PANDOC) \
@@ -553,6 +679,21 @@ $(OUTPUT_DIR)/r1.05/td6/td6-correction.pdf: docs/r1.05/td6/td6-correction.gen.md
 		td6-correction.gen.md \
 		-o ../../../$@
 
+$(OUTPUT_DIR)/r1.05/td6/td6-teacher.pdf: docs/r1.05/td6/td6-teacher.gen.md $(TEMPLATE_DIR)/template.tex $(FILTER_DIR)/custom-styles.lua $(R105_TD6_FIGURES)
+	@mkdir -p $(OUTPUT_DIR)/r1.05/td6
+	cd docs/r1.05/td6 && $(PANDOC) \
+		--from markdown+footnotes+definition_lists+fenced_divs+bracketed_spans \
+		--pdf-engine=pdflatex \
+		--pdf-engine-opt=-shell-escape \
+		--template=../../../$(TEMPLATE_DIR)/template.tex \
+		--lua-filter=../../../$(FILTER_DIR)/custom-styles.lua \
+		--resource-path=.:../../../$(TEMPLATE_DIR):figures \
+		--variable=license-badge:../../../$(TEMPLATE_DIR)/cc-by-nc-sa \
+		--variable=version:$(GIT_VERSION) \
+		--number-sections \
+		td6-teacher.gen.md \
+		-o ../../../$@
+
 # --- TD7 : Interrogation en SQL interprété (BD Voyages) ---
 
 R105_TD7_FIGURES = docs/r1.05/td7/figures/mcd.pdf
@@ -570,6 +711,9 @@ docs/r1.05/td7/td7.gen.md: $(R105_TD7_TEMPLATE) $(R105_TD7_SQL) $(R105_TD7_GEN)
 
 docs/r1.05/td7/td7-correction.gen.md: $(R105_TD7_TEMPLATE) $(R105_TD7_SQL) $(R105_TD7_GEN)
 	$(PYTHON) $(R105_TD7_GEN) --mode correction --template $< --output $@ $(word 2,$^)
+
+docs/r1.05/td7/td7-teacher.gen.md: $(R105_TD7_TEMPLATE) $(R105_TD7_SQL) $(R105_TD7_GEN)
+	$(PYTHON) $(R105_TD7_GEN) --mode teacher --template $< --output $@ $(word 2,$^)
 
 $(OUTPUT_DIR)/r1.05/td7/td7.pdf: docs/r1.05/td7/td7.gen.md $(TEMPLATE_DIR)/template.tex $(FILTER_DIR)/custom-styles.lua $(R105_TD7_FIGURES)
 	@mkdir -p $(OUTPUT_DIR)/r1.05/td7
@@ -599,6 +743,21 @@ $(OUTPUT_DIR)/r1.05/td7/td7-correction.pdf: docs/r1.05/td7/td7-correction.gen.md
 		--variable=version:$(GIT_VERSION) \
 		--number-sections \
 		td7-correction.gen.md \
+		-o ../../../$@
+
+$(OUTPUT_DIR)/r1.05/td7/td7-teacher.pdf: docs/r1.05/td7/td7-teacher.gen.md $(TEMPLATE_DIR)/template.tex $(FILTER_DIR)/custom-styles.lua $(R105_TD7_FIGURES)
+	@mkdir -p $(OUTPUT_DIR)/r1.05/td7
+	cd docs/r1.05/td7 && $(PANDOC) \
+		--from markdown+footnotes+definition_lists+fenced_divs+bracketed_spans \
+		--pdf-engine=pdflatex \
+		--pdf-engine-opt=-shell-escape \
+		--template=../../../$(TEMPLATE_DIR)/template.tex \
+		--lua-filter=../../../$(FILTER_DIR)/custom-styles.lua \
+		--resource-path=.:../../../$(TEMPLATE_DIR):figures \
+		--variable=license-badge:../../../$(TEMPLATE_DIR)/cc-by-nc-sa \
+		--variable=version:$(GIT_VERSION) \
+		--number-sections \
+		td7-teacher.gen.md \
 		-o ../../../$@
 
 # ==============================================================================

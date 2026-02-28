@@ -83,7 +83,8 @@ WHERE
     AND nomProf = 'BOITARD'
     AND prenomProf = 'DIDIER';
 
--- @remark dans la version algébrique et prédicative, il y a autant de tuples résultats que d’étudiants ayant un enseignement de Didier Boitard. Il faut donc utiliser DISTINCT pour éliminer les modules dupliqués. Dans la version imbriquée, le premier bloc n’opère que sur la relation module dont code est la clef primaire. Il ne peut donc pas y avoir de duplicats et DISTINCT n'a donc pas besoin d'être utilisé.
+-- @remark dans la version algébrique et prédicative, il y a autant de tuples résultats que d’étudiants ayant un enseignement de Didier Boitard. Il faut donc utiliser DISTINCT pour éliminer les modules dupliqués. Dans la version imbriquée, le premier bloc n’opère que sur la relation module dont code est la clef primaire. Il ne peut donc pas y avoir de duplicats et DISTINCT n’a donc pas besoin d’être utilisé.
+-- @remark_teacher Erreur fréquente : les étudiants oublient DISTINCT dans la version algébrique. Leur faire remarquer que la version imbriquée ne nécessite pas DISTINCT car la projection porte sur la clef primaire de Module.
 
 -- Q3 - c:1, t:2
 -- Quels sont les groupes de seconde année pour lesquels Marc Laporte a effectué un enseignement ?
