@@ -7,6 +7,8 @@
 
 -- Q1 - c:1, t:5
 -- Quelles sont les villes d'arrivée des voyages à destination du Maroc ?
+-- @difficulty 1
+-- @tags projection, sélection
 PROMPT "Q1";
 
 SELECT DISTINCT villeArr
@@ -15,6 +17,8 @@ WHERE paysArr = 'MAROC';
 
 -- Q2 - c:2, t:2
 -- Donnez les codes et libellés des options avec un libellé comportant le mot « Visite ».
+-- @difficulty 1
+-- @tags sélection
 PROMPT "Q2";
 
 SELECT *
@@ -23,6 +27,8 @@ WHERE Libelle LIKE '%VISITE%';
 
 -- Q3 - c:1, t:4
 -- Donnez, triées par ordre chronologique, les dates de départ proposées pour le voyage d'identifiant 927 entre le 1er juin 2004 et le 30 juillet 2004.
+-- @difficulty 1
+-- @tags sélection, tri
 PROMPT "Q3 - V1";
 
 SELECT dateDep
@@ -45,6 +51,8 @@ ORDER BY dateDep ASC;
 
 -- Q4 - c:5, t:8
 -- Donnez, triés par ordre décroissant du numéro de client, les numéros, noms, prénoms, code postaux et villes des clients n'habitant ni Paris ni Marseille.
+-- @difficulty 1
+-- @tags projection, sélection, tri
 PROMPT "Q4 - V1";
 
 SELECT numCl, nom, prenom, cp, ville FROM Client
@@ -62,6 +70,8 @@ ORDER BY numCl DESC;
 
 -- Q5 - c:2, t:7
 -- Quels sont les identifiants et noms des clients qui n’ont pas d’adresse enregistrée ?
+-- @difficulty 1
+-- @tags projection, null
 PROMPT "Q5";
 
 SELECT numCl, nom
@@ -73,6 +83,8 @@ WHERE adresse IS NULL;
 
 -- Q6 - c:1, t:2
 -- Donnez les identifiants des voyages pour lesquels le client Hubert Marin a fait une réservation.
+-- @difficulty 2
+-- @tags jointure, imbrication
 -- Version algébrique.
 PROMPT "Q6 - Version algébrique";
 
@@ -108,6 +120,8 @@ WHERE
 
 -- Q7 - c:3, t:15
 -- Donnez les numéros des clients ainsi que les dates de réservation et villes d'arrivée des voyages réservés par des clients habitant Marseille.
+-- @difficulty 2
+-- @tags jointure, imbrication
 -- Version algébrique.
 PROMPT "Q7 - Version algébrique";
 
@@ -145,6 +159,8 @@ WHERE
 
 -- Q8 - c:1, t:2
 -- Quelles sont les libellés des options proposées pour le voyage d'identifiant 862 ?
+-- @difficulty 2
+-- @tags jointure, imbrication
 -- Version algébrique.
 PROMPT "Q8 - Version algébrique";
 
@@ -175,6 +191,8 @@ WHERE
 
 -- Q9 - c:1, t:6
 -- Quels sont les libellés d’option proposées pour les voyages réservés par le client Thomas Jarolim ?
+-- @difficulty 3
+-- @tags jointure, imbrication
 -- Version algébrique.
 PROMPT "Q9 - Version algébrique";
 
@@ -222,6 +240,8 @@ WHERE
 
 -- Q10 - c:3, t:16
 -- Quels sont les noms, prénoms et villes des clients ayant réservé au moins un voyage partant de leur ville de résidence ?
+-- @difficulty 3
+-- @tags jointure, imbrication
 -- Version algébrique.
 PROMPT "Q10 - Version algébrique";
 
@@ -258,6 +278,8 @@ WHERE
 
 -- Q11 - c:1, t:1 (32)
 -- Combien y a-t-il de réservations ?
+-- @difficulty 1
+-- @tags agrégation
 PROMPT "Q11";
 
 SELECT COUNT(*)
@@ -265,6 +287,8 @@ FROM Reservation;
 
 -- Q12 - c:1, t:1 (6.25)
 -- Quelle est la durée moyenne des séjours au Kenya ?
+-- @difficulty 1
+-- @tags agrégation
 PROMPT "Q12";
 
 SELECT AVG(duree)
@@ -273,6 +297,8 @@ WHERE paysArr = 'KENYA';
 
 -- Q13 - c:1, t:1 (9)
 -- Combien y a-t-il de places réservées pour les voyages réservés d’identifiant 122 ?
+-- @difficulty 1
+-- @tags agrégation
 PROMPT "Q13";
 
 SELECT SUM(nbPers)
@@ -281,6 +307,8 @@ WHERE idV = 122;
 
 -- Q14 - c:1, t:1 (179)
 -- Quel est le tarif de voyage le moins cher ?
+-- @difficulty 1
+-- @tags agrégation
 PROMPT "Q14";
 
 SELECT MIN(tarif)
@@ -288,6 +316,8 @@ FROM Planning;
 
 -- Q15 - c:2, t:10
 -- Donnez les dates de départ et les dates de retour pour les voyages réservés d’identifiant 122.
+-- @difficulty 2
+-- @tags jointure
 PROMPT "Q15";
 
 SELECT dateDep, dateDep + duree AS dateRetour
@@ -299,6 +329,8 @@ WHERE V.idV = 122;
 
 -- Q16 - c:5, t:1
 -- Quels sont les identifiants, pays d’arrivée, villes d’arrivée et hôtels ainsi que leurs nombres d’étoiles des voyages pour lesquels le tarif est le plus faible ? Donnez deux formulations.
+-- @difficulty 2
+-- @tags jointure, imbrication, agrégation
 PROMPT "Q16 - V1";
 
 SELECT DISTINCT V.idV, paysArr, villeArr, hotel, nbEtoiles
@@ -322,6 +354,8 @@ WHERE tarif <= ALL(
 
 -- Q17 - c:4, t:1
 -- Quels sont les pays d’arrivée et villes d’arrivée et hôtels ainsi que leurs nombres d’étoiles des voyages réservés les plus cher ? Donnez deux formulations.
+-- @difficulty 2
+-- @tags jointure, imbrication, agrégation
 PROMPT "Q17 - V1";
 
 SELECT DISTINCT paysArr, villeArr, hotel, nbEtoiles
@@ -344,6 +378,8 @@ WHERE tarif >= ALL(
 
 -- Q18 - c:1, t:1 (1629)
 -- Donnez, en tenant compte du nombre de personnes, le prix total des réservations du client Arnaud Peyroche.
+-- @difficulty 3
+-- @tags jointure, imbrication, agrégation
 PROMPT "Q18 - V1";
 
 SELECT SUM(tarif * nbPers)
@@ -378,6 +414,8 @@ WHERE R.numCl IN (
 
 -- Q19 - c:1, t:1 (35)
 -- Donnez, le prix total des options proposées pour les voyages réservés par le client Nicolas Potier.
+-- @difficulty 3
+-- @tags jointure, agrégation
 PROMPT "Q19";
 
 SELECT SUM(prix)
@@ -393,6 +431,8 @@ WHERE
 
 -- Q20 - c:2, t:11
 -- Quels sont les noms et prénoms des clients qui n’ont aucune réservation ?
+-- @difficulty 2
+-- @tags imbrication, différence
 PROMPT "Q20 - V1";
 
 SELECT DISTINCT nom, prenom
@@ -414,6 +454,8 @@ WHERE numCl <> ALL(
 
 -- Q21 - c:3, t:14
 -- Quels sont les identifiants, pays d’arrivée et ville d’arrivée des voyages qui ne sont planifiés à aucune date ?
+-- @difficulty 2
+-- @tags imbrication, différence
 PROMPT "Q21 - V1";
 
 SELECT idv, paysArr, villeArr
@@ -435,6 +477,8 @@ WHERE idV <> ALL(
 
 -- Q22 - c:2, t:6
 -- Quels sont les pays d’arrivée et villes d’arrivée qui ne sont pas proposés au départ de Marseille ?
+-- @difficulty 2
+-- @tags imbrication, différence
 PROMPT "Q22 - V1";
 
 SELECT DISTINCT paysArr, villeArr
@@ -460,6 +504,8 @@ WHERE (
 
 -- Q23 - c:2, t:10
 -- Quels sont les codes et libellés des options qui ne sont pas proposés dans les voyages pour Chypre ?
+-- @difficulty 3
+-- @tags jointure, imbrication, différence
 PROMPT "Q23 - V1";
 
 SELECT code, Libelle

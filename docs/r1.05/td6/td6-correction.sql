@@ -7,6 +7,8 @@
 
 -- Q1 - c:4, t:3
 -- Donnez la liste des avions dont la capacité est strictement supérieure à 350 passagers.
+-- @difficulty 1
+-- @tags sélection
 PROMPT "Q1";
 
 SELECT *
@@ -15,6 +17,8 @@ WHERE capacite > 350;
 
 -- Q2 - c:2, t:2
 -- Quels sont les numéros et noms des avions localisés à Nice ?
+-- @difficulty 1
+-- @tags projection, sélection
 PROMPT "Q2";
 
 SELECT numAv, nomAv
@@ -23,6 +27,8 @@ WHERE localisation = 'NICE';
 
 -- Q3 - c:2, t:10
 -- Quels sont les numéros des pilotes en service et les villes de départ de leurs vols ?
+-- @difficulty 1
+-- @tags projection, distinct
 PROMPT "Q3";
 
 SELECT DISTINCT numPil, villeDep
@@ -30,6 +36,8 @@ FROM Vol;
 
 -- Q4 - c:1, t:2
 -- Quel sont les noms des pilotes domiciliés à Paris ayant un salaire d'au moins 5000 ?
+-- @difficulty 1
+-- @tags projection, sélection
 PROMPT "Q4";
 
 SELECT DISTINCT nomPil
@@ -40,6 +48,8 @@ WHERE
 
 -- Q5 - c:2, t:3
 -- Quels sont les numéros et noms d'avions localisés à Nice ou dont la capacité est strictement inférieure à 350 passagers ?
+-- @difficulty 1
+-- @tags sélection
 PROMPT "Q5 - V1";
 
 SELECT numAv, nomAv
@@ -61,6 +71,8 @@ WHERE capacite < 350;
 
 -- Q6 - c:7, t:2
 -- Donnez la liste des vols au départ de Nice allant à Paris à partir de 18 heures.
+-- @difficulty 1
+-- @tags sélection
 PROMPT "Q6 - V1";
 
 SELECT *
@@ -89,6 +101,8 @@ WHERE heureDep > '18:00';
 
 -- Q7 - c:2, t:5
 -- Quels sont les numéros et villes de départ des vols effectués par les pilotes de numéro 100 ou 204 ?
+-- @difficulty 1
+-- @tags sélection
 PROMPT "Q7 - V1";
 
 SELECT numVol, villeDep
@@ -119,6 +133,8 @@ WHERE numPil = 204;
 
 -- Q8 - c:1, t:1
 -- Combien y a-t-il de vols desservant Paris ?
+-- @difficulty 1
+-- @tags agrégation
 PROMPT "Q8";
 
 SELECT COUNT(*)
@@ -127,6 +143,8 @@ WHERE villeArr = 'PARIS';
 
 -- Q9 - c:1, t:1
 -- Donnez le nombre de pilotes effectuant un vol au départ de Paris.
+-- @difficulty 1
+-- @tags agrégation, distinct
 PROMPT "Q9";
 
 SELECT COUNT(DISTINCT numPil)
@@ -135,6 +153,8 @@ WHERE villeDep = 'PARIS';
 
 -- Q10 - c:1, t:1
 -- Quel est le salaire moyen des pilotes marseillais ?
+-- @difficulty 1
+-- @tags agrégation
 PROMPT "Q10";
 
 SELECT AVG(salaire)
@@ -146,6 +166,8 @@ WHERE adresse = 'MARSEILLE';
 
 -- Q11 - c:1, t:3
 -- Donnez les numéros des vols effectués au départ de Nice par des pilotes parisiens.
+-- @difficulty 2
+-- @tags jointure, imbrication
 -- Version algébrique.
 PROMPT "Q11 - Version algébrique";
 
@@ -181,6 +203,8 @@ WHERE
 
 -- Q12 - c:3, t:12
 -- Quels sont les numéros, villes de départ, et villes d'arrivée des vols effectués par un avion qui n'est pas localisé à Nice ?
+-- @difficulty 2
+-- @tags jointure, imbrication
 -- Version algébrique.
 PROMPT "Q12 - Version algébrique";
 
@@ -211,6 +235,8 @@ WHERE
 
 -- Q13 - c:1, t:2
 -- Quels sont les numéros des pilotes qui ne sont pas en service ?
+-- @difficulty 2
+-- @tags imbrication, différence
 PROMPT "Q13 - V1";
 
 SELECT numPil
@@ -241,6 +267,8 @@ FROM Vol;
 
 -- Q14 - c:2, t:4
 -- Quels sont les noms et adresses des pilotes assurant au moins un vol au départ de Nice avec des avions de capacité de plus de 300 places ?
+-- @difficulty 2
+-- @tags jointure, imbrication
 -- Version algébrique.
 PROMPT "Q14 - Version algébrique";
 
@@ -282,6 +310,8 @@ WHERE
 
 -- Q15 - c:1, t:1
 -- Quels sont les noms des pilotes domiciliés à Paris assurant des vols au départ de Nice avec des A320 ?
+-- @difficulty 2
+-- @tags jointure, imbrication
 -- Version algébrique.
 PROMPT "Q15 - Version algébrique";
 
@@ -327,6 +357,8 @@ WHERE
 
 -- Q16 - c:1, t:1
 -- Quels sont les numéros des vols effectués par des pilotes niçois au départ ou à l'arrivée de Nice avec des avions localisés à Paris ?
+-- @difficulty 3
+-- @tags jointure, imbrication
 -- Version algébrique.
 PROMPT "Q16 - Version algébrique";
 
@@ -371,6 +403,8 @@ WHERE
 
 -- Q17 - c:1, t:5
 -- Quels sont, à l'exception des pilotes nommés Durand, les noms de pilotes en service ?
+-- @difficulty 2
+-- @tags jointure, imbrication
 -- Version algébrique.
 PROMPT "Q17 - Version algébrique";
 
@@ -402,6 +436,8 @@ WHERE
 
 -- Q18 - c:1, t:3
 -- Quels sont les horaires de départ des vols desservant les villes d'arrivée des vols au départ de Paris ?
+-- @difficulty 3
+-- @tags jointure, imbrication
 -- Version algébrique.
 PROMPT "Q18 - Version algébrique";
 
@@ -435,6 +471,8 @@ WHERE
 
 -- Q19 - c:2, t:3
 -- Quels sont les numéros et noms des pilotes habitant dans les mêmes villes que les pilotes nommés Martin ?
+-- @difficulty 3
+-- @tags jointure, imbrication
 PROMPT "Q19 - Version algébrique";
 
 SELECT DISTINCT Px.numPil, Px.nomPil
@@ -469,6 +507,8 @@ WHERE
 
 -- Q20 - c:1, t:1
 -- Quels sont les numéros des avions localisés dans la même ville que l'avion numéro 100 ?
+-- @difficulty 2
+-- @tags jointure, imbrication
 PROMPT "Q20 - Version algébrique";
 
 SELECT Ax.numAv
@@ -503,6 +543,8 @@ WHERE
 
 -- Q21 - c:1, t:1
 -- Quelles sont les villes de départ de vols dans lesquelles ne réside aucun pilote ?
+-- @difficulty 2
+-- @tags imbrication, différence
 PROMPT "Q21 - V1";
 
 SELECT DISTINCT villeDep
@@ -533,6 +575,8 @@ FROM Pilote;
 
 -- Q22 - c:1, t:6
 -- Quels sont les noms des pilotes n'effectuant pas de vol au départ de Lyon ?
+-- @difficulty 2
+-- @tags imbrication, différence
 PROMPT "Q22 - V1";
 
 SELECT DISTINCT nomPil
@@ -567,6 +611,8 @@ WHERE villeDep = 'LYON';
 
 -- Q23 - c:2, t:2
 -- Donnez les numéros et noms des pilotes homonymes.
+-- @difficulty 3
+-- @tags jointure
 PROMPT "Q23 - Version algébrique";
 
 SELECT P1.numPil, P1.nomPil
@@ -590,6 +636,8 @@ WHERE
 
 -- Q24 - c:1, t:4
 -- Quelles sont les villes où habitent des pilotes et où sont localisés des avions ?
+-- @difficulty 2
+-- @tags intersection, imbrication
 PROMPT "Q24 - V1";
 
 SELECT DISTINCT adresse
@@ -611,6 +659,8 @@ FROM Avion;
 
 -- Q25 - c:1, t:4
 -- Quels sont les noms des pilotes qui effectuent des vols au départ de leur ville de résidence ?
+-- @difficulty 3
+-- @tags jointure, imbrication
 PROMPT "Q25 - Version algébrique";
 
 SELECT DISTINCT nomPil
@@ -642,6 +692,8 @@ WHERE
 
 -- Q26 - c:3, t:1
 -- Quels sont les numéros, noms et salaires des pilotes domiciliés dans les mêmes villes que les pilotes nommés Martin tout en ayant un salaire supérieur à eux ?
+-- @difficulty 3
+-- @tags jointure
 PROMPT "Q26 - Version algébrique";
 
 SELECT Px.numPil, Px.nomPil, Px.salaire
@@ -667,6 +719,8 @@ WHERE
 
 -- Q27 - c:2, t:1
 -- Quels sont les numéros et villes d'arrivée des vols dont l'horaire de départ est le plus tardif ?
+-- @difficulty 2
+-- @tags imbrication, agrégation
 PROMPT "Q27 - V1";
 
 SELECT numVol, villeArr
@@ -688,6 +742,8 @@ WHERE heureDep >= ALL(
 
 -- Q28 - c:1, t:1
 -- Donnez le nombre de vols effectués par les pilotes ayant les plus petits salaires.
+-- @difficulty 3
+-- @tags jointure, imbrication, agrégation
 PROMPT "Q28 - V1";
 
 SELECT COUNT(*)

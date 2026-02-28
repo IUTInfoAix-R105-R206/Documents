@@ -5,6 +5,8 @@
 
 -- Q1 - c:2, t:9
 -- Donnez, pour l'étudiant Stéphane Rocchi, les moyennes de test obtenues par ordre décroissant avec le code du module associé. 
+-- @difficulty 2
+-- @tags jointure, imbrication, sélection, tri
 -- Version algébrique.
 PROMPT "Q1 - Version algébrique";
 
@@ -44,6 +46,8 @@ ORDER BY moyTest DESC;
 
 -- Q2 - c:2, t:2
 -- Donnez les codes et libellés des modules enseignés par Didier Boitard.
+-- @difficulty 2
+-- @tags jointure, imbrication, distinct
 -- Version algébrique.
 PROMPT "Q2 - Version algébrique";
 
@@ -88,6 +92,8 @@ WHERE
 
 -- Q3 - c:1, t:2
 -- Quels sont les groupes de seconde année pour lesquels Marc Laporte a effectué un enseignement ?
+-- @difficulty 2
+-- @tags jointure, imbrication, sélection, distinct
 -- Version algébrique.
 PROMPT "Q3 - Version algébrique";
 
@@ -138,6 +144,8 @@ WHERE
 
 -- Q4 - c:2, t:18
 -- Donnez les numéros et, par ordre alphabétique, les noms des étudiants ayant suivi un enseignement effectué par un professeur, par ailleurs responsable d'un module quelconque.
+-- @difficulty 2
+-- @tags jointure, imbrication, tri, distinct
 -- Version algébrique.
 PROMPT "Q4 - Version algébrique";
 
@@ -178,6 +186,8 @@ ORDER BY nomEt ASC;
 
 -- Q5 - c:2, t:12
 -- Donnez les numéros et, par ordre alphabétique, les noms des étudiants ayant suivi un enseignement effectué par le professeur responsable de ce module.
+-- @difficulty 3
+-- @tags jointure, imbrication, tri, distinct
 -- Version algébrique.
 PROMPT "Q5 - Version algébrique";
 
@@ -221,6 +231,8 @@ ORDER BY nomEt ASC;
 
 -- Q6 - c:1, t:1 (17)
 -- Combien y-a-t-il de professeurs ?
+-- @difficulty 1
+-- @tags agrégation
 PROMPT "Q6";
 
 SELECT COUNT(*)
@@ -228,6 +240,8 @@ FROM Professeur;
 
 -- Q7 - c:1, t:1 (9.7)
 -- Quelle est la moyenne générale des notes de contrôle continu pour le module de code PRL ?
+-- @difficulty 1
+-- @tags agrégation, sélection
 PROMPT "Q7";
 
 SELECT AVG(moyCC)
@@ -236,6 +250,8 @@ WHERE code = 'PRL';
 
 -- Q8 - c:1, t:1 (7)
 -- Combien de professeurs ont donné un enseignement à l'étudiant Philippe Lyon ?
+-- @difficulty 2
+-- @tags jointure, agrégation, distinct
 PROMPT "Q8";
 
 SELECT COUNT(DISTINCT numProf)
@@ -249,6 +265,8 @@ WHERE
 
 -- Q9 - c:1, t:1 (10.66)
 -- Donnez, pour le module Prolog, la note moyenne obtenue par les étudiants en tenant compte des coefficients de contrôle continu et de test.
+-- @difficulty 3
+-- @tags jointure, agrégation, null
 PROMPT "Q9";
 
 SELECT AVG((COALESCE(moyCC, 0) * coefCC + COALESCE(moyTest, 0) * coefTest) / (coefCC + coefTest)) AS moyenne
@@ -260,6 +278,8 @@ WHERE libelle = 'PROLOG';
 
 -- Q10 - c:1, t:1 (0)
 -- Quel est le coefficient de test le plus faible ?
+-- @difficulty 1
+-- @tags agrégation
 PROMPT "Q10";
 
 SELECT MIN(coefTest)
@@ -267,6 +287,8 @@ FROM Module;
 
 -- Q11 - c:1, t:1 (ETUDE DE CAS 1)
 -- Quels sont les libellés des modules dont le coefficient de test est le plus faible ? Proposer deux formulations différentes de cette requête.
+-- @difficulty 2
+-- @tags imbrication, agrégation
 PROMPT "Q11 - V1";
 
 SELECT DISTINCT libelle
@@ -291,6 +313,8 @@ WHERE coefTest <= ALL(
 
 -- Q12 - c:1, t:1 (11.13)
 -- En supposant que tous les modules sont de même importance, donnez la moyenne générale de l'étudiante Sandrine Levy.
+-- @difficulty 3
+-- @tags jointure, agrégation, null
 PROMPT "Q12";
 
 SELECT AVG(((COALESCE(moyCC, 0) * coefCC) + (COALESCE(moyTest, 0) * coefTest)) / (coefCC + coefTest)) AS moyenne
@@ -303,6 +327,8 @@ FROM Module M
 
 -- Q13 - c:1, t:2
 -- Quels sont les codes des modules pour lesquels la meilleure note de test a été obtenue ?
+-- @difficulty 2
+-- @tags imbrication, agrégation
 PROMPT "Q13";
 
 SELECT DISTINCT code
@@ -314,6 +340,8 @@ WHERE moyTest = (
 
 -- Q14 - c:2, t:2
 -- Quels sont les numéros et noms des étudiants qui ont obtenu, tous modules confondus, la meilleure note de test ? Proposer deux formulations différentes de cette requête.
+-- @difficulty 2
+-- @tags jointure, imbrication, agrégation, null
 PROMPT "Q14 - V1";
 
 SELECT DISTINCT Et.numEt, nomEt
@@ -358,6 +386,8 @@ WHERE numEt IN (
 
 -- Q15 - c:1, t:6
 -- Donnez les villes de résidence des étudiants et des professeurs.
+-- @difficulty 1
+-- @tags union, null
 PROMPT "Q15";
 
 SELECT villeEt
@@ -370,6 +400,8 @@ WHERE villeProf IS NOT NULL;
 
 -- Q16 - c:2, t:4
 -- Quels sont les numéros des professeurs responsables d'un module qu'ils enseignent ainsi que le code du module correspondant ?
+-- @difficulty 2
+-- @tags intersection
 PROMPT "Q16";
 
 SELECT resp, code
@@ -380,6 +412,8 @@ FROM Enseigne;
 
 -- Q17 - c:1, t:23
 -- Donnez les libellés des modules ne correspondant à la spécialité d'aucun professeur.
+-- @difficulty 2
+-- @tags différence, imbrication
 PROMPT "Q17";
 
 SELECT DISTINCT libelle
@@ -397,6 +431,8 @@ WHERE code IN (
 
 -- Q18 - c:2, t:4 [= Q16]
 -- Quels sont les numéros des professeurs responsables d'un module qu'ils enseignent ainsi que le code du module correspondant ?
+-- @difficulty 2
+-- @tags jointure, imbrication, distinct
 PROMPT "Q18 - V1";
 
 SELECT DISTINCT resp, M.code
@@ -423,6 +459,8 @@ WHERE (
 
 -- Q19 - c:1, t:23 [= Q17]
 -- Donnez les libellés des modules ne correspondant à la spécialité d'aucun professeur.
+-- @difficulty 2
+-- @tags différence, imbrication, not-exists, jointure-externe, null
 PROMPT "Q19 - V1";
 
 SELECT DISTINCT libelle
@@ -459,6 +497,8 @@ WHERE specProf IS NULL;
 
 -- Q20 - c:3, t:27
 -- Donnez les numéros, noms et prénoms des étudiants n'ayant aucune note.
+-- @difficulty 2
+-- @tags différence, imbrication, not-exists, jointure-externe
 PROMPT "Q20 - V1";
 
 SELECT numEt, nomEt, prenomEt
@@ -499,6 +539,8 @@ WHERE N.numEt IS NULL;
 
 -- Q21 - c:2, t:41
 -- Quels sont les noms et prénoms des étudiants n'ayant eu aucun enseignement de Marc Laporte ?
+-- @difficulty 3
+-- @tags jointure, différence, imbrication, not-exists, jointure-externe
 PROMPT "Q21 - V1";
 
 SELECT nomEt, prenomEt
@@ -559,6 +601,8 @@ WHERE T.numEt IS NULL;
 
 -- Q22 - c:2, t:8
 -- Quels sont les noms et prénoms des professeurs n'étant pas responsables de modules ?
+-- @difficulty 2
+-- @tags différence, imbrication, not-exists, jointure-externe, null
 PROMPT "Q22 - V1";
 
 SELECT nomProf, prenomProf
@@ -605,6 +649,8 @@ WHERE resp IS NULL;
 
 -- Q23 - c:2, t:5
 -- Donnez, par groupe de seconde année, le nombre d'étudiants.
+-- @difficulty 1
+-- @tags groupement, agrégation, sélection
 PROMPT "Q23";
 
 SELECT groupeEt, COUNT(*) AS nbEtudiants
@@ -614,6 +660,8 @@ GROUP BY groupeEt;
 
 -- Q24 - c:2, t:29
 -- Donnez, pour chaque numéro d'étudiant, la meilleure note de test.
+-- @difficulty 1
+-- @tags groupement, agrégation
 PROMPT "Q24";
 
 SELECT numEt, MAX(moyTest) AS maxMoyTest
@@ -622,6 +670,8 @@ GROUP BY numEt;
 
 -- Q25 - c:4, t:71
 -- Donnez, pour chaque numéro et nom des étudiants de seconde année ainsi que pour chaque code de module, le nombre de professeurs.
+-- @difficulty 2
+-- @tags jointure, groupement, agrégation, sélection
 PROMPT "Q25";
 
 SELECT Et.numEt, nomEt, code, COUNT(numProf) AS nbProfs
@@ -634,6 +684,8 @@ GROUP BY Et.numEt, nomEt, code;
 
 -- Q26 - c:2, t:2
 -- Donnez, pour chaque ville de plus de cinq professeurs, le nombre de professeurs y résidant.
+-- @difficulty 2
+-- @tags groupement, agrégation
 PROMPT "Q26";
 
 SELECT villeProf, COUNT(*) AS nbProfs

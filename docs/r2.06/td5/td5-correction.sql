@@ -7,6 +7,8 @@
 
 -- Q1 - c:4, t:12
 -- Quel est, pour chacun des numéros et noms des professeurs, et pour chacune des années, le nombre d'étudiants auxquels il a enseigné ?
+-- @difficulty 2
+-- @tags jointure, groupement, agrégation, distinct
 PROMPT "Q1";
 
 SELECT P.numProf, nomProf, anneeEt, COUNT(DISTINCT Et.numEt) AS nbEtudiants
@@ -17,6 +19,8 @@ GROUP BY P.numProf, nomProf, anneeEt;
 
 -- Q2 - c:3, t:5
 -- Quel est, pour chacun des numéros et noms des professeurs responsable d'un module, le nombre de modules dans lesquels il fait cours ? Formulez les requêtes suivantes en utilisant, si possible, les trois formes de jointure.
+-- @difficulty 2
+-- @tags jointure, imbrication, groupement, agrégation, distinct
 
 -- Version algébrique.
 PROMPT "Q2 - Version algébrique";
@@ -52,6 +56,8 @@ GROUP BY P.numProf, nomProf;
 
 -- Q3 - c:2, t:5
 -- Donnez la moyenne des moyennes de test par groupe d'étudiants de seconde année pour le module de libellé Conception de SI.
+-- @difficulty 2
+-- @tags jointure, groupement, agrégation, sélection
 PROMPT "Q3";
 
 SELECT groupeEt, AVG(moyTest) AS moyMoyTest
@@ -67,6 +73,8 @@ GROUP BY groupeEt;
 
 -- Q4 - c:3, t:4
 -- Quels sont les numéros, noms et prénoms des enseignants ayant autant de modules que Bernard Faure ?
+-- @difficulty 3
+-- @tags jointure, groupement, agrégation, imbrication, sous-requête
 PROMPT "Q4 - V1";
 
 WITH
@@ -115,6 +123,8 @@ HAVING COUNT(DISTINCT code) = (
 
 -- Q5 - c:1, t:1 (9)
 -- Donnez le nombre moyen d'étudiants des groupes de seconde année.
+-- @difficulty 2
+-- @tags groupement, agrégation, sélection, sous-requête
 PROMPT "Q5 - V1";
 
 SELECT AVG(nbEtudiant)
@@ -133,6 +143,8 @@ WHERE anneeEt = 2;
 
 -- Q6 - c:1, t:1 (45)
 -- Quel est le plus grand nombre d'étudiants à qui un professeur enseigne ?
+-- @difficulty 2
+-- @tags groupement, agrégation, sous-requête, distinct
 PROMPT "Q6";
 
 SELECT MAX(nbEtudiant)
@@ -144,6 +156,8 @@ FROM (
 
 -- Q7 - c:3, t:9
 -- Donnez les codes et libellés des modules, et lorsqu'il existe, le pourcentage de la somme d'heures de cours par rapport au total des heures de cours dans la discipline correspondante.
+-- @difficulty 3
+-- @tags jointure, groupement, agrégation, sous-requête, null
 PROMPT "Q7";
 
 SELECT code, libelle, heureCMPrev / total AS pourcentageDiscipline
@@ -162,6 +176,8 @@ WHERE
 
 -- Q8 - c:3, t:6
 -- Donnez, pour chaque code de module, le nombre de professeurs qui les enseignent et la moyenne de test maximale.
+-- @difficulty 2
+-- @tags jointure, groupement, agrégation, sous-requête, distinct
 PROMPT "Q8 - V1";
 
 SELECT E.code, NB_Prof, moy_max
@@ -186,6 +202,8 @@ GROUP BY E.code;
 
 -- Q9 - c:2, t:1
 -- Quels sont les codes et libellés des racines des hiérarchies des modules ?
+-- @difficulty 1
+-- @tags sélection, null, récursion
 PROMPT "Q9";
 
 SELECT code, libelle
@@ -194,6 +212,8 @@ WHERE codePere IS NULL;
 
 -- Q10 - c:1, t:16
 -- Présenter, de manière hiérarchique, les libellés de tous les sous-modules du module Informatique 2de année.
+-- @difficulty 2
+-- @tags récursion
 PROMPT "Q10";
 
 SELECT LPAD('-', 2 * LEVEL, '-') || libelle
@@ -222,6 +242,8 @@ WHERE libelle <> 'INFORMATIQUE 2DE ANNEE';
 
 -- Q11 - c:1, t:7
 -- Présenter, de manière hiérarchique, les libellés du module Outils modèles génie logiciel et de tous ses sous-modules.
+-- @difficulty 2
+-- @tags récursion
 PROMPT "Q11";
 
 SELECT LPAD('-', 2 * LEVEL, '-') || libelle
@@ -248,6 +270,8 @@ FROM DescModule;
 
 -- Q12 - c:1, t:5
 -- Présenter, de manière hiérarchique, les libellés de tous les modules d'où est issu le module Bases de données.
+-- @difficulty 2
+-- @tags récursion, tri
 PROMPT "Q12";
 
 SELECT LPAD('-', 2 * (MAX(LEVEL) OVER () + 1 - LEVEL), '-') || libelle
@@ -276,6 +300,8 @@ ORDER BY lvl DESC;
 
 -- Q13 - c:1, t:13
 -- Présenter, de manière hiérarchique, les libellés de tous les sous-modules de la discipline Informatique, subordonnés au module Informatique 2e année, à l'exception du module Bases de données.
+-- @difficulty 3
+-- @tags récursion, sélection
 PROMPT "Q13";
 
 SELECT LPAD('-', 2 * LEVEL, '-') || libelle
@@ -312,6 +338,8 @@ WHERE
 
 -- Q14 - c:2, t:1
 -- Quels sont les noms et prénoms des professeurs ayant enseigné à tous les étudiants de seconde année ?
+-- @difficulty 3
+-- @tags division, not-exists, jointure, groupement, agrégation
 PROMPT "Q14 - Version double NOT EXISTS";
 
 SELECT nomProf, prenomProf
@@ -350,6 +378,8 @@ HAVING COUNT(DISTINCT Et.numEt) = (
 
 -- Q15 - c:2, t:11
 -- Quels sont les noms et prénoms des étudiants dont tous les professeurs ont aussi donné cours à l'étudiant numéro 1102 ?
+-- @difficulty 3
+-- @tags division, not-exists, jointure
 PROMPT "Q15 - Version double NOT EXISTS";
 
 SELECT nomEt, prenomEt
@@ -374,6 +404,8 @@ WHERE NOT EXISTS (
 
 -- Q16 - c:3, t:3
 -- Quels sont les numéros, noms et prénoms des étudiants ayant eu, pour le module Conception de SI, tous les Professeurs enseignant ce module ?
+-- @difficulty 3
+-- @tags division, not-exists, jointure, groupement, agrégation
 PROMPT "Q16 - Version double NOT EXISTS";
 
 SELECT numEt, nomEt, prenomEt
@@ -420,6 +452,8 @@ HAVING COUNT(DISTINCT numProf) = (
 
 -- Q17 - c:2, t:1
 -- Quels sont les codes et libellés des modules suivis par tous les étudiants du groupe d'étudiants 2 de seconde année ?
+-- @difficulty 3
+-- @tags division, not-exists, jointure, groupement, agrégation
 PROMPT "Q17 - Version double NOT EXISTS";
 
 SELECT code, libelle
@@ -465,6 +499,8 @@ HAVING COUNT(DISTINCT Et.numEt) = (
 
 -- Q18 - c:1, t:13
 -- Présenter, de manière hiérarchique, les libellés de tous les sous-modules de la discipline Informatique subordonnés au module Informatique 2de année à l'exception du module Codage et circuits et de tous ses éventuels sous-modules.
+-- @difficulty 3
+-- @tags récursion, sélection
 PROMPT "Q18";
 
 SELECT LPAD('-', 2 * LEVEL, '-') || libelle
@@ -495,6 +531,8 @@ WHERE discipline = 'INFORMATIQUE';
 
 -- Q19 - c:1, t:24
 -- Présenter, de manière hiérarchique, les modules suivis par l'étudiant Jérôme Atlani ?
+-- @difficulty 3
+-- @tags récursion, jointure, imbrication
 PROMPT "Q19";
 
 SELECT LPAD('-', 2 * (MAX(LEVEL) OVER () + 1 - LEVEL), '-') || libelle
@@ -538,6 +576,8 @@ FROM AncModule;
 
 -- Q20 - c:3, t:23
 -- Quels sont les numéros, noms et prénoms des étudiants de seconde année dont toutes les moyennes de test sont supérieures ou égales à 10 ?
+-- @difficulty 3
+-- @tags jointure, groupement, agrégation, sélection
 PROMPT "Q20 - V1";
 
 SELECT Et.numEt, nomEt, prenomEt
@@ -565,6 +605,8 @@ HAVING MIN(moyTest) >= 10;
 
 -- Q21 - c:3, t:19
 -- Quels sont les numéros, noms et prénoms des étudiants ayant des moyennes dans un module subordonnés au module Principes des BD ?
+-- @difficulty 2
+-- @tags jointure, imbrication, récursion, distinct
 PROMPT "Q21";
 
 SELECT DISTINCT Et.numEt, nomEt, prenomEt
@@ -598,6 +640,8 @@ WHERE code IN (SELECT code FROM DescModule);
 
 -- Q22 - c:3, t:29
 -- Donnez les numéros des étudiants, les écarts entre leurs éventuelles moyennes de test et la moins bonne moyenne de test du module ACSI ainsi que les écarts entre leurs éventuelles moyennes de test et la meilleure moyenne de test du module ACSI.
+-- @difficulty 3
+-- @tags agrégation, imbrication, sous-requête, sélection
 
 PROMPT "Q22 - V1";
 

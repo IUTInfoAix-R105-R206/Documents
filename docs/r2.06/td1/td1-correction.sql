@@ -6,6 +6,8 @@
 
 -- Q1 - c:3, t:29
 -- Donnez les dates de départ, villes d'arrivée et tarifs des voyages à destination du Maroc.
+-- @difficulty 2
+-- @tags jointure, imbrication
 -- Version algébrique.
 PROMPT "Q1 - Version algébrique";
 
@@ -29,6 +31,8 @@ WHERE
 
 -- Q2 - c:3, t:2
 -- Donnez les dates de départ, villes d'arrivée et pays d'arrivée des voyages réservés des clients ne résidant ni à Paris ni à Marseille.
+-- @difficulty 2
+-- @tags jointure, imbrication
 -- Version algébrique.
 PROMPT "Q2 - Version algébrique";
 
@@ -68,6 +72,8 @@ WHERE
 
 -- Q3 - c:1, t:3
 -- Quels sont les libellés des options gratuites proposées pour les voyages réservés par le client Nicolas Barbier ?
+-- @difficulty 3
+-- @tags jointure, imbrication, null
 -- Version algébrique.
 PROMPT "Q3 - Version algébrique";
 
@@ -122,6 +128,8 @@ WHERE
 
 -- Q4 - c:3, t:5
 -- Quels sont les noms, prénoms et villes de résidence des clients ayant réservé un voyage à destination d'Istanbul partant de leur ville de résidence ?
+-- @difficulty 3
+-- @tags jointure, imbrication
 -- Version algébrique.
 PROMPT "Q4 - Version algébrique";
 
@@ -167,6 +175,8 @@ WHERE
 
 -- Q5 - c:1, t:4
 -- Quelles sont les villes de départ d'un voyage dans lesquelles résident des clients ?
+-- @difficulty 2
+-- @tags intersection
 PROMPT "Q5";
 
 SELECT villeDep
@@ -177,6 +187,8 @@ FROM Client;
 
 -- Q6 - c:1, t:3
 -- Quels sont les libellés des options communes aux voyages d'identifiants 354 et 952 ?
+-- @difficulty 2
+-- @tags intersection, imbrication
 PROMPT "Q6";
 
 SELECT libelle
@@ -193,6 +205,8 @@ WHERE code IN (
 
 -- Q7 - c:3, t:14
 -- Donnez les identifiants, villes d'arrivée et pays d'arrivée des voyages pour lesquels il n'y a aucune réservation.
+-- @difficulty 2
+-- @tags différence, imbrication
 PROMPT "Q7";
 
 SELECT idV, villeArr, paysArr
@@ -207,6 +221,8 @@ WHERE idV IN (
 
 -- Q8 - c:1, t:5
 -- Quels sont les libellés des options gratuites pour le voyage d'identifiant 354 et ceux des options payantes pour le voyage d'identifiant 952 ?
+-- @difficulty 2
+-- @tags union, imbrication, null
 PROMPT "Q8";
 
 SELECT libelle
@@ -229,6 +245,8 @@ WHERE code IN (
 
 -- Q9 - c:3, t:1
 -- Quels sont les identifiants, villes d'arrivée et pays d'arrivée des voyages offrant à la fois les options de visite guidée et de piscine ?
+-- @difficulty 3
+-- @tags jointure, imbrication
 -- Version algébrique.
 PROMPT "Q9 - Version algébrique";
 
@@ -286,6 +304,8 @@ WHERE
 
 -- Q10 - c:2, t:11
 -- Donnez les noms et prénoms des clients qui n'ont aucune réservation.
+-- @difficulty 2
+-- @tags imbrication, différence, not-exists
 PROMPT "Q10 - V1";
 
 SELECT nom, prenom
@@ -325,6 +345,8 @@ WHERE NOT EXISTS (
 
 -- Q11
 -- Ajoutez les attributs correspondant au tarif enfant et au nombre d'enfants.
+-- @difficulty 1
+-- @tags ddl
 PROMPT "Q11";
 
 ALTER TABLE Planning ADD (tarifEnf NUMBER(6, 2));
@@ -335,6 +357,8 @@ DESCRIBE Planning;
 DESCRIBE Reservation;
 -- Q12
 -- Doublez la taille possible du libellé d'une option.
+-- @difficulty 1
+-- @tags ddl
 PROMPT "Q12";
 
 ALTER TABLE OptionV MODIFY (libelle VARCHAR2(40));
@@ -343,6 +367,8 @@ DESCRIBE OptionV;
 
 -- Q13
 -- En se basant sur les données actuelles, définissez une contrainte de domaine pour les catégories. Vérifiez en essayant d'ajouter un client ne respectant pas cette contrainte.
+-- @difficulty 2
+-- @tags ddl
 PROMPT "Q13";
 
 ALTER TABLE Client ADD (CONSTRAINT ck_Client_categorie CHECK (categorie IN ('PRIVILEGIE', 'BON')));
@@ -358,6 +384,8 @@ INSERT INTO Client (numCl, nom, prenom, adresse, cp, ville, categorie) VALUES (6
 
 -- Q14
 -- En se basant sur les données actuelles, définissez une contrainte de domaine pour les nombres d'étoiles. Vérifiez en essayant d'ajouter un voyage ne respectant pas cette contrainte.
+-- @difficulty 2
+-- @tags ddl
 PROMPT "Q14";
 
 ALTER TABLE Voyage ADD (CONSTRAINT ck_Voyage_nbEtoiles CHECK (nbEtoiles BETWEEN 3 AND 5));
@@ -373,6 +401,8 @@ INSERT INTO Voyage (idV, villeArr, paysArr, villeDep, hotel, nbEtoiles, duree) V
 
 -- Q15
 -- Créez une nouvelle relation `Capacite` permettant de connaître par hôtel et type de chambre `typeC`, pouvant être `SIMPLE`, `DOUBLE`, `DOUBLE LUXE`, `SUITE`, `SUITE JUNIOR` et `SUITE PRESTIGE`, le nombre de chambres `nbCh`.
+-- @difficulty 2
+-- @tags ddl
 PROMPT "Q15";
 
 DROP TABLE IF EXISTS Capacite PURGE;
@@ -395,6 +425,8 @@ DESCRIBE Capacite;
 
 -- Q16 - t:4
 -- Le client numéro 2103 réserve toujours avec ses deux enfants et le client Thomas Jarolim avec son enfant unique.
+-- @difficulty 2
+-- @tags dml, imbrication
 PROMPT "Q16";
 
 ALTER TABLE Planning ADD (tarifEnf NUMBER(6, 2));
@@ -425,6 +457,8 @@ WHERE
 
 -- Q17 - t:80
 -- Un tarif enfant est moitié prix du tarif correspondant.
+-- @difficulty 1
+-- @tags dml
 PROMPT "Q17";
 
 ALTER TABLE Planning ADD (tarifEnf NUMBER(6, 2));
@@ -438,6 +472,8 @@ FROM Planning;
 
 -- Q18 - t:12
 -- Insérez les données suivantes.
+-- @difficulty 1
+-- @tags dml
 --
 -- : Extension de la relation `Capacite` de la base de données Voyage
 --
@@ -492,6 +528,8 @@ FROM Capacite;
 
 -- Q19
 -- Créez une nouvelle relation `AncienneReservation` permettant d'archiver toutes les réservations programmées passées, la date de réservation étant remplacée par la date d'archivage.
+-- @difficulty 2
+-- @tags ddl
 PROMPT "Q19";
 
 DROP TABLE IF EXISTS AncienneReservation PURGE;
@@ -510,6 +548,8 @@ DESCRIBE AncienneReservation;
 
 -- Q20 - [`AncienneReservation` : 14 tuples]{.expected}, [`Reservation` : 18 tuples]{.expected}
 -- À l'aide d'une transaction, archivez les réservations antérieures à 2004.
+-- @difficulty 3
+-- @tags dml, transaction
 PROMPT "Q20";
 
 ALTER TABLE Reservation ADD (nbEnf NUMBER(2, 0));

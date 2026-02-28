@@ -7,6 +7,8 @@
 
 -- Q1 - c:2, t:2
 -- Donnez les identifiants et libellés des racines des hiérarchies des thèmes.
+-- @difficulty 1
+-- @tags sélection, null, récursion
 PROMPT "Q1";
 
 SELECT idT, libelle
@@ -15,6 +17,8 @@ WHERE idTPere IS NULL;
 
 -- Q2 - c:2, t:16
 -- Donnez les identifiants et libellés des feuilles de la hiérarchie des thèmes.
+-- @difficulty 2
+-- @tags imbrication, null, récursion
 PROMPT "Q2";
 
 SELECT idT, libelle
@@ -27,6 +31,8 @@ WHERE idT NOT IN (
 
 -- Q3 - c:2, t:17
 -- Donnez les identifiants et libellés de la hiérarchie des fils du thème Langage de requêtes.
+-- @difficulty 2
+-- @tags récursion
 PROMPT "Q3";
 
 -- noqa: disable=all
@@ -53,6 +59,8 @@ FROM DescTheme;
 
 -- Q4 - c:2, t:5
 -- Donnez les identifiants et libellés des thèmes subordonnés directement ou pas (l' ensemble des themes plus spécifiques) au thème Jointure à l’exception du sous-thème Jointure imbriquée. 
+-- @difficulty 2
+-- @tags récursion, sélection
 PROMPT "Q4";
 
 SELECT idT, libelle
@@ -79,6 +87,8 @@ WHERE libelle <> 'JOINTURE IMBRIQUEE';
 
 -- Q5 - c:2, t:4
 -- Donnez les identifiants et libellés des thèmes subordonnés directement ou pas au thème Jointure à l'exception du thème Jointure imbriquée et de ses sous-thèmes.
+-- @difficulty 3
+-- @tags récursion, sélection
 PROMPT "Q5";
 
 SELECT idT, libelle
@@ -106,6 +116,8 @@ FROM DescTheme;
 
 -- Q6 - c:2, t:4
 -- Donnez les identifiants et libellés généralisant strictement le thème Jointure externe en triant du thème le plus général au thème le plus spécifique.
+-- @difficulty 2
+-- @tags récursion, tri
 PROMPT "Q6";
 
 SELECT idT, libelle
@@ -134,6 +146,8 @@ ORDER BY lvl DESC;
 
 -- Q7 - c:2, t:28
 -- Quels sont les identifiants des questions et numéros de TP se rapportant à un thème subordonné directement ou indirectement au thème Jointure ?
+-- @difficulty 3
+-- @tags récursion, jointure, imbrication
 PROMPT "Q7 - V1";
 
 SELECT DISTINCT Q.idQ, Q.numTP
@@ -184,6 +198,8 @@ WHERE TQ.idT IN (SELECT idT FROM DescTheme);
 
 -- Q8 - c:2, t:5
 -- Quels sont les identifiants et libellés des thèmes généralisant les thèmes Jointure ou Sélection simple ?
+-- @difficulty 2
+-- @tags récursion, union
 PROMPT "Q8 - V1";
 
 SELECT DISTINCT idT, libelle
@@ -221,6 +237,8 @@ FROM AncTheme;
 
 -- Q9 - c:2, t:3
 -- Quels sont les identifiants et libellés des thèmes généralisant les thèmes Jointure et Sélection simple ?
+-- @difficulty 3
+-- @tags récursion, intersection
 PROMPT "Q9 - V1";
 
 SELECT idT, libelle
@@ -276,6 +294,8 @@ FROM AncSelection;
 
 -- Q10 - c:2, t:3
 -- Quels sont les identifiants et libellés des thèmes subordonnés directement ou indirectement au thème SQL LDD et qui ne sont utilisés par aucune question ?
+-- @difficulty 3
+-- @tags récursion, différence, imbrication
 PROMPT "Q10 - V1";
 
 SELECT idT, libelle
@@ -334,6 +354,8 @@ WHERE idT NOT IN (
 
 -- Q11 - c:2, t:10
 -- Quels sont les identifiants et libellés des thèmes feuilles de la hiérarchie des thèmes qui sont subordonnés directement ou indirectement à la même racine que celle du thème Jointure.
+-- @difficulty 3
+-- @tags récursion, imbrication, null
 PROMPT "Q11";
 
 SELECT idT, libelle
@@ -386,6 +408,8 @@ WHERE idT NOT IN (
 
 -- Q12 - c:2, t:9
 -- Quels sont les identifiants et libellés des thèmes se situant dans la branche, au-dessus ou en dessous, du thème Jointure ?
+-- @difficulty 2
+-- @tags récursion, union
 PROMPT "Q12";
 
 SELECT idT, libelle
@@ -429,6 +453,8 @@ SELECT idT, libelle FROM DescJointure;
 
 -- Q13 - c:3, t:4
 -- Donnez les numéros, noms et prénoms des étudiants ayant fait toutes les questions du TP numéro 1. Proposer deux formulations différentes, avec double NOT EXISTS et HAVING, de cette requête.
+-- @difficulty 3
+-- @tags division, not-exists, jointure, groupement, agrégation
 PROMPT "Q13 - Version double NOT EXISTS";
 
 SELECT numEt, nom, prenom
@@ -469,6 +495,8 @@ HAVING COUNT(*) = (
 
 -- Q14 - c:1, t:3
 -- Quels sont les groupes d'étudiants dans lesquels tous les types de BAC sont représentés ? Proposer deux formulations différentes, avec double NOT EXISTS et HAVING, de cette requête. 
+-- @difficulty 3
+-- @tags division, not-exists, groupement, agrégation, distinct
 PROMPT "Q14 - Version double NOT EXISTS";
 
 SELECT DISTINCT groupe
@@ -501,6 +529,8 @@ HAVING COUNT(DISTINCT typeBAC) = (
 
 -- Q15 - c:1, t:2
 -- Quels sont les groupes d'étudiants pour lesquels au moins un étudiant a été évalué pour chaque TP ?
+-- @difficulty 3
+-- @tags division, not-exists, jointure, groupement, agrégation, distinct
 PROMPT "Q15 - Version double NOT EXISTS";
 
 SELECT DISTINCT groupe
@@ -543,6 +573,8 @@ HAVING COUNT(DISTINCT numTP) = (
 
 -- Q16 - c:3, t:1
 -- Donnez les numéros, noms et prénoms des étudiants ayant eu au moins un résultat faux au TP numéro 2 et au TP numéro 3. Proposer trois formulations différentes.
+-- @difficulty 3
+-- @tags jointure, imbrication, intersection, sélection
 PROMPT "Q16 - V1";
 
 SELECT DISTINCT Et.numEt, nom, prenom
@@ -635,6 +667,8 @@ WHERE numEt IN (
 
 -- Q17 - c:1, t:1 (4)
 -- Donnez les numéros des groupes d'étudiants dont aucun étudiant n'a obtenu un résultat faux au TP numéro 1. 
+-- @difficulty 2
+-- @tags jointure, différence, imbrication
 PROMPT "Q17";
 
 SELECT DISTINCT groupe
@@ -653,6 +687,8 @@ WHERE groupe NOT IN (
 
 -- Q18 - c:3, t:7
 -- Donnez les numéros, noms et prénoms des étudiants dans le même groupe et ayant le même type de Bac que l'étudiante Marie Dujardin.
+-- @difficulty 2
+-- @tags jointure, imbrication
 PROMPT "Q18 - V1";
 
 SELECT Et.numEt, Et.nom, Et.prenom
@@ -679,6 +715,8 @@ WHERE (groupe, typeBAC) IN (
 
 -- Q19 - c:3, t:19
 -- Donnez les numéros, noms et prénoms des étudiants ayant réalisés le nombre de variantes demandées pour au moins une Question du TP numéro 2.
+-- @difficulty 2
+-- @tags jointure, imbrication, sélection
 PROMPT "Q19 - V1";
 
 SELECT DISTINCT Et.numEt, Et.nom, Et.prenom
@@ -705,6 +743,8 @@ WHERE (idQ, nbVariantes) IN (
 
 -- Q20 - c:2, t:2
 -- Donnez l'identifiant des questions et les numéros de TP portant à la fois sur le thème Jointure imbriquée et sur le thème Fonction agrégative ou statistique.
+-- @difficulty 3
+-- @tags jointure, imbrication, intersection
 PROMPT "Q20 - V1";
 
 SELECT Q.idQ, Q.numTP
@@ -746,6 +786,8 @@ WHERE T.libelle = 'FONCTION AGREGATIVE OU STATISTIQUE';
 
 -- Q21 - c:2, t:4
 -- Donnez, pour chaque TP, le nombre de points obtenu par l'étudiante Marie Dujardin.
+-- @difficulty 2
+-- @tags jointure, groupement, agrégation, sélection
 PROMPT "Q21";
 
 SELECT numTP, SUM(E.NbPoints) AS totalPoints
@@ -761,6 +803,8 @@ GROUP BY numTP;
 
 -- Q22 - c:2, t:3
 -- Donnez les numéros et noms des étudiants ayant eu au moins trois résultats justes à des questions complexes.
+-- @difficulty 2
+-- @tags jointure, groupement, agrégation, sélection
 PROMPT "Q22";
 
 SELECT Et.numEt, Et.nom
@@ -777,6 +821,8 @@ HAVING COUNT(*) >= 3;
 
 -- Q23 - c:3, t:12
 -- Donnez, pour chaque étudiant ayant au moins une réponse juste au TP numéro 3, le nombre de réponses effectivement justes à ce TP.
+-- @difficulty 3
+-- @tags jointure, imbrication, groupement, agrégation, sélection
 PROMPT "Q23";
 
 SELECT Et.numEt, Et.nom, COUNT(*) AS nbJustes

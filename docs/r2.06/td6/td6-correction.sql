@@ -33,6 +33,8 @@ END;
 
 -- Q1 - c:3, t:9
 -- Quels sont les numéros, noms et prénoms des professeurs de seconde année ?
+-- @difficulty 2
+-- @tags vue, jointure, distinct
 PROMPT "Q1";
 
 CREATE OR REPLACE VIEW Q1 (numProf, nomProf, prenomProf) AS
@@ -51,6 +53,8 @@ FROM Q1;
 
 -- Q2 - c:1, t:1 (9)
 -- À partir du nombre d'étudiants de chaque groupe d'étudiants de seconde année, donnez le nombre moyen d'étudiants.
+-- @difficulty 2
+-- @tags vue, groupement, agrégation
 PROMPT "Q2";
 
 CREATE OR REPLACE VIEW Q2 (groupeEt, nbEtudiants) AS
@@ -64,6 +68,8 @@ FROM Q2;
 
 -- Q3 - c:1, t:1 (45)
 -- À partir du nombre d'étudiants à qui chaque professeur enseigne, quel est le plus grand nombre d'étudiants ?
+-- @difficulty 2
+-- @tags vue, groupement, agrégation
 PROMPT "Q3";
 
 CREATE OR REPLACE VIEW Q3 (numProf, nbEtudiants) AS
@@ -76,6 +82,8 @@ FROM Q3;
 
 -- Q4 - c:3, t:9
 -- À partir de la somme d'heures de cours pour chaque discipline, donnez les codes et libellés des modules ainsi que le pourcentage de ces sommes d'heures par rapport au total des heures de cours dans la discipline correspondante.
+-- @difficulty 2
+-- @tags vue, jointure, agrégation, groupement
 PROMPT "Q4";
 
 CREATE OR REPLACE VIEW Q4 (discipline, total) AS
@@ -91,6 +99,8 @@ WHERE heureCMPrev IS NOT NULL;
 
 -- Q5 - c:3, t:6
 -- À partir, du nombre de professeurs qui enseignent chaque module d'une part, et de la moyenne de test maximale de ces modules d'autre part, donnez les codes des modules, le nombre de professeurs qui les enseignent et la moyenne de test maximale de ces Modules.
+-- @difficulty 2
+-- @tags vue, groupement, agrégation, distinct
 PROMPT "Q5";
 
 CREATE OR REPLACE VIEW Q51 (code, nbProfs) AS
@@ -110,6 +120,8 @@ FROM Q51
 
 -- Q6 - c:3, t:29
 -- À partir de la moins bonne et de la meilleure moyenne de test du module ACSI, donnez les numéros des étudiants et les écarts respectifs entre les éventuelles moyennes de test des étudiants et ces moyennes extrêmes.
+-- @difficulty 2
+-- @tags vue, agrégation, sous-requête
 PROMPT "Q6";
 
 CREATE OR REPLACE VIEW Q6 (moyMin, moyMax) AS
@@ -123,6 +135,8 @@ WHERE code = 'ACSI';
 
 -- Q7
 -- Créer une vue de mise à jour permettant d'assurer que les discipline insérées ou modifiées ne peuvent être que Gestion, Informatique ou Maths.
+-- @difficulty 2
+-- @tags vue, dml
 PROMPT "Q7";
 
 CREATE OR REPLACE VIEW Q7 AS
@@ -142,6 +156,8 @@ INSERT INTO Q7 (code, libelle, heureCMPrev, heureCMReal, heureTPPrev, heureTPRea
 
 -- Q8
 -- Créer une vue de mise à jour permettant d'assurer que les responsables d'un Module inséré ou modifié doivent enseigner ce Module.
+-- @difficulty 3
+-- @tags vue, dml, imbrication, transaction
 PROMPT "Q8 - V1";
 
 CREATE OR REPLACE VIEW Q8 AS
@@ -191,6 +207,8 @@ INSERT INTO Q8 (code, libelle, heureCMPrev, heureCMReal, heureTPPrev, heureTPRea
 
 -- Q9 - c:3, t:19
 -- Quels sont les numéros, noms et prénoms des étudiants ayant eu une note dans le module Principes des BD ou dans un de ses sous-modules direct ou pas ?
+-- @difficulty 3
+-- @tags récursion, jointure, imbrication
 PROMPT "Q9";
 
 SELECT DISTINCT Et.numEt, nomEt, prenomEt
@@ -228,6 +246,8 @@ FROM Etudiant Et
 
 -- Q10 - c:2, t:32
 -- Donnez les libellés des modules et les libellés des modules d'où ils sont directement issus.
+-- @difficulty 2
+-- @tags jointure
 PROMPT "Q10";
 
 SELECT M.libelle, MPere.libelle AS libellePere
@@ -236,6 +256,8 @@ WHERE MPere.code = M.codePere;
 
 -- Q11 - c:1, t:1 (4)
 -- Quels sont les groupes de seconde année, dans lesquels un étudiant a obtenu, pour le module Conception de SI, une meilleure note de test que le meilleur étudiant du groupe d'étudiants 3 dans le même Module ?
+-- @difficulty 3
+-- @tags jointure, imbrication, groupement, agrégation, sous-requête
 PROMPT "Q11 - V1";
 
 WITH T (anneeEt, groupeEt, moyTest, libelle) AS (
@@ -346,6 +368,8 @@ ALTER TABLE Enseigne ADD CONSTRAINT fk_Enseignt_code FOREIGN KEY (code) REFERENC
 
 -- Q12 - c:1, t:7
 -- Quels sont les noms des attributs de la relation Professeur ?
+-- @difficulty 1
+-- @tags projection, sélection
 PROMPT "Q12";
 
 SELECT column_Name
@@ -354,6 +378,8 @@ WHERE table_Name = 'PROFESSEUR';
 
 -- Q13 - c:1, t:5
 -- Quelle sont les tables ?
+-- @difficulty 1
+-- @tags projection, sélection
 PROMPT "Q13 - V1";
 
 SELECT table_Name
@@ -367,6 +393,8 @@ WHERE object_Type = 'TABLE';
 
 -- Q14 - c:1, t:20
 -- Quelles sont les noms des contraintes d'intégrité ?
+-- @difficulty 1
+-- @tags projection
 PROMPT "Q14";
 
 SELECT constraint_Name
@@ -374,6 +402,8 @@ FROM User_Constraints;
 
 -- Q15 - c:1, t:13
 -- Quelles sont les noms des contraintes d'intégrité définies sur des relations ayant au moins un attribut de type VARCHAR2 de 20 caractères ou plus ?
+-- @difficulty 2
+-- @tags imbrication, sélection
 PROMPT "Q15";
 
 SELECT constraint_Name
@@ -388,6 +418,8 @@ WHERE table_Name IN (
 
 -- Q16 - c:2, t:15
 -- Quelles sont, pour les attributs de type NUMBER, les noms des contraintes et les noms des attributs sur lesquels elles portent ?
+-- @difficulty 2
+-- @tags jointure, sélection, distinct
 PROMPT "Q16";
 
 SELECT DISTINCT UCC.constraint_Name, UCC.column_Name
@@ -400,6 +432,8 @@ WHERE data_Type = 'NUMBER';
 
 -- Q17 - c:3, t:26
 -- Quels sont les noms des contraintes, les noms attributs sur lesquels elles portent et le type de ces attributs, pour les relations ayant au moins un attribut de type NUMBER ?
+-- @difficulty 2
+-- @tags jointure, imbrication, sélection
 PROMPT "Q17";
 
 SELECT UCC.constraint_Name, UCC.column_Name, data_Type
@@ -416,6 +450,8 @@ WHERE UCC.table_Name IN (
 
 -- Q18 - c:1, t:5
 -- Quelles sont les noms des contraintes de clefs primaires ?
+-- @difficulty 1
+-- @tags projection, sélection
 PROMPT "Q18";
 
 SELECT constraint_Name
@@ -424,6 +460,8 @@ WHERE constraint_Type = 'P';
 
 -- Q19 - c:3, t:7
 -- Quels sont les noms des attributs, et leurs relations correspondantes, d'attributs portant le même nom dans des relations différentes ?
+-- @difficulty 2
+-- @tags jointure
 PROMPT "Q19";
 
 SELECT UTC1.column_Name, UTC1.table_Name AS Relation1, UTC2.table_Name AS Relation2
