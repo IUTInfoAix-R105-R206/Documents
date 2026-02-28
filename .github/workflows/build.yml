@@ -69,13 +69,12 @@ jobs:
           retention-days: 30
 
       # Publication sur GitHub Pages (branche main uniquement)
-      # Les PDF enseignant (*-teacher.pdf) ne sont PAS publiés sur Pages.
       - name: Prepare GitHub Pages content
         if: github.ref == 'refs/heads/main'
         run: |
           mkdir -p site/pdfs/r1.05 site/pdfs/r2.06
-          find output/r1.05 -name "*.pdf" ! -name "*-teacher.pdf" -exec cp {} site/pdfs/r1.05/ \; 2>/dev/null || true
-          find output/r2.06 -name "*.pdf" ! -name "*-teacher.pdf" -exec cp {} site/pdfs/r2.06/ \; 2>/dev/null || true
+          find output/r1.05 -name "*.pdf" -exec cp {} site/pdfs/r1.05/ \; 2>/dev/null || true
+          find output/r2.06 -name "*.pdf" -exec cp {} site/pdfs/r2.06/ \; 2>/dev/null || true
           # Guides pratiques (PDF à la racine de output/)
           find output -maxdepth 1 -name "*.pdf" -exec cp {} site/pdfs/ \; 2>/dev/null || true
 

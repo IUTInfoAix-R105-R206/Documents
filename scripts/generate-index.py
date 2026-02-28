@@ -90,11 +90,15 @@ def scan_pdfs(pdf_dir):
         filename = parts[1]
         name = filename.removesuffix(".pdf")
 
-        # Ignorer les PDF qui ne correspondent pas au pattern tdN ou tdN-correction
-        if not re.match(r"^td\d+(-correction)?$", name):
+        # Ignorer les PDF qui ne correspondent pas au pattern tdN, tdN-correction ou tdN-teacher
+        if not re.match(r"^td\d+(-correction|-teacher)?$", name):
             continue
 
-        if name.endswith("-correction"):
+        if name.endswith("-teacher"):
+            td_name = name.removesuffix("-teacher")
+            td_id = f"{resource}/{td_name}"
+            tds.setdefault(td_id, {})["teacher"] = f"pdfs/{rel}"
+        elif name.endswith("-correction"):
             td_name = name.removesuffix("-correction")
             td_id = f"{resource}/{td_name}"
             tds.setdefault(td_id, {})["correction"] = f"pdfs/{rel}"
@@ -169,6 +173,8 @@ def generate_index(titles, pdfs, summary, guides, output_file):
             links = []
             if "correction" in pdf_info:
                 links.append(f'<a href="{pdf_info["correction"]}">Corrigé</a>')
+            if "teacher" in pdf_info:
+                links.append(f'<a href="{pdf_info["teacher"]}">Corrigé enseignant</a>')
             if report_info:
                 report_file = report_info.get("report_file", "")
                 if report_file:
