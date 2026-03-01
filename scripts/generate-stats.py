@@ -135,8 +135,14 @@ def compute_statistics(questions):
         / max(sum(1 for q in questions if q["difficulty"]), 1)
     )
 
+    # Tous les tags : d'abord ceux utilisés par fréquence décroissante,
+    # puis ceux à zéro par ordre alphabétique.
+    all_tag_counts = tag_counts.most_common()
+    unused_tags = sorted(t for t in VALID_TAGS if t not in tag_counts)
+    all_tag_counts.extend((t, 0) for t in unused_tags)
+
     return {
-        "tag_counts": tag_counts.most_common(),
+        "tag_counts": all_tag_counts,
         "diff_counts": dict(sorted(diff_counts.items())),
         "tag_diff_matrix": {
             t: dict(v) for t, v in tag_diff_matrix.items()
@@ -180,6 +186,8 @@ CSS = """\
     .bar { background: #0366d6; color: white; padding: 0.15rem 0.5rem;
            border-radius: 3px; font-size: 0.8rem; min-width: 25px;
            text-align: right; transition: width 0.3s; }
+    .bar-row-zero { opacity: 0.5; }
+    .bar-zero { font-size: 0.8rem; color: #999; }
     .difficulty-chart { display: flex; gap: 2rem; align-items: flex-end;
                         height: 180px; margin: 1rem 0; justify-content: center; }
     .diff-col { display: flex; flex-direction: column; align-items: center;
@@ -225,7 +233,12 @@ CSS = """\
     #filter-controls button:hover { background: #e1e4e8; }
     #filter-controls select { padding: 0.3rem; border: 1px solid #d0d7de;
                               border-radius: 4px; font-size: 0.85rem; }
-    .hidden { display: none; }"""
+    .hidden { display: none; }
+    .td-nav { margin: 0.75rem 0; display: flex; gap: 0.4rem; flex-wrap: wrap; }
+    .td-nav-item { display: inline-block; font-size: 0.8rem; padding: 0.2rem 0.5rem;
+                   border-radius: 3px; border: 1px solid #d0d7de; background: #f0f4f8; }
+    .td-nav-item:hover { background: #e1e4e8; text-decoration: none; }
+    .td-nav-current { background: #2c3e50; color: white; border-color: #2c3e50; }"""
 
 JS = """\
 let currentFilter = { tag: null, difficulty: null, tdId: null };
@@ -351,90 +364,158 @@ document.addEventListener('DOMContentLoaded', function() {
 });"""
 
 
-def generate_html(questions, stats):
-    """Génère la page HTML complète."""
+def _render_stat_boxes(stats, td_links=None):
+    """Génère les stat-boxes HTML."""
     total = stats["total"]
     avg_diff = stats["avg_difficulty"]
     used_tags = stats["used_tags"]
     total_tags = stats["total_tags"]
     num_tds = stats["num_tds"]
-    num_resources = stats["num_resources"]
+
+    boxes = (
+        f'<div class="stat-box"><strong>{total}</strong>'
+        f'<small>Questions</small></div>'
+        f'<div class="stat-box"><strong>{avg_diff}</strong>'
+        f'<small>Difficulté moy.</small></div>'
+        f'<div class="stat-box"><strong>{used_tags}/{total_tags}</strong>'
+        f'<small>Tags utilisés</small></div>'
+    )
+    if num_tds > 1:
+        num_res = stats["num_resources"]
+        boxes += (
+            f'<div class="stat-box"><strong>{num_tds}</strong>'
+            f'<small>TD ({num_res} ressources)</small></div>'
+        )
+    return f'<div class="stats">{boxes}</div>'
+
+
+def _render_bar_chart(tag_counts):
+    """Génère le graphique de barres des tags."""
+    max_count = tag_counts[0][1] if tag_counts else 1
+    rows = []
+    for tag, count in tag_counts:
+        if count > 0:
+            pct = count * 100 // max_count
+            rows.append(
+                f'<div class="bar-row" data-tag="{tag}" '
+                f'onclick="selectTag(\'{tag}\')">'
+                f'<span class="bar-label">{tag}</span>'
+                f'<div class="bar" style="width: {max(pct, 3)}%;">'
+                f'{count}</div></div>'
+            )
+        else:
+            rows.append(
+                f'<div class="bar-row bar-row-zero" data-tag="{tag}" '
+                f'onclick="selectTag(\'{tag}\')">'
+                f'<span class="bar-label">{tag}</span>'
+                f'<span class="bar-zero">0</span></div>'
+            )
+    return "\n".join(rows)
+
+
+def _render_diff_chart(diff_counts, difficulties):
+    """Génère l'histogramme de difficulté."""
+    max_count = max(
+        (diff_counts.get(d, 0) for d in difficulties), default=1
+    )
+    cols = []
+    for d in difficulties:
+        count = diff_counts.get(d, 0)
+        height_pct = count * 100 // max(max_count, 1)
+        label = DIFFICULTY_LABELS.get(d, str(d))
+        cols.append(
+            f'<div class="diff-col" data-difficulty="{d}" '
+            f'onclick="selectDifficulty({d})">'
+            f'<div class="diff-bar diff-{d}" '
+            f'style="height: {max(height_pct, 5)}%;">{count}</div>'
+            f'<span class="diff-label">{label}</span></div>'
+        )
+    return "\n".join(cols)
+
+
+def _render_matrix(tag_counts, tag_diff_matrix, difficulties):
+    """Génère la matrice tag×difficulté."""
+    rows = []
+    for tag, count in tag_counts:
+        cells = f'<td class="tag-label">{tag}</td>'
+        for d in difficulties:
+            n = tag_diff_matrix.get(tag, {}).get(d, 0)
+            cls = "clickable" if n > 0 else ""
+            click = (
+                f'onclick="selectCell(\'{tag}\', {d})"' if n > 0 else ""
+            )
+            cells += f'<td class="{cls}" {click}>{n or ""}</td>'
+        cells += f'<td class="total-col">{count}</td>'
+        rows.append(f"<tr>{cells}</tr>")
+
+    diff_headers = "".join(
+        f"<th>{DIFFICULTY_LABELS.get(d, d)}</th>" for d in difficulties
+    )
+    return diff_headers, "\n".join(rows)
+
+
+def _render_td_nav(td_list, current_td_id=None):
+    """Génère la navigation entre TD (pour les pages par-TD)."""
+    items = []
+    for td_id, td_title, filename in td_list:
+        if td_id == current_td_id:
+            items.append(
+                f'<span class="td-nav-item td-nav-current">'
+                f'{td_id.split("/")[1].upper()}</span>'
+            )
+        else:
+            items.append(
+                f'<a href="{filename}" class="td-nav-item">'
+                f'{td_id.split("/")[1].upper()}</a>'
+            )
+    return '<div class="td-nav">' + " ".join(items) + '</div>'
+
+
+def generate_html(questions, stats, title=None, subtitle=None,
+                  back_link=None, back_text=None, td_filter=True,
+                  td_nav_html=""):
+    """Génère une page HTML de statistiques (globale ou par-TD)."""
     tag_counts = stats["tag_counts"]
     diff_counts = stats["diff_counts"]
     difficulties = stats["difficulties"]
     tag_diff_matrix = stats["tag_diff_matrix"]
 
-    # --- Stat boxes ---
-    stat_boxes = (
-        f'<div class="stats">'
-        f'<div class="stat-box"><strong>{total}</strong><small>Questions</small></div>'
-        f'<div class="stat-box"><strong>{avg_diff}</strong>'
-        f'<small>Difficulté moy.</small></div>'
-        f'<div class="stat-box"><strong>{used_tags}/{total_tags}</strong>'
-        f'<small>Tags utilisés</small></div>'
-        f'<div class="stat-box"><strong>{num_tds}</strong>'
-        f'<small>TD ({num_resources} ressources)</small></div>'
-        f'</div>'
-    )
-
-    # --- Bar chart (tags) ---
-    max_count = tag_counts[0][1] if tag_counts else 1
-    bar_rows = []
-    for tag, count in tag_counts:
-        pct = count * 100 // max_count
-        bar_rows.append(
-            f'<div class="bar-row" data-tag="{tag}" onclick="selectTag(\'{tag}\')">'
-            f'<span class="bar-label">{tag}</span>'
-            f'<div class="bar" style="width: {max(pct, 3)}%;">{count}</div>'
-            f'</div>'
+    if not title:
+        title = "Statistiques des questions SQL"
+    if not subtitle:
+        total = stats["total"]
+        num_tds = stats["num_tds"]
+        num_res = stats["num_resources"]
+        subtitle = (
+            f"{total} questions &mdash; {num_tds} TD "
+            f"&mdash; {num_res} ressources"
         )
-    bar_chart = "\n".join(bar_rows)
+    if not back_link:
+        back_link = "../index.html"
+    if not back_text:
+        back_text = "Retour à l'index"
 
-    # --- Difficulty histogram ---
-    max_diff_count = max(
-        (diff_counts.get(d, 0) for d in difficulties), default=1
+    page_title = title.replace("&mdash;", "—")
+    stat_boxes = _render_stat_boxes(stats)
+    bar_chart = _render_bar_chart(tag_counts)
+    diff_chart = _render_diff_chart(diff_counts, difficulties)
+    diff_headers, matrix_body = _render_matrix(
+        tag_counts, tag_diff_matrix, difficulties,
     )
-    diff_cols = []
-    for d in difficulties:
-        count = diff_counts.get(d, 0)
-        height_pct = count * 100 // max(max_diff_count, 1)
-        label = DIFFICULTY_LABELS.get(d, str(d))
-        diff_cols.append(
-            f'<div class="diff-col" data-difficulty="{d}" '
-            f'onclick="selectDifficulty({d})">'
-            f'<div class="diff-bar diff-{d}" '
-            f'style="height: {max(height_pct, 5)}%;">{count}</div>'
-            f'<span class="diff-label">{label}</span>'
-            f'</div>'
+
+    # TD filter (only on global page)
+    td_filter_html = ""
+    if td_filter:
+        td_ids = sorted({q["td_id"] for q in questions})
+        td_options = "".join(
+            f'<option value="{td}">{td}</option>' for td in td_ids
         )
-    diff_chart = "\n".join(diff_cols)
+        td_filter_html = (
+            f'<select id="td-filter" onchange="applyTdFilter()">'
+            f'<option value="">Tous les TD</option>'
+            f'{td_options}</select>'
+        )
 
-    # --- Matrix table ---
-    matrix_rows = []
-    for tag, count in tag_counts:
-        cells = f'<td class="tag-label">{tag}</td>'
-        for d in difficulties:
-            n = tag_diff_matrix.get(tag, {}).get(d, 0)
-            cell_class = "clickable" if n > 0 else ""
-            onclick = (
-                f'onclick="selectCell(\'{tag}\', {d})"' if n > 0 else ""
-            )
-            cells += f'<td class="{cell_class}" {onclick}>{n or ""}</td>'
-        cells += f'<td class="total-col">{count}</td>'
-        matrix_rows.append(f"<tr>{cells}</tr>")
-    matrix_body = "\n".join(matrix_rows)
-
-    diff_headers = "".join(
-        f"<th>{DIFFICULTY_LABELS.get(d, d)}</th>" for d in difficulties
-    )
-
-    # --- TD filter options ---
-    td_ids = sorted({q["td_id"] for q in questions})
-    td_options = "".join(
-        f'<option value="{td_id}">{td_id}</option>' for td_id in td_ids
-    )
-
-    # --- JSON data for JS ---
     data_json = json.dumps(
         {"questions": questions}, ensure_ascii=False, separators=(",", ":")
     )
@@ -444,13 +525,14 @@ def generate_html(questions, stats):
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Statistiques — Questions SQL</title>
+  <title>Statistiques — {page_title}</title>
   <style>{CSS}</style>
 </head>
 <body>
-  <p class="back-link"><a href="../index.html">&larr; Retour à l'index</a></p>
-  <h1>Statistiques des questions SQL</h1>
-  <p class="subtitle">{total} questions &mdash; {num_tds} TD &mdash; {num_resources} ressources</p>
+  <p class="back-link"><a href="{back_link}">&larr; {back_text}</a></p>
+  <h1>{title}</h1>
+  <p class="subtitle">{subtitle}</p>
+  {td_nav_html}
 
   {stat_boxes}
 
@@ -475,10 +557,7 @@ def generate_html(questions, stats):
   <h2>Questions <span id="filter-label"></span></h2>
   <div id="filter-controls" class="hidden">
     <button onclick="clearFilter()">Tout afficher</button>
-    <select id="td-filter" onchange="applyTdFilter()">
-      <option value="">Tous les TD</option>
-      {td_options}
-    </select>
+    {td_filter_html}
   </div>
   <div id="question-list"></div>
 
@@ -496,6 +575,53 @@ def generate_html(questions, stats):
 # Main
 # ---------------------------------------------------------------------------
 
+def td_report_filename(td_id):
+    """Convertit un td_id (ex: r2.06/td3) en nom de fichier."""
+    return td_id.replace("/", "-") + ".html"
+
+
+def generate_per_td_pages(questions, output_dir):
+    """Génère les pages de statistiques par TD."""
+    # Grouper les questions par td_id
+    td_groups = {}
+    td_order = []
+    for q in questions:
+        td_id = q["td_id"]
+        if td_id not in td_groups:
+            td_groups[td_id] = []
+            td_order.append(td_id)
+        td_groups[td_id].append(q)
+
+    # Préparer la navigation
+    td_list = [
+        (td_id, td_groups[td_id][0]["td_title"], td_report_filename(td_id))
+        for td_id in td_order
+    ]
+
+    for td_id in td_order:
+        td_questions = td_groups[td_id]
+        td_title = td_questions[0]["td_title"]
+        td_stats = compute_statistics(td_questions)
+        filename = td_report_filename(td_id)
+        nav_html = _render_td_nav(td_list, current_td_id=td_id)
+
+        html = generate_html(
+            td_questions, td_stats,
+            title=f"{td_title}",
+            subtitle=f"{td_stats['total']} questions &mdash; "
+                     f"{td_id.upper().replace('/', ' ')}",
+            back_link="index.html",
+            back_text="Vue globale",
+            td_filter=False,
+            td_nav_html=nav_html,
+        )
+
+        filepath = os.path.join(output_dir, filename)
+        with open(filepath, "w", encoding="utf-8") as f:
+            f.write(html)
+        print(f"  {filename} ({td_stats['total']} questions)")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Génère la page de statistiques des questions SQL."
@@ -512,13 +638,37 @@ def main():
 
     questions, _titles = collect_questions(args.docs_dir)
     stats = compute_statistics(questions)
+    output_dir = os.path.dirname(args.output) or "."
+    os.makedirs(output_dir, exist_ok=True)
 
-    html = generate_html(questions, stats)
+    # Liens vers les pages par TD dans la vue globale
+    td_ids = sorted({q["td_id"] for q in questions})
+    td_links = []
+    for td_id in td_ids:
+        td_qs = [q for q in questions if q["td_id"] == td_id]
+        td_title = td_qs[0]["td_title"]
+        filename = td_report_filename(td_id)
+        n = len(td_qs)
+        td_links.append(
+            f'<a href="{filename}" class="td-nav-item">'
+            f'{td_id.split("/")[1].upper()} ({n})</a>'
+        )
+    td_nav_html = (
+        '<h2>Par TD</h2>'
+        '<div class="td-nav">' + " ".join(td_links) + '</div>'
+    )
 
-    os.makedirs(os.path.dirname(args.output) or ".", exist_ok=True)
+    # Page globale
+    html = generate_html(
+        questions, stats, td_nav_html=td_nav_html,
+    )
     with open(args.output, "w", encoding="utf-8") as f:
         f.write(html)
-    print(f"Statistiques écrites dans {args.output} ({stats['total']} questions)")
+    print(f"Statistiques écrites dans {args.output} "
+          f"({stats['total']} questions)")
+
+    # Pages par TD
+    generate_per_td_pages(questions, output_dir)
 
 
 if __name__ == "__main__":

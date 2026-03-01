@@ -31,6 +31,8 @@ _spec.loader.exec_module(_mod)
 collect_questions = _mod.collect_questions
 compute_statistics = _mod.compute_statistics
 generate_html = _mod.generate_html
+generate_per_td_pages = _mod.generate_per_td_pages
+td_report_filename = _mod.td_report_filename
 read_td_titles = _mod.read_td_titles
 VALID_TAGS = _mod.VALID_TAGS
 
@@ -257,6 +259,81 @@ class TestGenerateHTML(unittest.TestCase):
             self.assertGreater(os.path.getsize(path), 1000)
         finally:
             os.unlink(path)
+
+
+class TestPerTDPages(unittest.TestCase):
+    """Tests sur la génération des pages par TD."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.questions, _ = collect_questions(DOCS_DIR)
+        cls.output_dir = tempfile.mkdtemp()
+        generate_per_td_pages(cls.questions, cls.output_dir)
+
+    def test_all_td_pages_generated(self):
+        """Une page HTML est générée pour chaque TD."""
+        td_ids = sorted({q["td_id"] for q in self.questions})
+        for td_id in td_ids:
+            filename = td_report_filename(td_id)
+            path = os.path.join(self.output_dir, filename)
+            with self.subTest(td_id=td_id):
+                self.assertTrue(
+                    os.path.isfile(path),
+                    f"Page manquante: {filename}",
+                )
+
+    def test_per_td_page_structure(self):
+        """Chaque page par TD contient les éléments attendus."""
+        td_ids = sorted({q["td_id"] for q in self.questions})
+        for td_id in td_ids:
+            filename = td_report_filename(td_id)
+            path = os.path.join(self.output_dir, filename)
+            with open(path, encoding="utf-8") as f:
+                html = f.read()
+            with self.subTest(td_id=td_id):
+                self.assertIn("<!DOCTYPE html>", html)
+                self.assertIn("bar-row", html)
+                self.assertIn("difficulty-chart", html)
+                self.assertIn("matrix-table", html)
+                self.assertIn("const DATA =", html)
+
+    def test_per_td_page_contains_only_its_questions(self):
+        """Le JSON embarqué ne contient que les questions du TD."""
+        td_ids = sorted({q["td_id"] for q in self.questions})
+        for td_id in td_ids:
+            filename = td_report_filename(td_id)
+            path = os.path.join(self.output_dir, filename)
+            with open(path, encoding="utf-8") as f:
+                html = f.read()
+            m = re.search(r"const DATA = ({.*?});", html, re.DOTALL)
+            with self.subTest(td_id=td_id):
+                self.assertIsNotNone(m)
+                data = json.loads(m.group(1))
+                for q in data["questions"]:
+                    self.assertEqual(q["td_id"], td_id)
+
+    def test_per_td_page_has_navigation(self):
+        """Chaque page par TD contient la navigation inter-TD."""
+        td_ids = sorted({q["td_id"] for q in self.questions})
+        for td_id in td_ids:
+            filename = td_report_filename(td_id)
+            path = os.path.join(self.output_dir, filename)
+            with open(path, encoding="utf-8") as f:
+                html = f.read()
+            with self.subTest(td_id=td_id):
+                self.assertIn("td-nav", html)
+                self.assertIn("td-nav-current", html)
+                self.assertIn("index.html", html)
+
+    def test_per_td_page_back_link(self):
+        """Le lien de retour pointe vers la vue globale."""
+        td_id = sorted({q["td_id"] for q in self.questions})[0]
+        filename = td_report_filename(td_id)
+        path = os.path.join(self.output_dir, filename)
+        with open(path, encoding="utf-8") as f:
+            html = f.read()
+        self.assertIn('href="index.html"', html)
+        self.assertIn("Vue globale", html)
 
 
 if __name__ == "__main__":
