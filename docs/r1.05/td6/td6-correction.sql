@@ -879,7 +879,7 @@ WHERE
 -- Q27 - c:2, t:1
 -- Quels sont les numéros et villes d'arrivée des vols dont l'horaire de départ est le plus tardif ?
 -- @difficulty 2
--- @tags imbrication, calcul-vertical
+-- @tags imbrication, calcul-vertical, extrémum
 PROMPT "Q27 - V1";
 
 SELECT numVol, villeArr
@@ -902,7 +902,7 @@ WHERE heureDep >= ALL(
 -- Q28 - c:1, t:1
 -- Donnez le nombre de vols effectués par les pilotes ayant les plus petits salaires.
 -- @difficulty 3
--- @tags jointure, imbrication, semi-jointure, calcul-vertical, exists
+-- @tags jointure, imbrication, semi-jointure, calcul-vertical, extrémum, exists
 PROMPT "Q28 - V1";
 
 SELECT COUNT(*)

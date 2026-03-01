@@ -405,7 +405,7 @@ WHERE V.idV = 122;
 -- Q16 - c:5, t:1
 -- Quels sont les identifiants, pays d’arrivée, villes d’arrivée et hôtels ainsi que leurs nombres d’étoiles des voyages pour lesquels le tarif est le plus faible ? Donnez deux formulations.
 -- @difficulty 2
--- @tags jointure, imbrication, calcul-vertical
+-- @tags jointure, imbrication, calcul-vertical, extrémum
 PROMPT "Q16 - V1";
 
 SELECT DISTINCT V.idV, paysArr, villeArr, hotel, nbEtoiles
@@ -430,7 +430,7 @@ WHERE tarif <= ALL(
 -- Q17 - c:4, t:1
 -- Quels sont les pays d’arrivée et villes d’arrivée et hôtels ainsi que leurs nombres d’étoiles des voyages réservés les plus cher ? Donnez deux formulations.
 -- @difficulty 2
--- @tags jointure, imbrication, calcul-vertical
+-- @tags jointure, imbrication, calcul-vertical, extrémum
 PROMPT "Q17 - V1";
 
 SELECT DISTINCT paysArr, villeArr, hotel, nbEtoiles

@@ -288,7 +288,7 @@ FROM Module;
 -- Q11 - c:1, t:1 (ETUDE DE CAS 1)
 -- Quels sont les libellés des modules dont le coefficient de test est le plus faible ? Proposer deux formulations différentes de cette requête.
 -- @difficulty 2
--- @tags imbrication, calcul-vertical
+-- @tags imbrication, calcul-vertical, extrémum
 PROMPT "Q11 - V1";
 
 SELECT DISTINCT libelle
@@ -328,7 +328,7 @@ FROM Module M
 -- Q13 - c:1, t:2
 -- Quels sont les codes des modules pour lesquels la meilleure note de test a été obtenue ?
 -- @difficulty 2
--- @tags imbrication, calcul-vertical
+-- @tags imbrication, calcul-vertical, extrémum
 PROMPT "Q13";
 
 SELECT DISTINCT code
@@ -341,7 +341,7 @@ WHERE moyTest = (
 -- Q14 - c:2, t:2
 -- Quels sont les numéros et noms des étudiants qui ont obtenu, tous modules confondus, la meilleure note de test ? Proposer deux formulations différentes de cette requête.
 -- @difficulty 2
--- @tags jointure, imbrication, calcul-vertical, null
+-- @tags jointure, imbrication, calcul-vertical, extrémum, null
 PROMPT "Q14 - V1";
 
 SELECT DISTINCT Et.numEt, nomEt

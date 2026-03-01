@@ -322,7 +322,7 @@ HAVING COUNT(*) > (
 -- Q20 - c:1, t:1 (PRIVILEGIE)
 -- Quelles sont les catégories effectives comportant le plus de clients ?
 -- @difficulty 3
--- @tags groupement, calcul-vertical, imbrication, sous-requête, null
+-- @tags groupement, calcul-vertical, imbrication, sous-requête, extrémum, null
 PROMPT "Q20";
 
 WITH
@@ -343,7 +343,7 @@ WHERE nbClients >= ALL(
 -- Q21 - c:1, t:2
 -- Quels sont les pays pour lesquels il y a le plus de réservations ?
 -- @difficulty 3
--- @tags jointure, groupement, calcul-vertical, imbrication, sous-requête
+-- @tags jointure, groupement, calcul-vertical, imbrication, sous-requête, extrémum
 PROMPT "Q21";
 
 WITH
@@ -554,7 +554,7 @@ WHERE categorie = 'PRIVILEGIE';
 -- Q29 - c:3, t:1
 -- Quels sont les numéros, noms et prénoms des clients ayant fait une réservation avec un nombre total maximal de personnes ?
 -- @difficulty 3
--- @tags jointure, calcul-vertical, imbrication, sous-requête, null
+-- @tags jointure, calcul-vertical, imbrication, sous-requête, extrémum, null
 PROMPT "Q29";
 
 WITH
@@ -585,7 +585,7 @@ WHERE numCl = 2101;
 -- Q31 - c:1, t:4
 -- Quels sont les hôtels avec le plus d'étoiles ?
 -- @difficulty 2
--- @tags imbrication, calcul-vertical, distinct
+-- @tags imbrication, calcul-vertical, extrémum, distinct
 PROMPT "Q31";
 
 SELECT DISTINCT Hotel
@@ -598,7 +598,7 @@ WHERE nbEtoiles = (
 -- Q32 - c:1, t:4
 -- Quels sont les pays n'ayant pas d'hôtel avec le plus grand nombre d'étoiles ?
 -- @difficulty 3
--- @tags imbrication, calcul-vertical, anti-jointure, distinct
+-- @tags imbrication, calcul-vertical, extrémum, anti-jointure, distinct
 PROMPT "Q32";
 
 SELECT DISTINCT paysArr
