@@ -23,7 +23,12 @@ import sys
 RE_EXPECTED = re.compile(r'^(-- Q\d+[a-z]?)\s*-\s*c:\d+.*', re.IGNORECASE)
 
 # Lines to drop entirely
-RE_ANNOTATION = re.compile(r'^-- @(tags|difficulty|title|intro|section|instruction)\b')
+RE_ANNOTATION = re.compile(
+    r'^-- @(tags|difficulty|title|intro|section|instruction|remark_teacher)\b',
+)
+
+# @remark → Remarque :
+RE_REMARK = re.compile(r'^-- @remark\s+(.*)')
 
 # Trailing -- noqa: ...
 RE_NOQA = re.compile(r'\s*-- noqa:\s*\S+\s*$')
@@ -39,6 +44,11 @@ def strip_annotations(text):
         # Drop annotation lines
         if RE_ANNOTATION.match(line.lstrip()):
             continue
+
+        # Convert @remark to plain comment
+        m_remark = RE_REMARK.match(line)
+        if m_remark:
+            line = '-- Remarque : ' + m_remark.group(1)
 
         # Strip c:t from question headers
         m = RE_EXPECTED.match(line)
