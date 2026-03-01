@@ -46,6 +46,19 @@ jobs:
       - name: Build teacher PDFs
         run: make teacher GIT_VERSION=${{ github.ref_name }}
 
+      - name: Generate clean SQL corrections
+        run: make clean-corrections
+
+      - name: Copy Oracle data scripts
+        run: |
+          for link in $(find docs -name data -type l); do
+            td_dir=$(dirname "$link")
+            td_rel=${td_dir#docs/}
+            target=$(readlink "$link")
+            data_dir="$td_dir/$target"
+            cp "$data_dir/oracle.sql" "output/$td_rel/oracle.sql"
+          done
+
       - name: Create ZIP archive
         run: cd output && zip -r ../Documents-${{ github.ref_name }}.zip .
 

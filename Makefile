@@ -70,7 +70,7 @@ R206_TEACHER_PDFS = \
 	test-sql-sqlite-local    test-sql-sqlite-docker    \
 	test-sql-oracle-local    test-sql-oracle-docker    \
 	test-sql-local test-sql-docker \
-	bump help
+	clean-corrections bump help
 
 help: ## Affiche cette aide
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -890,6 +890,19 @@ test-sql-docker: ## Exécute les corrections SQL avec tous les SGBD via Docker (
 	$(MAKE) test-sql-sqlite-docker     || rc=1; \
 	$(MAKE) test-sql-oracle-docker     || rc=1; \
 	exit $$rc
+
+# ==============================================================================
+# Corrections nettoyées (pour la release)
+# ==============================================================================
+
+CORRECTION_SQLS = $(shell find docs -name '*-correction.sql' 2>/dev/null)
+CLEAN_CORRECTIONS = $(patsubst docs/%,$(OUTPUT_DIR)/%,$(CORRECTION_SQLS))
+
+$(OUTPUT_DIR)/%-correction.sql: docs/%-correction.sql scripts/strip-sql-annotations.py
+	@mkdir -p $(dir $@)
+	$(PYTHON) scripts/strip-sql-annotations.py $< -o $@
+
+clean-corrections: $(CLEAN_CORRECTIONS) ## Génère les corrections SQL nettoyées (sans annotations)
 
 # ==============================================================================
 # Versionnage
