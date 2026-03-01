@@ -38,36 +38,36 @@
   "r1.05/td7": {
     "title": "TD7 : Interrogation en SQL interprété",
     "report_file": "r1.05-td7.html",
-    "total": 126,
-    "pass": 118,
+    "total": 144,
+    "pass": 136,
     "error": 8,
     "fail": 0,
     "skip": 0,
-    "tested": 126,
+    "tested": 144,
     "dbms": {
       "postgres": {
-        "total": 42,
-        "pass": 42,
+        "total": 48,
+        "pass": 48,
         "error": 0,
         "fail": 0,
         "skip": 0,
-        "tested": 42
+        "tested": 48
       },
       "sqlite": {
-        "total": 42,
-        "pass": 34,
+        "total": 48,
+        "pass": 40,
         "error": 8,
         "fail": 0,
         "skip": 0,
-        "tested": 42
+        "tested": 48
       },
       "oracle": {
-        "total": 42,
-        "pass": 42,
+        "total": 48,
+        "pass": 48,
         "error": 0,
         "fail": 0,
         "skip": 0,
-        "tested": 42
+        "tested": 48
       }
     }
   },
