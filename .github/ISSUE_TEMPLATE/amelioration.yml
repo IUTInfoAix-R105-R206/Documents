@@ -1,0 +1,60 @@
+name: Proposer une amélioration
+description: Proposer un nouveau contenu, un exercice ou une amélioration d'un sujet existant
+labels: ["enhancement"]
+body:
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type d'amélioration
+      description: Quel type de modification proposez-vous ?
+      options:
+        - Amélioration d'un sujet existant
+        - Nouvel exercice ou nouvelle question
+        - Mise à jour des données de test
+        - Nouveau TD
+        - Amélioration de l'infrastructure (CI, scripts, compilation)
+        - Autre
+    validations:
+      required: true
+
+  - type: dropdown
+    id: td
+    attributes:
+      label: TD concerné
+      description: Quel TD est concerné par cette proposition ?
+      options:
+        - R1.05 TD1 — Algèbre relationnelle
+        - R1.05 TD2 — Concepts relationnels
+        - R1.05 TD3 — DF et normalisation
+        - R1.05 TD4 — Modèle E/A
+        - R1.05 TD5 — Conception E/A
+        - R1.05 TD6 — Interrogation SQL
+        - R1.05 TD7 — SQL interprété
+        - R2.06 TD1 — Opérateurs ensemblistes
+        - R2.06 TD2 — Jointures externes
+        - R2.06 TD3 — Interrogations SQL
+        - R2.06 TD4 — Récursif et division
+        - R2.06 TD5 — SQL avancé
+        - R2.06 TD6 — Vues et tables système
+        - Nouveau TD
+        - Transversal (plusieurs TD ou infrastructure)
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description de la proposition
+      description: Décrivez l'amélioration que vous proposez.
+      placeholder: "Ex : Ajouter une question sur les jointures externes avec valeurs NULL dans le TD2 R2.06..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation
+      description: Pourquoi cette amélioration serait-elle utile ?
+      placeholder: "Ex : Les étudiants ont souvent du mal avec ce concept et un exercice supplémentaire aiderait..."
+    validations:
+      required: false

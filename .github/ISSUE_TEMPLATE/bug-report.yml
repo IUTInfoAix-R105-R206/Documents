@@ -1,0 +1,68 @@
+name: Signaler un problème
+description: Signaler une erreur dans un sujet, une correction SQL ou la compilation PDF
+labels: ["bug"]
+body:
+  - type: dropdown
+    id: categorie
+    attributes:
+      label: Catégorie
+      description: Quel type de problème avez-vous rencontré ?
+      options:
+        - Erreur dans un sujet (texte, énoncé, figure)
+        - Correction SQL incorrecte (résultat faux, requête erronée)
+        - Problème de compilation PDF
+        - Annotation incorrecte (c:t, @difficulty, @tags)
+        - Autre
+    validations:
+      required: true
+
+  - type: dropdown
+    id: td
+    attributes:
+      label: TD concerné
+      description: Quel TD est impacté ?
+      options:
+        - R1.05 TD1 — Algèbre relationnelle
+        - R1.05 TD2 — Concepts relationnels
+        - R1.05 TD3 — DF et normalisation
+        - R1.05 TD4 — Modèle E/A
+        - R1.05 TD5 — Conception E/A
+        - R1.05 TD6 — Interrogation SQL
+        - R1.05 TD7 — SQL interprété
+        - R2.06 TD1 — Opérateurs ensemblistes
+        - R2.06 TD2 — Jointures externes
+        - R2.06 TD3 — Interrogations SQL
+        - R2.06 TD4 — Récursif et division
+        - R2.06 TD5 — SQL avancé
+        - R2.06 TD6 — Vues et tables système
+        - Données partagées (docs/shared/data/)
+        - Infrastructure (Makefile, CI, scripts)
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description du problème
+      description: Décrivez le problème rencontré. Précisez le numéro de question si applicable.
+      placeholder: "Ex : La Q5 du TD3 R2.06 renvoie 3 tuples au lieu de 5..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: attendu
+    attributes:
+      label: Résultat attendu
+      description: Quel devrait être le comportement correct ?
+      placeholder: "Ex : La requête devrait renvoyer 5 tuples selon l'énoncé..."
+    validations:
+      required: false
+
+  - type: textarea
+    id: contexte
+    attributes:
+      label: Contexte supplémentaire
+      description: Logs d'erreur, captures d'écran, commandes exécutées, etc.
+      placeholder: "Collez ici les logs ou ajoutez des captures d'écran..."
+    validations:
+      required: false

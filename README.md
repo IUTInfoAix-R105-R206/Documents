@@ -213,12 +213,14 @@ Installation de SQLFluff : `pip install sqlfluff`
 
 ## Contribuer
 
+Consultez le [guide de contribution](CONTRIBUTING.md) pour le détail du
+processus. En résumé :
+
 1. Installer les hooks : `make install-hooks`
-2. Modifier le fichier `.md` du TD concerné
-3. Prévisualiser : `make r206` (par exemple)
-4. Comparer le PDF généré avec la version précédente
-5. Poser un tag si c'est une nouvelle version : `git tag V2.x.y`
-6. Commit + push / merge request (le hook corrige le style SQL au commit)
+2. Créer une branche : `git checkout -b fix/description`
+3. Modifier le fichier `.md` du TD concerné
+4. Prévisualiser : `make r206` (par exemple)
+5. Commit + push + créer une pull request
 
 ## Licence
 
