@@ -62,6 +62,7 @@ VALID_TAGS = {
     'union', 'intersection', 'différence', 'sous-requête',
     'exists', 'not-exists', 'tri', 'distinct', 'null',
     'vue', 'ddl', 'dml', 'transaction', 'récursion',
+    'calcul-vertical', 'calcul-horizontal',
 }
 
 

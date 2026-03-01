@@ -54,7 +54,7 @@ FROM Q1;
 -- Q2 - c:1, t:1 (9)
 -- À partir du nombre d'étudiants de chaque groupe d'étudiants de seconde année, donnez le nombre moyen d'étudiants.
 -- @difficulty 2
--- @tags vue, groupement, agrégation
+-- @tags vue, groupement, calcul-vertical
 PROMPT "Q2";
 
 CREATE OR REPLACE VIEW Q2 (groupeEt, nbEtudiants) AS
@@ -69,7 +69,7 @@ FROM Q2;
 -- Q3 - c:1, t:1 (45)
 -- À partir du nombre d'étudiants à qui chaque professeur enseigne, quel est le plus grand nombre d'étudiants ?
 -- @difficulty 2
--- @tags vue, groupement, agrégation
+-- @tags vue, groupement, calcul-vertical
 PROMPT "Q3";
 
 CREATE OR REPLACE VIEW Q3 (numProf, nbEtudiants) AS
@@ -83,7 +83,7 @@ FROM Q3;
 -- Q4 - c:3, t:9
 -- À partir de la somme d'heures de cours pour chaque discipline, donnez les codes et libellés des modules ainsi que le pourcentage de ces sommes d'heures par rapport au total des heures de cours dans la discipline correspondante.
 -- @difficulty 2
--- @tags vue, jointure, agrégation, groupement
+-- @tags vue, jointure, calcul-vertical, groupement
 PROMPT "Q4";
 
 CREATE OR REPLACE VIEW Q4 (discipline, total) AS
@@ -100,7 +100,7 @@ WHERE heureCMPrev IS NOT NULL;
 -- Q5 - c:3, t:6
 -- À partir, du nombre de professeurs qui enseignent chaque module d'une part, et de la moyenne de test maximale de ces modules d'autre part, donnez les codes des modules, le nombre de professeurs qui les enseignent et la moyenne de test maximale de ces Modules.
 -- @difficulty 2
--- @tags vue, groupement, agrégation, distinct
+-- @tags vue, groupement, calcul-vertical, distinct
 PROMPT "Q5";
 
 CREATE OR REPLACE VIEW Q51 (code, nbProfs) AS
@@ -121,7 +121,7 @@ FROM Q51
 -- Q6 - c:3, t:29
 -- À partir de la moins bonne et de la meilleure moyenne de test du module ACSI, donnez les numéros des étudiants et les écarts respectifs entre les éventuelles moyennes de test des étudiants et ces moyennes extrêmes.
 -- @difficulty 2
--- @tags vue, agrégation, sous-requête
+-- @tags vue, calcul-vertical, sous-requête
 PROMPT "Q6";
 
 CREATE OR REPLACE VIEW Q6 (moyMin, moyMax) AS
@@ -257,7 +257,7 @@ WHERE MPere.code = M.codePere;
 -- Q11 - c:1, t:1 (4)
 -- Quels sont les groupes de seconde année, dans lesquels un étudiant a obtenu, pour le module Conception de SI, une meilleure note de test que le meilleur étudiant du groupe d'étudiants 3 dans le même Module ?
 -- @difficulty 3
--- @tags jointure, imbrication, groupement, agrégation, sous-requête
+-- @tags jointure, imbrication, groupement, calcul-vertical, sous-requête
 PROMPT "Q11 - V1";
 
 WITH T (anneeEt, groupeEt, moyTest, libelle) AS (

@@ -279,7 +279,7 @@ WHERE
 -- Q11 - c:1, t:1 (32)
 -- Combien y a-t-il de réservations ?
 -- @difficulty 1
--- @tags agrégation
+-- @tags calcul-vertical
 PROMPT "Q11";
 
 SELECT COUNT(*)
@@ -288,7 +288,7 @@ FROM Reservation;
 -- Q12 - c:1, t:1 (6.25)
 -- Quelle est la durée moyenne des séjours au Kenya ?
 -- @difficulty 1
--- @tags agrégation
+-- @tags calcul-vertical
 PROMPT "Q12";
 
 SELECT AVG(duree)
@@ -298,7 +298,7 @@ WHERE paysArr = 'KENYA';
 -- Q13 - c:1, t:1 (9)
 -- Combien y a-t-il de places réservées pour les voyages réservés d’identifiant 122 ?
 -- @difficulty 1
--- @tags agrégation
+-- @tags calcul-vertical
 PROMPT "Q13";
 
 SELECT SUM(nbPers)
@@ -308,7 +308,7 @@ WHERE idV = 122;
 -- Q14 - c:1, t:1 (179)
 -- Quel est le tarif de voyage le moins cher ?
 -- @difficulty 1
--- @tags agrégation
+-- @tags calcul-vertical
 PROMPT "Q14";
 
 SELECT MIN(tarif)
@@ -317,7 +317,7 @@ FROM Planning;
 -- Q15 - c:2, t:10
 -- Donnez les dates de départ et les dates de retour pour les voyages réservés d’identifiant 122.
 -- @difficulty 2
--- @tags jointure
+-- @tags jointure, calcul-horizontal
 PROMPT "Q15";
 
 SELECT dateDep, dateDep + duree AS dateRetour
@@ -330,7 +330,7 @@ WHERE V.idV = 122;
 -- Q16 - c:5, t:1
 -- Quels sont les identifiants, pays d’arrivée, villes d’arrivée et hôtels ainsi que leurs nombres d’étoiles des voyages pour lesquels le tarif est le plus faible ? Donnez deux formulations.
 -- @difficulty 2
--- @tags jointure, imbrication, agrégation
+-- @tags jointure, imbrication, calcul-vertical
 PROMPT "Q16 - V1";
 
 SELECT DISTINCT V.idV, paysArr, villeArr, hotel, nbEtoiles
@@ -355,7 +355,7 @@ WHERE tarif <= ALL(
 -- Q17 - c:4, t:1
 -- Quels sont les pays d’arrivée et villes d’arrivée et hôtels ainsi que leurs nombres d’étoiles des voyages réservés les plus cher ? Donnez deux formulations.
 -- @difficulty 2
--- @tags jointure, imbrication, agrégation
+-- @tags jointure, imbrication, calcul-vertical
 PROMPT "Q17 - V1";
 
 SELECT DISTINCT paysArr, villeArr, hotel, nbEtoiles
@@ -379,7 +379,7 @@ WHERE tarif >= ALL(
 -- Q18 - c:1, t:1 (1629)
 -- Donnez, en tenant compte du nombre de personnes, le prix total des réservations du client Arnaud Peyroche.
 -- @difficulty 3
--- @tags jointure, imbrication, agrégation
+-- @tags jointure, imbrication, calcul-vertical, calcul-horizontal
 PROMPT "Q18 - V1";
 
 SELECT SUM(tarif * nbPers)
@@ -415,7 +415,7 @@ WHERE R.numCl IN (
 -- Q19 - c:1, t:1 (35)
 -- Donnez, le prix total des options proposées pour les voyages réservés par le client Nicolas Potier.
 -- @difficulty 3
--- @tags jointure, agrégation
+-- @tags jointure, calcul-vertical
 PROMPT "Q19";
 
 SELECT SUM(prix)

@@ -154,7 +154,7 @@ WHERE numCl IS NULL;
 -- Q7 - c:2, t:7
 -- Donnez, par pays d'arrivée, le nombre de voyages.
 -- @difficulty 1
--- @tags groupement, agrégation
+-- @tags groupement, calcul-vertical
 PROMPT "Q7";
 
 SELECT paysArr, COUNT(*) AS nbVoyages
@@ -164,7 +164,7 @@ GROUP BY paysArr;
 -- Q8 - c:3, t:15
 -- Donnez, par pays et ville d'arrivée, le nombre de voyages.
 -- @difficulty 1
--- @tags groupement, agrégation
+-- @tags groupement, calcul-vertical
 PROMPT "Q8";
 
 SELECT paysArr, villeArr, COUNT(*) AS nbVoyages
@@ -174,7 +174,7 @@ GROUP BY paysArr, villeArr;
 -- Q9 - c:2, t:7
 -- Donnez, pour chaque pays d'arrivée, le nombre de villes.
 -- @difficulty 1
--- @tags groupement, agrégation, distinct
+-- @tags groupement, calcul-vertical, distinct
 PROMPT "Q9";
 
 SELECT paysArr, COUNT(DISTINCT villeArr) AS nbVilles
@@ -184,7 +184,7 @@ GROUP BY paysArr;
 -- Q10 - c:3, t:15
 -- Donnez, pour chaque identifiant et ville d'arrivée de voyage, le nombre de dates planifiées.
 -- @difficulty 2
--- @tags jointure, groupement, agrégation
+-- @tags jointure, groupement, calcul-vertical
 PROMPT "Q10";
 
 SELECT V.idV, villeArr, COUNT(dateDep) AS nbDates
@@ -195,7 +195,7 @@ GROUP BY V.idV, villeArr;
 -- Q11 - c:3, t:11
 -- Donnez, pour chaque identifiant et ville d'arrivée de voyage, le nombre d'options gratuites.
 -- @difficulty 2
--- @tags jointure, groupement, agrégation, sélection, null
+-- @tags jointure, groupement, calcul-vertical, sélection, null
 PROMPT "Q11";
 
 SELECT V.idV, villeArr, COUNT(code) AS nbOptions
@@ -207,7 +207,7 @@ GROUP BY V.idV, villeArr;
 -- Q12 - c:2, t:2
 -- Donnez, par catégorie effective, le nombre de clients.
 -- @difficulty 1
--- @tags groupement, agrégation, null
+-- @tags groupement, calcul-vertical, null
 PROMPT "Q12";
 
 SELECT categorie, COUNT(*) AS nbClients
@@ -218,7 +218,7 @@ GROUP BY categorie;
 -- Q13 - c:4, t:9
 -- Donnez, par identifiant de voyage et ville d'arrivée, le nombre de voyages réservés et le nombre total de personnes.
 -- @difficulty 2
--- @tags jointure, groupement, agrégation, null
+-- @tags jointure, groupement, calcul-vertical, null
 PROMPT "Q13";
 
 SELECT V.idV, villeArr, COUNT(R.idV) AS nbReservations, SUM(COALESCE(nbPers, 0)) AS totalPers
@@ -229,7 +229,7 @@ GROUP BY V.idV, villeArr;
 -- Q14 - c:2, t:7
 -- Donnez, par voyage, le prix moyen effectif des options.
 -- @difficulty 2
--- @tags groupement, agrégation
+-- @tags groupement, calcul-vertical
 PROMPT "Q14 - V1";
 
 SELECT idV, AVG(prix) AS prixMoyen
@@ -248,7 +248,7 @@ HAVING AVG(prix) IS NOT NULL;
 -- Q15 - c:4, t:6
 -- Donnez, pour chaque identifiant de voyage et ville d'arrivée, le nombre d'options gratuites et le nombre d'options payantes.
 -- @difficulty 3
--- @tags jointure, groupement, agrégation, distinct
+-- @tags jointure, groupement, calcul-vertical, distinct
 PROMPT "Q15";
 
 SELECT V.idV, villeArr, COUNT(DISTINCT CaG.code) AS nbGratuites, COUNT(DISTINCT CaP.code) AS nbPayantes
@@ -263,7 +263,7 @@ GROUP BY V.idV, villeArr;
 -- Q16 - c:2, t:2
 -- Donnez, par ville de résidence, et lorsque son nombre est supérieur à cinq, le nombre de clients.
 -- @difficulty 2
--- @tags groupement, agrégation
+-- @tags groupement, calcul-vertical
 PROMPT "Q16";
 
 SELECT ville, COUNT(*) AS nbClients
@@ -274,7 +274,7 @@ HAVING COUNT(*) > 5;
 -- Q17 - c:3, t:9
 -- Quel est, pour chaque identifiant de voyage et pays d'arrivée, le montant total, tenant compte du nombre de personnes, réglé par les clients ?
 -- @difficulty 2
--- @tags jointure, groupement, agrégation
+-- @tags jointure, groupement, calcul-vertical
 PROMPT "Q17";
 
 SELECT V.idV, paysArr, SUM(tarif * nbPers) AS montantTotal
@@ -286,7 +286,7 @@ GROUP BY V.idV, paysArr;
 -- Q18 - c:3, t:17
 -- Quel est, pour chaque identifiant de voyage et date de départ planifiée, le montant total, tenant compte du nombre de personnes, réglé par les clients ?
 -- @difficulty 2
--- @tags jointure, groupement, agrégation
+-- @tags jointure, groupement, calcul-vertical
 PROMPT "Q18";
 
 SELECT P.idV, P.dateDep, SUM(tarif * nbPers) AS montantTotal
@@ -300,7 +300,7 @@ GROUP BY P.idV, P.dateDep;
 -- Q19 - c:1, t:6
 -- Quels sont les pays pour lesquels il y a plus de réservations que pour l'Espagne ?
 -- @difficulty 3
--- @tags jointure, groupement, agrégation, imbrication, sous-requête
+-- @tags jointure, groupement, calcul-vertical, imbrication, sous-requête
 PROMPT "Q19";
 
 WITH
@@ -322,7 +322,7 @@ HAVING COUNT(*) > (
 -- Q20 - c:1, t:1 (PRIVILEGIE)
 -- Quelles sont les catégories effectives comportant le plus de clients ?
 -- @difficulty 3
--- @tags groupement, agrégation, imbrication, sous-requête, null
+-- @tags groupement, calcul-vertical, imbrication, sous-requête, null
 PROMPT "Q20";
 
 WITH
@@ -343,7 +343,7 @@ WHERE nbClients >= ALL(
 -- Q21 - c:1, t:2
 -- Quels sont les pays pour lesquels il y a le plus de réservations ?
 -- @difficulty 3
--- @tags jointure, groupement, agrégation, imbrication, sous-requête
+-- @tags jointure, groupement, calcul-vertical, imbrication, sous-requête
 PROMPT "Q21";
 
 WITH
@@ -364,7 +364,7 @@ WHERE nbRes >= ALL(
 -- Q22 - c:3, t:6
 -- Donnez, pour chaque numéro et nom de client ayant fait une réservation pour le Kenya, le nombre total de réservations.
 -- @difficulty 3
--- @tags jointure, groupement, agrégation, imbrication
+-- @tags jointure, groupement, calcul-vertical, imbrication
 PROMPT "Q22";
 
 SELECT C.numCl, nom, COUNT(*) AS nbReservations
@@ -382,7 +382,7 @@ GROUP BY C.numCl, nom;
 -- Q23 - c:2, t:3
 -- Donnez, pour chaque pays ayant au moins un hôtel classé cinq étoiles, le nombre total d'hôtels, quel que soit leur nombre d'étoiles.
 -- @difficulty 2
--- @tags groupement, agrégation, imbrication
+-- @tags groupement, calcul-vertical, imbrication
 PROMPT "Q23";
 
 SELECT paysArr, COUNT(DISTINCT Hotel) AS nbHotels
@@ -541,7 +541,7 @@ WHERE
 -- Q28 - c:2, t:1 (6, 10)
 -- Donnez le nombre de réservations et le nombre total de personnes pour les clients de la catégorie privilégié.
 -- @difficulty 2
--- @tags jointure, agrégation, null
+-- @tags jointure, calcul-vertical, null
 PROMPT "Q28";
 
 SELECT COUNT(*) AS nbReservations, SUM(COALESCE(nbPers, 0)) AS totalPers
@@ -554,7 +554,7 @@ WHERE categorie = 'PRIVILEGIE';
 -- Q29 - c:3, t:1
 -- Quels sont les numéros, noms et prénoms des clients ayant fait une réservation avec un nombre total maximal de personnes ?
 -- @difficulty 3
--- @tags jointure, agrégation, imbrication, sous-requête, null
+-- @tags jointure, calcul-vertical, imbrication, sous-requête, null
 PROMPT "Q29";
 
 WITH
@@ -574,7 +574,7 @@ WHERE COALESCE(nbPers, 0) = (
 -- Q30 - c:1, t:1 (14484)
 -- Quel est le montant total des réservations du Client numéro 2101 ?
 -- @difficulty 2
--- @tags jointure, agrégation, null
+-- @tags jointure, calcul-vertical, null
 PROMPT "Q30";
 
 SELECT SUM(COALESCE(nbPers, 0) * COALESCE(tarif, 0))
@@ -585,7 +585,7 @@ WHERE numCl = 2101;
 -- Q31 - c:1, t:4
 -- Quels sont les hôtels avec le plus d'étoiles ?
 -- @difficulty 2
--- @tags imbrication, agrégation, distinct
+-- @tags imbrication, calcul-vertical, distinct
 PROMPT "Q31";
 
 SELECT DISTINCT Hotel
@@ -598,7 +598,7 @@ WHERE nbEtoiles = (
 -- Q32 - c:1, t:4
 -- Quels sont les pays n'ayant pas d'hôtel avec le plus grand nombre d'étoiles ?
 -- @difficulty 3
--- @tags imbrication, agrégation, différence, distinct
+-- @tags imbrication, calcul-vertical, différence, distinct
 PROMPT "Q32";
 
 SELECT DISTINCT paysArr

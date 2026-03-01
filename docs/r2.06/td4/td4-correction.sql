@@ -454,7 +454,7 @@ SELECT idT, libelle FROM DescJointure;
 -- Q13 - c:3, t:4
 -- Donnez les numéros, noms et prénoms des étudiants ayant fait toutes les questions du TP numéro 1. Proposer deux formulations différentes, avec double NOT EXISTS et HAVING, de cette requête.
 -- @difficulty 3
--- @tags division, not-exists, jointure, groupement, agrégation
+-- @tags division, not-exists, jointure, groupement, calcul-vertical
 PROMPT "Q13 - Version double NOT EXISTS";
 
 SELECT numEt, nom, prenom
@@ -496,7 +496,7 @@ HAVING COUNT(*) = (
 -- Q14 - c:1, t:3
 -- Quels sont les groupes d'étudiants dans lesquels tous les types de BAC sont représentés ? Proposer deux formulations différentes, avec double NOT EXISTS et HAVING, de cette requête. 
 -- @difficulty 3
--- @tags division, not-exists, groupement, agrégation, distinct
+-- @tags division, not-exists, groupement, calcul-vertical, distinct
 PROMPT "Q14 - Version double NOT EXISTS";
 
 SELECT DISTINCT groupe
@@ -530,7 +530,7 @@ HAVING COUNT(DISTINCT typeBAC) = (
 -- Q15 - c:1, t:2
 -- Quels sont les groupes d'étudiants pour lesquels au moins un étudiant a été évalué pour chaque TP ?
 -- @difficulty 3
--- @tags division, not-exists, jointure, groupement, agrégation, distinct
+-- @tags division, not-exists, jointure, groupement, calcul-vertical, distinct
 PROMPT "Q15 - Version double NOT EXISTS";
 
 SELECT DISTINCT groupe
@@ -787,7 +787,7 @@ WHERE T.libelle = 'FONCTION AGREGATIVE OU STATISTIQUE';
 -- Q21 - c:2, t:4
 -- Donnez, pour chaque TP, le nombre de points obtenu par l'étudiante Marie Dujardin.
 -- @difficulty 2
--- @tags jointure, groupement, agrégation, sélection
+-- @tags jointure, groupement, calcul-vertical, sélection
 PROMPT "Q21";
 
 SELECT numTP, SUM(E.NbPoints) AS totalPoints
@@ -804,7 +804,7 @@ GROUP BY numTP;
 -- Q22 - c:2, t:3
 -- Donnez les numéros et noms des étudiants ayant eu au moins trois résultats justes à des questions complexes.
 -- @difficulty 2
--- @tags jointure, groupement, agrégation, sélection
+-- @tags jointure, groupement, calcul-vertical, sélection
 PROMPT "Q22";
 
 SELECT Et.numEt, Et.nom
@@ -822,7 +822,7 @@ HAVING COUNT(*) >= 3;
 -- Q23 - c:3, t:12
 -- Donnez, pour chaque étudiant ayant au moins une réponse juste au TP numéro 3, le nombre de réponses effectivement justes à ce TP.
 -- @difficulty 3
--- @tags jointure, imbrication, groupement, agrégation, sélection
+-- @tags jointure, imbrication, groupement, calcul-vertical, sélection
 PROMPT "Q23";
 
 SELECT Et.numEt, Et.nom, COUNT(*) AS nbJustes

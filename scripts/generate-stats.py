@@ -458,15 +458,16 @@ def _render_td_nav(td_list, current_td_id=None):
     """Génère la navigation entre TD (pour les pages par-TD)."""
     items = []
     for td_id, td_title, filename in td_list:
+        label = td_id.upper().replace("/", " ")
         if td_id == current_td_id:
             items.append(
                 f'<span class="td-nav-item td-nav-current">'
-                f'{td_id.split("/")[1].upper()}</span>'
+                f'{label}</span>'
             )
         else:
             items.append(
                 f'<a href="{filename}" class="td-nav-item">'
-                f'{td_id.split("/")[1].upper()}</a>'
+                f'{label}</a>'
             )
     return '<div class="td-nav">' + " ".join(items) + '</div>'
 
@@ -649,9 +650,10 @@ def main():
         td_title = td_qs[0]["td_title"]
         filename = td_report_filename(td_id)
         n = len(td_qs)
+        label = td_id.upper().replace("/", " ")
         td_links.append(
             f'<a href="{filename}" class="td-nav-item">'
-            f'{td_id.split("/")[1].upper()} ({n})</a>'
+            f'{label} ({n})</a>'
         )
     td_nav_html = (
         '<h2>Par TD</h2>'

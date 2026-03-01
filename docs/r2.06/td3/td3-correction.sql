@@ -232,7 +232,7 @@ ORDER BY nomEt ASC;
 -- Q6 - c:1, t:1 (17)
 -- Combien y-a-t-il de professeurs ?
 -- @difficulty 1
--- @tags agrégation
+-- @tags calcul-vertical
 PROMPT "Q6";
 
 SELECT COUNT(*)
@@ -241,7 +241,7 @@ FROM Professeur;
 -- Q7 - c:1, t:1 (9.7)
 -- Quelle est la moyenne générale des notes de contrôle continu pour le module de code PRL ?
 -- @difficulty 1
--- @tags agrégation, sélection
+-- @tags calcul-vertical, sélection
 PROMPT "Q7";
 
 SELECT AVG(moyCC)
@@ -251,7 +251,7 @@ WHERE code = 'PRL';
 -- Q8 - c:1, t:1 (7)
 -- Combien de professeurs ont donné un enseignement à l'étudiant Philippe Lyon ?
 -- @difficulty 2
--- @tags jointure, agrégation, distinct
+-- @tags jointure, calcul-vertical, distinct
 PROMPT "Q8";
 
 SELECT COUNT(DISTINCT numProf)
@@ -266,7 +266,7 @@ WHERE
 -- Q9 - c:1, t:1 (10.66)
 -- Donnez, pour le module Prolog, la note moyenne obtenue par les étudiants en tenant compte des coefficients de contrôle continu et de test.
 -- @difficulty 3
--- @tags jointure, agrégation, null
+-- @tags jointure, calcul-vertical, null
 PROMPT "Q9";
 
 SELECT AVG((COALESCE(moyCC, 0) * coefCC + COALESCE(moyTest, 0) * coefTest) / (coefCC + coefTest)) AS moyenne
@@ -279,7 +279,7 @@ WHERE libelle = 'PROLOG';
 -- Q10 - c:1, t:1 (0)
 -- Quel est le coefficient de test le plus faible ?
 -- @difficulty 1
--- @tags agrégation
+-- @tags calcul-vertical
 PROMPT "Q10";
 
 SELECT MIN(coefTest)
@@ -288,7 +288,7 @@ FROM Module;
 -- Q11 - c:1, t:1 (ETUDE DE CAS 1)
 -- Quels sont les libellés des modules dont le coefficient de test est le plus faible ? Proposer deux formulations différentes de cette requête.
 -- @difficulty 2
--- @tags imbrication, agrégation
+-- @tags imbrication, calcul-vertical
 PROMPT "Q11 - V1";
 
 SELECT DISTINCT libelle
@@ -314,7 +314,7 @@ WHERE coefTest <= ALL(
 -- Q12 - c:1, t:1 (11.13)
 -- En supposant que tous les modules sont de même importance, donnez la moyenne générale de l'étudiante Sandrine Levy.
 -- @difficulty 3
--- @tags jointure, agrégation, null
+-- @tags jointure, calcul-vertical, null
 PROMPT "Q12";
 
 SELECT AVG(((COALESCE(moyCC, 0) * coefCC) + (COALESCE(moyTest, 0) * coefTest)) / (coefCC + coefTest)) AS moyenne
@@ -328,7 +328,7 @@ FROM Module M
 -- Q13 - c:1, t:2
 -- Quels sont les codes des modules pour lesquels la meilleure note de test a été obtenue ?
 -- @difficulty 2
--- @tags imbrication, agrégation
+-- @tags imbrication, calcul-vertical
 PROMPT "Q13";
 
 SELECT DISTINCT code
@@ -341,7 +341,7 @@ WHERE moyTest = (
 -- Q14 - c:2, t:2
 -- Quels sont les numéros et noms des étudiants qui ont obtenu, tous modules confondus, la meilleure note de test ? Proposer deux formulations différentes de cette requête.
 -- @difficulty 2
--- @tags jointure, imbrication, agrégation, null
+-- @tags jointure, imbrication, calcul-vertical, null
 PROMPT "Q14 - V1";
 
 SELECT DISTINCT Et.numEt, nomEt
@@ -650,7 +650,7 @@ WHERE resp IS NULL;
 -- Q23 - c:2, t:5
 -- Donnez, par groupe de seconde année, le nombre d'étudiants.
 -- @difficulty 1
--- @tags groupement, agrégation, sélection
+-- @tags groupement, calcul-vertical, sélection
 PROMPT "Q23";
 
 SELECT groupeEt, COUNT(*) AS nbEtudiants
@@ -661,7 +661,7 @@ GROUP BY groupeEt;
 -- Q24 - c:2, t:29
 -- Donnez, pour chaque numéro d'étudiant, la meilleure note de test.
 -- @difficulty 1
--- @tags groupement, agrégation
+-- @tags groupement, calcul-vertical
 PROMPT "Q24";
 
 SELECT numEt, MAX(moyTest) AS maxMoyTest
@@ -671,7 +671,7 @@ GROUP BY numEt;
 -- Q25 - c:4, t:71
 -- Donnez, pour chaque numéro et nom des étudiants de seconde année ainsi que pour chaque code de module, le nombre de professeurs.
 -- @difficulty 2
--- @tags jointure, groupement, agrégation, sélection
+-- @tags jointure, groupement, calcul-vertical, sélection
 PROMPT "Q25";
 
 SELECT Et.numEt, nomEt, code, COUNT(numProf) AS nbProfs
@@ -685,7 +685,7 @@ GROUP BY Et.numEt, nomEt, code;
 -- Q26 - c:2, t:2
 -- Donnez, pour chaque ville de plus de cinq professeurs, le nombre de professeurs y résidant.
 -- @difficulty 2
--- @tags groupement, agrégation
+-- @tags groupement, calcul-vertical
 PROMPT "Q26";
 
 SELECT villeProf, COUNT(*) AS nbProfs

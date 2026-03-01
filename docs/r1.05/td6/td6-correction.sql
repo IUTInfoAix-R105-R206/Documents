@@ -134,7 +134,7 @@ WHERE numPil = 204;
 -- Q8 - c:1, t:1
 -- Combien y a-t-il de vols desservant Paris ?
 -- @difficulty 1
--- @tags agrégation
+-- @tags calcul-vertical
 PROMPT "Q8";
 
 SELECT COUNT(*)
@@ -144,7 +144,7 @@ WHERE villeArr = 'PARIS';
 -- Q9 - c:1, t:1
 -- Donnez le nombre de pilotes effectuant un vol au départ de Paris.
 -- @difficulty 1
--- @tags agrégation, distinct
+-- @tags calcul-vertical, distinct
 PROMPT "Q9";
 
 SELECT COUNT(DISTINCT numPil)
@@ -154,7 +154,7 @@ WHERE villeDep = 'PARIS';
 -- Q10 - c:1, t:1
 -- Quel est le salaire moyen des pilotes marseillais ?
 -- @difficulty 1
--- @tags agrégation
+-- @tags calcul-vertical
 PROMPT "Q10";
 
 SELECT AVG(salaire)
@@ -717,7 +717,7 @@ WHERE
 -- Q27 - c:2, t:1
 -- Quels sont les numéros et villes d'arrivée des vols dont l'horaire de départ est le plus tardif ?
 -- @difficulty 2
--- @tags imbrication, agrégation
+-- @tags imbrication, calcul-vertical
 PROMPT "Q27 - V1";
 
 SELECT numVol, villeArr
@@ -740,7 +740,7 @@ WHERE heureDep >= ALL(
 -- Q28 - c:1, t:1
 -- Donnez le nombre de vols effectués par les pilotes ayant les plus petits salaires.
 -- @difficulty 3
--- @tags jointure, imbrication, agrégation
+-- @tags jointure, imbrication, calcul-vertical
 PROMPT "Q28 - V1";
 
 SELECT COUNT(*)
