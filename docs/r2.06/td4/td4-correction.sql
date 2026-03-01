@@ -295,7 +295,7 @@ FROM AncSelection;
 -- Q10 - c:2, t:3
 -- Quels sont les identifiants et libellés des thèmes subordonnés directement ou indirectement au thème SQL LDD et qui ne sont utilisés par aucune question ?
 -- @difficulty 3
--- @tags récursion, différence, imbrication
+-- @tags récursion, anti-jointure, différence, imbrication
 PROMPT "Q10 - V1";
 
 SELECT idT, libelle
@@ -668,7 +668,7 @@ WHERE numEt IN (
 -- Q17 - c:1, t:1 (4)
 -- Donnez les numéros des groupes d'étudiants dont aucun étudiant n'a obtenu un résultat faux au TP numéro 1. 
 -- @difficulty 2
--- @tags jointure, différence, imbrication
+-- @tags jointure, anti-jointure, imbrication
 PROMPT "Q17";
 
 SELECT DISTINCT groupe

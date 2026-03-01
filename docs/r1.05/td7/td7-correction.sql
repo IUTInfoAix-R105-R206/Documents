@@ -525,7 +525,7 @@ WHERE
 -- Q20 - c:2, t:11
 -- Quels sont les noms et prénoms des clients qui n’ont aucune réservation ?
 -- @difficulty 2
--- @tags imbrication, différence
+-- @tags imbrication, anti-jointure
 PROMPT "Q20 - V1";
 
 SELECT DISTINCT nom, prenom
@@ -548,7 +548,7 @@ WHERE numCl <> ALL(
 -- Q21 - c:3, t:14
 -- Quels sont les identifiants, pays d’arrivée et ville d’arrivée des voyages qui ne sont planifiés à aucune date ?
 -- @difficulty 2
--- @tags imbrication, différence
+-- @tags imbrication, anti-jointure
 PROMPT "Q21 - V1";
 
 SELECT idv, paysArr, villeArr
@@ -571,7 +571,7 @@ WHERE idV <> ALL(
 -- Q22 - c:2, t:6
 -- Quels sont les pays d’arrivée et villes d’arrivée qui ne sont pas proposés au départ de Marseille ?
 -- @difficulty 2
--- @tags imbrication, différence
+-- @tags imbrication, anti-jointure
 PROMPT "Q22 - V1";
 
 SELECT DISTINCT paysArr, villeArr
@@ -598,7 +598,7 @@ WHERE (
 -- Q23 - c:2, t:10
 -- Quels sont les codes et libellés des options qui ne sont pas proposés dans les voyages pour Chypre ?
 -- @difficulty 3
--- @tags jointure, imbrication, différence
+-- @tags jointure, imbrication, anti-jointure
 PROMPT "Q23 - V1";
 
 SELECT code, Libelle

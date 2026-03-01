@@ -58,7 +58,7 @@ RE_EMPTY = re.compile(r'^\s*$')
 
 VALID_TAGS = {
     'projection', 'sélection', 'jointure', 'jointure-externe',
-    'imbrication', 'semi-jointure', 'groupement', 'division',
+    'imbrication', 'semi-jointure', 'anti-jointure', 'groupement', 'division',
     'union', 'intersection', 'différence', 'sous-requête',
     'exists', 'not-exists', 'tri', 'distinct', 'null',
     'vue', 'ddl', 'dml', 'transaction', 'récursion',

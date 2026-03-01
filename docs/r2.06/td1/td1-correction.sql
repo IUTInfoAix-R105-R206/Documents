@@ -206,7 +206,7 @@ WHERE code IN (
 -- Q7 - c:3, t:14
 -- Donnez les identifiants, villes d'arrivée et pays d'arrivée des voyages pour lesquels il n'y a aucune réservation.
 -- @difficulty 2
--- @tags différence, imbrication
+-- @tags anti-jointure, différence, imbrication
 PROMPT "Q7";
 
 SELECT idV, villeArr, paysArr
@@ -305,7 +305,7 @@ WHERE
 -- Q10 - c:2, t:11
 -- Donnez les noms et prénoms des clients qui n'ont aucune réservation.
 -- @difficulty 2
--- @tags imbrication, différence, not-exists
+-- @tags imbrication, anti-jointure, not-exists
 PROMPT "Q10 - V1";
 
 SELECT nom, prenom

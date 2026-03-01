@@ -453,7 +453,7 @@ WHERE
 -- Q26 - c:1, t:5
 -- Quelles sont les libellés des options toujours gratuites ? Proposer quatre formulations différentes.
 -- @difficulty 3
--- @tags différence, imbrication, not-exists, jointure-externe, null
+-- @tags anti-jointure, différence, imbrication, not-exists, jointure-externe, null
 PROMPT "Q26 - V1";
 
 SELECT libelle
@@ -598,7 +598,7 @@ WHERE nbEtoiles = (
 -- Q32 - c:1, t:4
 -- Quels sont les pays n'ayant pas d'hôtel avec le plus grand nombre d'étoiles ?
 -- @difficulty 3
--- @tags imbrication, calcul-vertical, différence, distinct
+-- @tags imbrication, calcul-vertical, anti-jointure, distinct
 PROMPT "Q32";
 
 SELECT DISTINCT paysArr
@@ -628,7 +628,7 @@ FROM Client
 -- Q34 - c:2, t:26
 -- Quels sont les numéros et noms des clients qui n'ont fait aucune réservation pour un voyage au Maroc ? Donnez deux formulations : une avec jointure externe et une avec test de non-existence.
 -- @difficulty 3
--- @tags jointure-externe, jointure, imbrication, not-exists, différence
+-- @tags jointure-externe, jointure, imbrication, not-exists, anti-jointure
 -- Version avec jointure externe.
 PROMPT "Q34 - Version avec jointure externe";
 

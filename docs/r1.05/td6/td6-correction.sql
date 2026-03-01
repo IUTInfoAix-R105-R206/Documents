@@ -264,7 +264,7 @@ WHERE EXISTS (
 -- Q13 - c:1, t:2
 -- Quels sont les numéros des pilotes qui ne sont pas en service ?
 -- @difficulty 2
--- @tags imbrication, différence
+-- @tags imbrication, anti-jointure, différence
 PROMPT "Q13 - V1";
 
 SELECT numPil
@@ -680,7 +680,7 @@ WHERE
 -- Q21 - c:1, t:1
 -- Quelles sont les villes de départ de vols dans lesquelles ne réside aucun pilote ?
 -- @difficulty 2
--- @tags imbrication, différence
+-- @tags imbrication, anti-jointure, différence
 PROMPT "Q21 - V1";
 
 SELECT DISTINCT villeDep
@@ -712,7 +712,7 @@ FROM Pilote;
 -- Q22 - c:1, t:6
 -- Quels sont les noms des pilotes n'effectuant pas de vol au départ de Lyon ?
 -- @difficulty 2
--- @tags imbrication, différence
+-- @tags imbrication, anti-jointure, différence
 PROMPT "Q22 - V1";
 
 SELECT DISTINCT nomPil

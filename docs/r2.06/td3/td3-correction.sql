@@ -413,7 +413,7 @@ FROM Enseigne;
 -- Q17 - c:1, t:23
 -- Donnez les libellés des modules ne correspondant à la spécialité d'aucun professeur.
 -- @difficulty 2
--- @tags différence, imbrication
+-- @tags anti-jointure, différence, imbrication
 PROMPT "Q17";
 
 SELECT DISTINCT libelle
@@ -475,7 +475,7 @@ WHERE EXISTS (
 -- Q19 - c:1, t:23 [= Q17]
 -- Donnez les libellés des modules ne correspondant à la spécialité d'aucun professeur.
 -- @difficulty 2
--- @tags différence, imbrication, not-exists, jointure-externe, null
+-- @tags anti-jointure, imbrication, not-exists, jointure-externe, null
 PROMPT "Q19 - V1";
 
 SELECT DISTINCT libelle
@@ -513,7 +513,7 @@ WHERE specProf IS NULL;
 -- Q20 - c:3, t:27
 -- Donnez les numéros, noms et prénoms des étudiants n'ayant aucune note.
 -- @difficulty 2
--- @tags différence, imbrication, not-exists, jointure-externe
+-- @tags anti-jointure, imbrication, not-exists, jointure-externe
 PROMPT "Q20 - V1";
 
 SELECT numEt, nomEt, prenomEt
@@ -555,7 +555,7 @@ WHERE N.numEt IS NULL;
 -- Q21 - c:2, t:41
 -- Quels sont les noms et prénoms des étudiants n'ayant eu aucun enseignement de Marc Laporte ?
 -- @difficulty 3
--- @tags jointure, différence, imbrication, not-exists, jointure-externe
+-- @tags jointure, anti-jointure, imbrication, not-exists, jointure-externe
 PROMPT "Q21 - V1";
 
 SELECT nomEt, prenomEt
@@ -617,7 +617,7 @@ WHERE T.numEt IS NULL;
 -- Q22 - c:2, t:8
 -- Quels sont les noms et prénoms des professeurs n'étant pas responsables de modules ?
 -- @difficulty 2
--- @tags différence, imbrication, not-exists, jointure-externe, null
+-- @tags anti-jointure, imbrication, not-exists, jointure-externe, null
 PROMPT "Q22 - V1";
 
 SELECT nomProf, prenomProf
