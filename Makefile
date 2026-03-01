@@ -70,7 +70,7 @@ R206_TEACHER_PDFS = \
 	test-sql-sqlite-local    test-sql-sqlite-docker    \
 	test-sql-oracle-local    test-sql-oracle-docker    \
 	test-sql-local test-sql-docker \
-	help
+	bump help
 
 help: ## Affiche cette aide
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -890,6 +890,38 @@ test-sql-docker: ## Exécute les corrections SQL avec tous les SGBD via Docker (
 	$(MAKE) test-sql-sqlite-docker     || rc=1; \
 	$(MAKE) test-sql-oracle-docker     || rc=1; \
 	exit $$rc
+
+# ==============================================================================
+# Versionnage
+# ==============================================================================
+
+# Usage :
+#   make bump           → incrémente le patch   (v1.0.0 → v1.0.1)
+#   make bump PART=minor → incrémente le minor  (v1.0.1 → v1.1.0)
+#   make bump PART=major → incrémente le major  (v1.1.0 → v2.0.0)
+PART ?= patch
+
+bump: ## Crée un tag de version (PART=patch|minor|major, défaut: patch)
+	@LAST=$$(git tag --sort=-v:refname | head -1); \
+	if [ -z "$$LAST" ]; then \
+		NEXT="v1.0.0"; \
+	else \
+		MAJOR=$$(echo "$$LAST" | sed 's/^v//' | cut -d. -f1); \
+		MINOR=$$(echo "$$LAST" | sed 's/^v//' | cut -d. -f2); \
+		PATCH=$$(echo "$$LAST" | sed 's/^v//' | cut -d. -f3); \
+		case "$(PART)" in \
+			major) MAJOR=$$((MAJOR + 1)); MINOR=0; PATCH=0 ;; \
+			minor) MINOR=$$((MINOR + 1)); PATCH=0 ;; \
+			patch) PATCH=$$((PATCH + 1)) ;; \
+			*) echo "Erreur : PART doit être patch, minor ou major"; exit 1 ;; \
+		esac; \
+		NEXT="v$$MAJOR.$$MINOR.$$PATCH"; \
+	fi; \
+	echo "$$LAST → $$NEXT"; \
+	git commit --allow-empty -m "$$NEXT" && \
+	git tag "$$NEXT" && \
+	git push origin main "$$NEXT" && \
+	echo "Tag $$NEXT poussé sur origin."
 
 # ==============================================================================
 # Nettoyage
