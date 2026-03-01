@@ -434,7 +434,7 @@ WHERE
     P.numPil = V.numPil
     AND nomPil <> 'DURAND';
 
--- Q18 - c:1, t:3
+-- Q18 - c:1, t:7
 -- Quels sont les horaires de départ des vols desservant les villes d'arrivée des vols au départ de Paris ?
 -- @difficulty 3
 -- @tags jointure, imbrication
@@ -443,11 +443,10 @@ PROMPT "Q18 - Version algébrique";
 
 SELECT DISTINCT VolCor.heureDep
 FROM Vol VolPar
-    INNER JOIN Vol VolCor ON VolPar.villeDep = VolCor.villeArr
+    INNER JOIN Vol VolCor ON VolPar.villeArr = VolCor.villeDep
 WHERE VolPar.villeDep = 'PARIS';
 
 -- Version imbriquée.
--- Q18 - c:1, t:7
 PROMPT "Q18 - Version imbriquée";
 
 SELECT DISTINCT heureDep
@@ -460,13 +459,12 @@ WHERE villeDep IN (
 
 
 -- Version prédicative.
--- Q18 - c:1, t:3
 PROMPT "Q18 - Version prédicative";
 
 SELECT DISTINCT VolCor.heureDep
 FROM Vol VolPar, Vol VolCor
 WHERE
-    VolPar.villeDep = VolCor.villeArr
+    VolPar.villeArr = VolCor.villeDep
     AND VolPar.villeDep = 'PARIS';
 
 -- Q19 - c:2, t:3
@@ -648,7 +646,6 @@ WHERE adresse IN (
 );
 
 -- Version alternative (pas au programme mais plus fidèle à la requête correspondante en algèbre relationnelle).
--- Q24 - c:1, t:4
 PROMPT "Q24 - V2";
 
 SELECT adresse
