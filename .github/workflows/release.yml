@@ -41,10 +41,10 @@ jobs:
             inkscape
 
       - name: Build all PDFs
-        run: make all
+        run: make all GIT_VERSION=${{ github.ref_name }}
 
       - name: Build teacher PDFs
-        run: make teacher
+        run: make teacher GIT_VERSION=${{ github.ref_name }}
 
       - name: Create ZIP archive
         run: cd output && zip -r ../Documents-${{ github.ref_name }}.zip .
