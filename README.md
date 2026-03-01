@@ -25,6 +25,49 @@ sudo apt-get install build-essential pandoc texlive-latex-base texlive-latex-ext
 - `inkscape` : requis pour inclure le badge Creative Commons au format SVG lors de la compilation PDF
 - `sqlite3` : requis pour `make test-sql-sqlite-local` (tests SQL sans PostgreSQL ni Docker)
 
+## Environnement de développement (Dev Container)
+
+Un [Dev Container](https://containers.dev/) est fourni avec **toutes les dépendances
+pré-installées** (Pandoc, LaTeX, Inkscape, SQLite, PostgreSQL client, Docker CLI).
+Il suffit de Docker et de VS Code pour démarrer.
+
+### Prérequis
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (ou Docker Engine)
+- [VS Code](https://code.visualstudio.com/) avec l'extension
+  [Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+- Alternative : ouvrir le dépôt directement dans
+  [GitHub Codespaces](https://github.com/features/codespaces)
+
+### Démarrage
+
+1. Cloner le dépôt et l'ouvrir dans VS Code
+2. Cliquer sur **« Reopen in Container »** (ou `Ctrl+Shift+P` → *Dev Containers: Reopen in Container*)
+3. Attendre la fin du build (~2-3 min la première fois, Oracle met ~1 min à démarrer)
+
+### Ce qui est inclus
+
+| Composant | Détail |
+|---|---|
+| **Compilation PDF** | Pandoc, LaTeX (texlive), Inkscape |
+| **PostgreSQL 16** | Service Docker, base `gestion_pedagogique` pré-créée |
+| **Oracle Free 23.5** | Service Docker, utilisateur `testuser` pré-créé |
+| **SQLite 3** | Installé dans le conteneur |
+| **SQLTools** | 3 connexions pré-configurées (PostgreSQL, SQLite, Oracle) |
+| **Hooks Git** | Pre-commit SQLFluff installé automatiquement |
+| **Python 3.13** | Avec SQLFluff et dépendances (via `requirements.txt`) |
+
+### Tester les corrections SQL
+
+Les variables d'environnement sont pré-configurées — les trois SGBD
+fonctionnent directement :
+
+```bash
+make test-sql-postgresql-local   # PostgreSQL (service Docker)
+make test-sql-sqlite-local       # SQLite (local)
+make test-sql-oracle-local       # Oracle (service Docker)
+```
+
 ## Compilation
 
 ```bash
@@ -48,15 +91,19 @@ Les PDF générés sont placés dans `output/r1.05/` et `output/r2.06/`.
 
 La version affichée dans les PDF est dérivée de git :
 
-- Si le commit courant porte un tag → le tag est utilisé (ex : `V2.0.5`)
+- Si le commit courant porte un tag → le tag est utilisé (ex : `v2.0.5`)
 - Sinon → le SHA1 court du commit (ex : `93e26fc`)
 
 Pour publier une nouvelle version :
 
 ```bash
-git tag V2.0.5
-make r206   # les PDF afficheront "V2.0.5"
+make bump              # incrémente le patch   (v1.0.0 → v1.0.1)
+make bump PART=minor   # incrémente le minor   (v1.0.1 → v1.1.0)
+make bump PART=major   # incrémente le major   (v1.1.0 → v2.0.0)
 ```
+
+La cible `bump` crée un commit vide avec le numéro de version, le tag
+correspondant, et pousse les deux sur `origin`.
 
 ## Structure du projet
 
