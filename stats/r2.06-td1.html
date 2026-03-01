@@ -90,42 +90,6 @@
 
   <div class="stats"><div class="stat-box"><strong>20</strong><small>Questions</small></div><div class="stat-box"><strong>2.0</strong><small>Difficulté moy.</small></div><div class="stat-box"><strong>12/25</strong><small>Tags utilisés</small></div></div>
 
-  <h2>Fréquence des tags</h2>
-  <div class="chart-container">
-    <div class="bar-row" data-tag="imbrication" onclick="selectTag('imbrication')"><span class="bar-label">imbrication</span><div class="bar" style="width: 100%;">10</div></div>
-<div class="bar-row" data-tag="ddl" onclick="selectTag('ddl')"><span class="bar-label">ddl</span><div class="bar" style="width: 60%;">6</div></div>
-<div class="bar-row" data-tag="jointure" onclick="selectTag('jointure')"><span class="bar-label">jointure</span><div class="bar" style="width: 50%;">5</div></div>
-<div class="bar-row" data-tag="semi-jointure" onclick="selectTag('semi-jointure')"><span class="bar-label">semi-jointure</span><div class="bar" style="width: 50%;">5</div></div>
-<div class="bar-row" data-tag="dml" onclick="selectTag('dml')"><span class="bar-label">dml</span><div class="bar" style="width: 40%;">4</div></div>
-<div class="bar-row" data-tag="null" onclick="selectTag('null')"><span class="bar-label">null</span><div class="bar" style="width: 20%;">2</div></div>
-<div class="bar-row" data-tag="intersection" onclick="selectTag('intersection')"><span class="bar-label">intersection</span><div class="bar" style="width: 20%;">2</div></div>
-<div class="bar-row" data-tag="anti-jointure" onclick="selectTag('anti-jointure')"><span class="bar-label">anti-jointure</span><div class="bar" style="width: 20%;">2</div></div>
-<div class="bar-row" data-tag="différence" onclick="selectTag('différence')"><span class="bar-label">différence</span><div class="bar" style="width: 10%;">1</div></div>
-<div class="bar-row" data-tag="union" onclick="selectTag('union')"><span class="bar-label">union</span><div class="bar" style="width: 10%;">1</div></div>
-<div class="bar-row" data-tag="not-exists" onclick="selectTag('not-exists')"><span class="bar-label">not-exists</span><div class="bar" style="width: 10%;">1</div></div>
-<div class="bar-row" data-tag="transaction" onclick="selectTag('transaction')"><span class="bar-label">transaction</span><div class="bar" style="width: 10%;">1</div></div>
-<div class="bar-row bar-row-zero" data-tag="calcul-horizontal" onclick="selectTag('calcul-horizontal')"><span class="bar-label">calcul-horizontal</span><span class="bar-zero">0</span></div>
-<div class="bar-row bar-row-zero" data-tag="calcul-vertical" onclick="selectTag('calcul-vertical')"><span class="bar-label">calcul-vertical</span><span class="bar-zero">0</span></div>
-<div class="bar-row bar-row-zero" data-tag="distinct" onclick="selectTag('distinct')"><span class="bar-label">distinct</span><span class="bar-zero">0</span></div>
-<div class="bar-row bar-row-zero" data-tag="division" onclick="selectTag('division')"><span class="bar-label">division</span><span class="bar-zero">0</span></div>
-<div class="bar-row bar-row-zero" data-tag="exists" onclick="selectTag('exists')"><span class="bar-label">exists</span><span class="bar-zero">0</span></div>
-<div class="bar-row bar-row-zero" data-tag="groupement" onclick="selectTag('groupement')"><span class="bar-label">groupement</span><span class="bar-zero">0</span></div>
-<div class="bar-row bar-row-zero" data-tag="jointure-externe" onclick="selectTag('jointure-externe')"><span class="bar-label">jointure-externe</span><span class="bar-zero">0</span></div>
-<div class="bar-row bar-row-zero" data-tag="projection" onclick="selectTag('projection')"><span class="bar-label">projection</span><span class="bar-zero">0</span></div>
-<div class="bar-row bar-row-zero" data-tag="récursion" onclick="selectTag('récursion')"><span class="bar-label">récursion</span><span class="bar-zero">0</span></div>
-<div class="bar-row bar-row-zero" data-tag="sous-requête" onclick="selectTag('sous-requête')"><span class="bar-label">sous-requête</span><span class="bar-zero">0</span></div>
-<div class="bar-row bar-row-zero" data-tag="sélection" onclick="selectTag('sélection')"><span class="bar-label">sélection</span><span class="bar-zero">0</span></div>
-<div class="bar-row bar-row-zero" data-tag="tri" onclick="selectTag('tri')"><span class="bar-label">tri</span><span class="bar-zero">0</span></div>
-<div class="bar-row bar-row-zero" data-tag="vue" onclick="selectTag('vue')"><span class="bar-label">vue</span><span class="bar-zero">0</span></div>
-  </div>
-
-  <h2>Questions <span id="filter-label"></span></h2>
-  <div id="filter-controls" class="hidden">
-    <button onclick="clearFilter()">Tout afficher</button>
-    
-  </div>
-  <div id="question-list"></div>
-
   <h2>Répartition par difficulté</h2>
   <div class="difficulty-chart">
     <div class="diff-col" data-difficulty="1" onclick="selectDifficulty(1)"><div class="diff-bar diff-1" style="height: 33%;">4</div><span class="diff-label">Facile</span></div>
@@ -163,6 +127,43 @@
 <tr><td class="tag-label">tri</td><td class="" ></td><td class="" ></td><td class="" ></td><td class="total-col">0</td></tr>
 <tr><td class="tag-label">vue</td><td class="" ></td><td class="" ></td><td class="" ></td><td class="total-col">0</td></tr>
     </tbody>
+  
+  <h2>Fréquence des tags</h2>
+  <div class="chart-container">
+    <div class="bar-row" data-tag="imbrication" onclick="selectTag('imbrication')"><span class="bar-label">imbrication</span><div class="bar" style="width: 100%;">10</div></div>
+<div class="bar-row" data-tag="ddl" onclick="selectTag('ddl')"><span class="bar-label">ddl</span><div class="bar" style="width: 60%;">6</div></div>
+<div class="bar-row" data-tag="jointure" onclick="selectTag('jointure')"><span class="bar-label">jointure</span><div class="bar" style="width: 50%;">5</div></div>
+<div class="bar-row" data-tag="semi-jointure" onclick="selectTag('semi-jointure')"><span class="bar-label">semi-jointure</span><div class="bar" style="width: 50%;">5</div></div>
+<div class="bar-row" data-tag="dml" onclick="selectTag('dml')"><span class="bar-label">dml</span><div class="bar" style="width: 40%;">4</div></div>
+<div class="bar-row" data-tag="null" onclick="selectTag('null')"><span class="bar-label">null</span><div class="bar" style="width: 20%;">2</div></div>
+<div class="bar-row" data-tag="intersection" onclick="selectTag('intersection')"><span class="bar-label">intersection</span><div class="bar" style="width: 20%;">2</div></div>
+<div class="bar-row" data-tag="anti-jointure" onclick="selectTag('anti-jointure')"><span class="bar-label">anti-jointure</span><div class="bar" style="width: 20%;">2</div></div>
+<div class="bar-row" data-tag="différence" onclick="selectTag('différence')"><span class="bar-label">différence</span><div class="bar" style="width: 10%;">1</div></div>
+<div class="bar-row" data-tag="union" onclick="selectTag('union')"><span class="bar-label">union</span><div class="bar" style="width: 10%;">1</div></div>
+<div class="bar-row" data-tag="not-exists" onclick="selectTag('not-exists')"><span class="bar-label">not-exists</span><div class="bar" style="width: 10%;">1</div></div>
+<div class="bar-row" data-tag="transaction" onclick="selectTag('transaction')"><span class="bar-label">transaction</span><div class="bar" style="width: 10%;">1</div></div>
+<div class="bar-row bar-row-zero" data-tag="calcul-horizontal" onclick="selectTag('calcul-horizontal')"><span class="bar-label">calcul-horizontal</span><span class="bar-zero">0</span></div>
+<div class="bar-row bar-row-zero" data-tag="calcul-vertical" onclick="selectTag('calcul-vertical')"><span class="bar-label">calcul-vertical</span><span class="bar-zero">0</span></div>
+<div class="bar-row bar-row-zero" data-tag="distinct" onclick="selectTag('distinct')"><span class="bar-label">distinct</span><span class="bar-zero">0</span></div>
+<div class="bar-row bar-row-zero" data-tag="division" onclick="selectTag('division')"><span class="bar-label">division</span><span class="bar-zero">0</span></div>
+<div class="bar-row bar-row-zero" data-tag="exists" onclick="selectTag('exists')"><span class="bar-label">exists</span><span class="bar-zero">0</span></div>
+<div class="bar-row bar-row-zero" data-tag="groupement" onclick="selectTag('groupement')"><span class="bar-label">groupement</span><span class="bar-zero">0</span></div>
+<div class="bar-row bar-row-zero" data-tag="jointure-externe" onclick="selectTag('jointure-externe')"><span class="bar-label">jointure-externe</span><span class="bar-zero">0</span></div>
+<div class="bar-row bar-row-zero" data-tag="projection" onclick="selectTag('projection')"><span class="bar-label">projection</span><span class="bar-zero">0</span></div>
+<div class="bar-row bar-row-zero" data-tag="récursion" onclick="selectTag('récursion')"><span class="bar-label">récursion</span><span class="bar-zero">0</span></div>
+<div class="bar-row bar-row-zero" data-tag="sous-requête" onclick="selectTag('sous-requête')"><span class="bar-label">sous-requête</span><span class="bar-zero">0</span></div>
+<div class="bar-row bar-row-zero" data-tag="sélection" onclick="selectTag('sélection')"><span class="bar-label">sélection</span><span class="bar-zero">0</span></div>
+<div class="bar-row bar-row-zero" data-tag="tri" onclick="selectTag('tri')"><span class="bar-label">tri</span><span class="bar-zero">0</span></div>
+<div class="bar-row bar-row-zero" data-tag="vue" onclick="selectTag('vue')"><span class="bar-label">vue</span><span class="bar-zero">0</span></div>
+  </div>
+
+  <h2>Questions <span id="filter-label"></span></h2>
+  <div id="filter-controls" class="hidden">
+    <button onclick="clearFilter()">Tout afficher</button>
+    
+  </div>
+  <div id="question-list"></div>
+
   </table>
 
   <p class="footer">IUT d'Aix-Marseille &mdash; Département Informatique</p>

@@ -90,42 +90,6 @@
 
   <div class="stats"><div class="stat-box"><strong>199</strong><small>Questions</small></div><div class="stat-box"><strong>2.1</strong><small>Difficulté moy.</small></div><div class="stat-box"><strong>25/25</strong><small>Tags utilisés</small></div><div class="stat-box"><strong>8</strong><small>TD (2 ressources)</small></div></div>
 
-  <h2>Fréquence des tags</h2>
-  <div class="chart-container">
-    <div class="bar-row" data-tag="jointure" onclick="selectTag('jointure')"><span class="bar-label">jointure</span><div class="bar" style="width: 100%;">89</div></div>
-<div class="bar-row" data-tag="imbrication" onclick="selectTag('imbrication')"><span class="bar-label">imbrication</span><div class="bar" style="width: 94%;">84</div></div>
-<div class="bar-row" data-tag="calcul-vertical" onclick="selectTag('calcul-vertical')"><span class="bar-label">calcul-vertical</span><div class="bar" style="width: 82%;">73</div></div>
-<div class="bar-row" data-tag="sélection" onclick="selectTag('sélection')"><span class="bar-label">sélection</span><div class="bar" style="width: 52%;">47</div></div>
-<div class="bar-row" data-tag="groupement" onclick="selectTag('groupement')"><span class="bar-label">groupement</span><div class="bar" style="width: 49%;">44</div></div>
-<div class="bar-row" data-tag="semi-jointure" onclick="selectTag('semi-jointure')"><span class="bar-label">semi-jointure</span><div class="bar" style="width: 48%;">43</div></div>
-<div class="bar-row" data-tag="null" onclick="selectTag('null')"><span class="bar-label">null</span><div class="bar" style="width: 30%;">27</div></div>
-<div class="bar-row" data-tag="distinct" onclick="selectTag('distinct')"><span class="bar-label">distinct</span><div class="bar" style="width: 24%;">22</div></div>
-<div class="bar-row" data-tag="récursion" onclick="selectTag('récursion')"><span class="bar-label">récursion</span><div class="bar" style="width: 23%;">21</div></div>
-<div class="bar-row" data-tag="exists" onclick="selectTag('exists')"><span class="bar-label">exists</span><div class="bar" style="width: 21%;">19</div></div>
-<div class="bar-row" data-tag="anti-jointure" onclick="selectTag('anti-jointure')"><span class="bar-label">anti-jointure</span><div class="bar" style="width: 21%;">19</div></div>
-<div class="bar-row" data-tag="jointure-externe" onclick="selectTag('jointure-externe')"><span class="bar-label">jointure-externe</span><div class="bar" style="width: 19%;">17</div></div>
-<div class="bar-row" data-tag="not-exists" onclick="selectTag('not-exists')"><span class="bar-label">not-exists</span><div class="bar" style="width: 15%;">14</div></div>
-<div class="bar-row" data-tag="sous-requête" onclick="selectTag('sous-requête')"><span class="bar-label">sous-requête</span><div class="bar" style="width: 14%;">13</div></div>
-<div class="bar-row" data-tag="projection" onclick="selectTag('projection')"><span class="bar-label">projection</span><div class="bar" style="width: 11%;">10</div></div>
-<div class="bar-row" data-tag="vue" onclick="selectTag('vue')"><span class="bar-label">vue</span><div class="bar" style="width: 8%;">8</div></div>
-<div class="bar-row" data-tag="différence" onclick="selectTag('différence')"><span class="bar-label">différence</span><div class="bar" style="width: 7%;">7</div></div>
-<div class="bar-row" data-tag="intersection" onclick="selectTag('intersection')"><span class="bar-label">intersection</span><div class="bar" style="width: 7%;">7</div></div>
-<div class="bar-row" data-tag="tri" onclick="selectTag('tri')"><span class="bar-label">tri</span><div class="bar" style="width: 7%;">7</div></div>
-<div class="bar-row" data-tag="division" onclick="selectTag('division')"><span class="bar-label">division</span><div class="bar" style="width: 7%;">7</div></div>
-<div class="bar-row" data-tag="ddl" onclick="selectTag('ddl')"><span class="bar-label">ddl</span><div class="bar" style="width: 6%;">6</div></div>
-<div class="bar-row" data-tag="dml" onclick="selectTag('dml')"><span class="bar-label">dml</span><div class="bar" style="width: 6%;">6</div></div>
-<div class="bar-row" data-tag="union" onclick="selectTag('union')"><span class="bar-label">union</span><div class="bar" style="width: 4%;">4</div></div>
-<div class="bar-row" data-tag="calcul-horizontal" onclick="selectTag('calcul-horizontal')"><span class="bar-label">calcul-horizontal</span><div class="bar" style="width: 3%;">2</div></div>
-<div class="bar-row" data-tag="transaction" onclick="selectTag('transaction')"><span class="bar-label">transaction</span><div class="bar" style="width: 3%;">2</div></div>
-  </div>
-
-  <h2>Questions <span id="filter-label"></span></h2>
-  <div id="filter-controls" class="hidden">
-    <button onclick="clearFilter()">Tout afficher</button>
-    <select id="td-filter" onchange="applyTdFilter()"><option value="">Tous les TD</option><option value="r1.05/td6">r1.05/td6</option><option value="r1.05/td7">r1.05/td7</option><option value="r2.06/td1">r2.06/td1</option><option value="r2.06/td2">r2.06/td2</option><option value="r2.06/td3">r2.06/td3</option><option value="r2.06/td4">r2.06/td4</option><option value="r2.06/td5">r2.06/td5</option><option value="r2.06/td6">r2.06/td6</option></select>
-  </div>
-  <div id="question-list"></div>
-
   <h2>Répartition par difficulté</h2>
   <div class="difficulty-chart">
     <div class="diff-col" data-difficulty="1" onclick="selectDifficulty(1)"><div class="diff-bar diff-1" style="height: 38%;">39</div><span class="diff-label">Facile</span></div>
@@ -163,6 +127,43 @@
 <tr><td class="tag-label">calcul-horizontal</td><td class="" ></td><td class="clickable" onclick="selectCell('calcul-horizontal', 2)">1</td><td class="clickable" onclick="selectCell('calcul-horizontal', 3)">1</td><td class="total-col">2</td></tr>
 <tr><td class="tag-label">transaction</td><td class="" ></td><td class="" ></td><td class="clickable" onclick="selectCell('transaction', 3)">2</td><td class="total-col">2</td></tr>
     </tbody>
+  
+  <h2>Fréquence des tags</h2>
+  <div class="chart-container">
+    <div class="bar-row" data-tag="jointure" onclick="selectTag('jointure')"><span class="bar-label">jointure</span><div class="bar" style="width: 100%;">89</div></div>
+<div class="bar-row" data-tag="imbrication" onclick="selectTag('imbrication')"><span class="bar-label">imbrication</span><div class="bar" style="width: 94%;">84</div></div>
+<div class="bar-row" data-tag="calcul-vertical" onclick="selectTag('calcul-vertical')"><span class="bar-label">calcul-vertical</span><div class="bar" style="width: 82%;">73</div></div>
+<div class="bar-row" data-tag="sélection" onclick="selectTag('sélection')"><span class="bar-label">sélection</span><div class="bar" style="width: 52%;">47</div></div>
+<div class="bar-row" data-tag="groupement" onclick="selectTag('groupement')"><span class="bar-label">groupement</span><div class="bar" style="width: 49%;">44</div></div>
+<div class="bar-row" data-tag="semi-jointure" onclick="selectTag('semi-jointure')"><span class="bar-label">semi-jointure</span><div class="bar" style="width: 48%;">43</div></div>
+<div class="bar-row" data-tag="null" onclick="selectTag('null')"><span class="bar-label">null</span><div class="bar" style="width: 30%;">27</div></div>
+<div class="bar-row" data-tag="distinct" onclick="selectTag('distinct')"><span class="bar-label">distinct</span><div class="bar" style="width: 24%;">22</div></div>
+<div class="bar-row" data-tag="récursion" onclick="selectTag('récursion')"><span class="bar-label">récursion</span><div class="bar" style="width: 23%;">21</div></div>
+<div class="bar-row" data-tag="exists" onclick="selectTag('exists')"><span class="bar-label">exists</span><div class="bar" style="width: 21%;">19</div></div>
+<div class="bar-row" data-tag="anti-jointure" onclick="selectTag('anti-jointure')"><span class="bar-label">anti-jointure</span><div class="bar" style="width: 21%;">19</div></div>
+<div class="bar-row" data-tag="jointure-externe" onclick="selectTag('jointure-externe')"><span class="bar-label">jointure-externe</span><div class="bar" style="width: 19%;">17</div></div>
+<div class="bar-row" data-tag="not-exists" onclick="selectTag('not-exists')"><span class="bar-label">not-exists</span><div class="bar" style="width: 15%;">14</div></div>
+<div class="bar-row" data-tag="sous-requête" onclick="selectTag('sous-requête')"><span class="bar-label">sous-requête</span><div class="bar" style="width: 14%;">13</div></div>
+<div class="bar-row" data-tag="projection" onclick="selectTag('projection')"><span class="bar-label">projection</span><div class="bar" style="width: 11%;">10</div></div>
+<div class="bar-row" data-tag="vue" onclick="selectTag('vue')"><span class="bar-label">vue</span><div class="bar" style="width: 8%;">8</div></div>
+<div class="bar-row" data-tag="différence" onclick="selectTag('différence')"><span class="bar-label">différence</span><div class="bar" style="width: 7%;">7</div></div>
+<div class="bar-row" data-tag="intersection" onclick="selectTag('intersection')"><span class="bar-label">intersection</span><div class="bar" style="width: 7%;">7</div></div>
+<div class="bar-row" data-tag="tri" onclick="selectTag('tri')"><span class="bar-label">tri</span><div class="bar" style="width: 7%;">7</div></div>
+<div class="bar-row" data-tag="division" onclick="selectTag('division')"><span class="bar-label">division</span><div class="bar" style="width: 7%;">7</div></div>
+<div class="bar-row" data-tag="ddl" onclick="selectTag('ddl')"><span class="bar-label">ddl</span><div class="bar" style="width: 6%;">6</div></div>
+<div class="bar-row" data-tag="dml" onclick="selectTag('dml')"><span class="bar-label">dml</span><div class="bar" style="width: 6%;">6</div></div>
+<div class="bar-row" data-tag="union" onclick="selectTag('union')"><span class="bar-label">union</span><div class="bar" style="width: 4%;">4</div></div>
+<div class="bar-row" data-tag="calcul-horizontal" onclick="selectTag('calcul-horizontal')"><span class="bar-label">calcul-horizontal</span><div class="bar" style="width: 3%;">2</div></div>
+<div class="bar-row" data-tag="transaction" onclick="selectTag('transaction')"><span class="bar-label">transaction</span><div class="bar" style="width: 3%;">2</div></div>
+  </div>
+
+  <h2>Questions <span id="filter-label"></span></h2>
+  <div id="filter-controls" class="hidden">
+    <button onclick="clearFilter()">Tout afficher</button>
+    <select id="td-filter" onchange="applyTdFilter()"><option value="">Tous les TD</option><option value="r1.05/td6">r1.05/td6</option><option value="r1.05/td7">r1.05/td7</option><option value="r2.06/td1">r2.06/td1</option><option value="r2.06/td2">r2.06/td2</option><option value="r2.06/td3">r2.06/td3</option><option value="r2.06/td4">r2.06/td4</option><option value="r2.06/td5">r2.06/td5</option><option value="r2.06/td6">r2.06/td6</option></select>
+  </div>
+  <div id="question-list"></div>
+
   </table>
 
   <p class="footer">IUT d'Aix-Marseille &mdash; Département Informatique</p>
