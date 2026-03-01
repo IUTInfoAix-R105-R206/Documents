@@ -364,7 +364,7 @@ WHERE nbRes >= ALL(
 -- Q22 - c:3, t:6
 -- Donnez, pour chaque numéro et nom de client ayant fait une réservation pour le Kenya, le nombre total de réservations.
 -- @difficulty 3
--- @tags jointure, groupement, calcul-vertical, imbrication
+-- @tags jointure, groupement, calcul-vertical, imbrication, semi-jointure
 PROMPT "Q22";
 
 SELECT C.numCl, nom, COUNT(*) AS nbReservations
@@ -382,7 +382,7 @@ GROUP BY C.numCl, nom;
 -- Q23 - c:2, t:3
 -- Donnez, pour chaque pays ayant au moins un hôtel classé cinq étoiles, le nombre total d'hôtels, quel que soit leur nombre d'étoiles.
 -- @difficulty 2
--- @tags groupement, calcul-vertical, imbrication
+-- @tags groupement, calcul-vertical, imbrication, semi-jointure
 PROMPT "Q23";
 
 SELECT paysArr, COUNT(DISTINCT Hotel) AS nbHotels
@@ -419,7 +419,7 @@ WHERE
 -- Q25 - c:1, t:2
 -- Quelles sont les libellés des options gratuites pour au moins un voyage et payante pour au moins un autre ? Donner deux formulations différentes.
 -- @difficulty 3
--- @tags jointure, imbrication, null
+-- @tags jointure, imbrication, semi-jointure, null
 PROMPT "Q25 - V1";
 
 SELECT DISTINCT libelle
@@ -516,7 +516,7 @@ WHERE code IN (
 -- Q27 - c:3, t:7
 -- Quels sont les numéros, noms et prénoms des autres clients ayant réservé pour un des voyages réservé par Arnaud Peyroche ?
 -- @difficulty 3
--- @tags jointure, imbrication, sous-requête
+-- @tags jointure, imbrication, semi-jointure, sous-requête
 PROMPT "Q27";
 
 WITH

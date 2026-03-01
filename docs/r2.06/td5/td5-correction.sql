@@ -20,7 +20,7 @@ GROUP BY P.numProf, nomProf, anneeEt;
 -- Q2 - c:3, t:5
 -- Quel est, pour chacun des numéros et noms des professeurs responsable d'un module, le nombre de modules dans lesquels il fait cours ? Formulez les requêtes suivantes en utilisant, si possible, les trois formes de jointure.
 -- @difficulty 2
--- @tags jointure, imbrication, groupement, calcul-vertical, distinct
+-- @tags jointure, imbrication, semi-jointure, groupement, calcul-vertical, distinct
 
 -- Version algébrique.
 PROMPT "Q2 - Version algébrique";
@@ -532,7 +532,7 @@ WHERE discipline = 'INFORMATIQUE';
 -- Q19 - c:1, t:24
 -- Présenter, de manière hiérarchique, les modules suivis par l'étudiant Jérôme Atlani ?
 -- @difficulty 3
--- @tags récursion, jointure, imbrication
+-- @tags récursion, jointure, imbrication, semi-jointure
 PROMPT "Q19";
 
 SELECT LPAD('-', 2 * (MAX(LEVEL) OVER () + 1 - LEVEL), '-') || libelle
@@ -606,7 +606,7 @@ HAVING MIN(moyTest) >= 10;
 -- Q21 - c:3, t:19
 -- Quels sont les numéros, noms et prénoms des étudiants ayant des moyennes dans un module subordonnés au module Principes des BD ?
 -- @difficulty 2
--- @tags jointure, imbrication, récursion, distinct
+-- @tags jointure, imbrication, semi-jointure, récursion, distinct
 PROMPT "Q21";
 
 SELECT DISTINCT Et.numEt, nomEt, prenomEt

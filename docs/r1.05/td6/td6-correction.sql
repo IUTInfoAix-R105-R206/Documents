@@ -162,12 +162,12 @@ FROM Pilote
 WHERE adresse = 'MARSEILLE';
 
 -- @section Requêtes complexes
--- @instruction Quand cela possible, formulez les requêtes suivantes de trois manières différentes.
+-- @instruction Quand cela possible, formulez les requêtes suivantes de quatre manières différentes (algébrique, prédicative, imbriquée, existentielle).
 
 -- Q11 - c:1, t:3
 -- Donnez les numéros des vols effectués au départ de Nice par des pilotes parisiens.
 -- @difficulty 2
--- @tags jointure, imbrication
+-- @tags jointure, imbrication, semi-jointure, exists
 -- Version algébrique.
 PROMPT "Q11 - Version algébrique";
 
@@ -201,10 +201,25 @@ WHERE
     AND villeDep = 'NICE'
     AND adresse = 'PARIS';
 
+-- Version existentielle.
+PROMPT "Q11 - Version existentielle";
+
+SELECT numVol
+FROM Vol V
+WHERE
+    villeDep = 'NICE'
+    AND EXISTS (
+        SELECT *
+        FROM Pilote P
+        WHERE
+            P.numPil = V.numPil -- noqa: RF03
+            AND adresse = 'PARIS' -- noqa: RF03
+    );
+
 -- Q12 - c:3, t:12
 -- Quels sont les numéros, villes de départ, et villes d'arrivée des vols effectués par un avion qui n'est pas localisé à Nice ?
 -- @difficulty 2
--- @tags jointure, imbrication
+-- @tags jointure, imbrication, semi-jointure, exists
 -- Version algébrique.
 PROMPT "Q12 - Version algébrique";
 
@@ -232,6 +247,19 @@ FROM Vol V, Avion A
 WHERE
     V.numAv = A.numAv
     AND localisation <> 'NICE';
+
+-- Version existentielle.
+PROMPT "Q12 - Version existentielle";
+
+SELECT numVol, villeDep, villeArr
+FROM Vol V
+WHERE EXISTS (
+    SELECT *
+    FROM Avion A
+    WHERE
+        A.numAv = V.numAv -- noqa: RF03
+        AND localisation <> 'NICE' -- noqa: RF03
+);
 
 -- Q13 - c:1, t:2
 -- Quels sont les numéros des pilotes qui ne sont pas en service ?
@@ -268,7 +296,7 @@ FROM Vol;
 -- Q14 - c:2, t:4
 -- Quels sont les noms et adresses des pilotes assurant au moins un vol au départ de Nice avec des avions de capacité de plus de 300 places ?
 -- @difficulty 2
--- @tags jointure, imbrication
+-- @tags jointure, imbrication, semi-jointure, exists
 -- Version algébrique.
 PROMPT "Q14 - Version algébrique";
 
@@ -308,10 +336,25 @@ WHERE
     AND villeDep = 'NICE'
     AND capacite > 300;
 
+-- Version existentielle.
+PROMPT "Q14 - Version existentielle";
+
+SELECT DISTINCT nomPil, adresse
+FROM Pilote P
+WHERE EXISTS (
+    SELECT *
+    FROM Vol V
+        INNER JOIN Avion A ON V.numAv = A.numAv
+    WHERE
+        V.numPil = P.numPil -- noqa: RF03
+        AND villeDep = 'NICE'
+        AND capacite > 300
+);
+
 -- Q15 - c:1, t:1
 -- Quels sont les noms des pilotes domiciliés à Paris assurant des vols au départ de Nice avec des A320 ?
 -- @difficulty 2
--- @tags jointure, imbrication
+-- @tags jointure, imbrication, semi-jointure, exists
 -- Version algébrique.
 PROMPT "Q15 - Version algébrique";
 
@@ -355,10 +398,27 @@ WHERE
     AND villeDep = 'NICE'
     AND nomAv = 'A320';
 
+-- Version existentielle.
+PROMPT "Q15 - Version existentielle";
+
+SELECT DISTINCT nomPil
+FROM Pilote P
+WHERE
+    adresse = 'PARIS'
+    AND EXISTS (
+        SELECT *
+        FROM Vol V
+            INNER JOIN Avion A ON V.numAv = A.numAv
+        WHERE
+            V.numPil = P.numPil -- noqa: RF03
+            AND villeDep = 'NICE'
+            AND nomAv = 'A320'
+    );
+
 -- Q16 - c:1, t:1
 -- Quels sont les numéros des vols effectués par des pilotes niçois au départ ou à l'arrivée de Nice avec des avions localisés à Paris ?
 -- @difficulty 3
--- @tags jointure, imbrication
+-- @tags jointure, imbrication, semi-jointure, exists
 -- Version algébrique.
 PROMPT "Q16 - Version algébrique";
 
@@ -401,10 +461,32 @@ WHERE
     AND adresse = 'NICE'
     AND localisation = 'PARIS';
 
+-- Version existentielle.
+PROMPT "Q16 - Version existentielle";
+
+SELECT numVol
+FROM Vol V
+WHERE
+    (villeDep = 'NICE' OR villeArr = 'NICE')
+    AND EXISTS (
+        SELECT *
+        FROM Pilote P
+        WHERE
+            P.numPil = V.numPil -- noqa: RF03
+            AND adresse = 'NICE' -- noqa: RF03
+    )
+    AND EXISTS (
+        SELECT *
+        FROM Avion A
+        WHERE
+            A.numAv = V.numAv -- noqa: RF03
+            AND localisation = 'PARIS' -- noqa: RF03
+    );
+
 -- Q17 - c:1, t:5
 -- Quels sont, à l'exception des pilotes nommés Durand, les noms de pilotes en service ?
 -- @difficulty 2
--- @tags jointure, imbrication
+-- @tags jointure, imbrication, semi-jointure, exists
 -- Version algébrique.
 PROMPT "Q17 - Version algébrique";
 
@@ -434,10 +516,23 @@ WHERE
     P.numPil = V.numPil
     AND nomPil <> 'DURAND';
 
+-- Version existentielle.
+PROMPT "Q17 - Version existentielle";
+
+SELECT DISTINCT nomPil
+FROM Pilote P
+WHERE
+    nomPil <> 'DURAND'
+    AND EXISTS (
+        SELECT *
+        FROM Vol V
+        WHERE V.numPil = P.numPil -- noqa: RF03
+    );
+
 -- Q18 - c:1, t:7
 -- Quels sont les horaires de départ des vols desservant les villes d'arrivée des vols au départ de Paris ?
 -- @difficulty 3
--- @tags jointure, imbrication
+-- @tags jointure, imbrication, semi-jointure, exists
 -- Version algébrique.
 PROMPT "Q18 - Version algébrique";
 
@@ -467,10 +562,23 @@ WHERE
     VolPar.villeArr = VolCor.villeDep
     AND VolPar.villeDep = 'PARIS';
 
+-- Version existentielle.
+PROMPT "Q18 - Version existentielle";
+
+SELECT DISTINCT heureDep
+FROM Vol V1
+WHERE EXISTS (
+    SELECT *
+    FROM Vol V2
+    WHERE
+        V2.villeArr = V1.villeDep -- noqa: RF03
+        AND V2.villeDep = 'PARIS'
+);
+
 -- Q19 - c:2, t:3
 -- Quels sont les numéros et noms des pilotes habitant dans les mêmes villes que les pilotes nommés Martin ?
 -- @difficulty 3
--- @tags jointure, imbrication
+-- @tags jointure, imbrication, semi-jointure, exists
 PROMPT "Q19 - Version algébrique";
 
 SELECT DISTINCT Px.numPil, Px.nomPil
@@ -503,10 +611,25 @@ WHERE
     AND Px.nomPil <> 'MARTIN'
     AND PMar.nomPil = 'MARTIN';
 
+-- Version existentielle.
+PROMPT "Q19 - Version existentielle";
+
+SELECT DISTINCT numPil, nomPil
+FROM Pilote Px
+WHERE
+    nomPil <> 'MARTIN'
+    AND EXISTS (
+        SELECT *
+        FROM Pilote PMar
+        WHERE
+            PMar.adresse = Px.adresse -- noqa: RF03
+            AND PMar.nomPil = 'MARTIN'
+    );
+
 -- Q20 - c:1, t:1
 -- Quels sont les numéros des avions localisés dans la même ville que l'avion numéro 100 ?
 -- @difficulty 2
--- @tags jointure, imbrication
+-- @tags jointure, imbrication, semi-jointure, exists
 PROMPT "Q20 - Version algébrique";
 
 SELECT Ax.numAv
@@ -538,6 +661,21 @@ WHERE
     Ax.localisation = A100.localisation
     AND Ax.numAv <> 100
     AND A100.numAv = 100;
+
+-- Version existentielle.
+PROMPT "Q20 - Version existentielle";
+
+SELECT numAv
+FROM Avion Ax
+WHERE
+    numAv <> 100
+    AND EXISTS (
+        SELECT *
+        FROM Avion A100
+        WHERE
+            A100.localisation = Ax.localisation -- noqa: RF03
+            AND A100.numAv = 100
+    );
 
 -- Q21 - c:1, t:1
 -- Quelles sont les villes de départ de vols dans lesquelles ne réside aucun pilote ?
@@ -635,7 +773,7 @@ WHERE
 -- Q24 - c:1, t:4
 -- Quelles sont les villes où habitent des pilotes et où sont localisés des avions ?
 -- @difficulty 2
--- @tags intersection, imbrication
+-- @tags intersection, imbrication, semi-jointure, exists
 PROMPT "Q24 - V1";
 
 SELECT DISTINCT adresse
@@ -654,10 +792,21 @@ INTERSECT
 SELECT localisation
 FROM Avion;
 
+-- Version existentielle.
+PROMPT "Q24 - Version existentielle";
+
+SELECT DISTINCT adresse
+FROM Pilote P
+WHERE EXISTS (
+    SELECT *
+    FROM Avion A
+    WHERE A.localisation = P.adresse -- noqa: RF03
+);
+
 -- Q25 - c:1, t:4
 -- Quels sont les noms des pilotes qui effectuent des vols au départ de leur ville de résidence ?
 -- @difficulty 3
--- @tags jointure, imbrication
+-- @tags jointure, imbrication, semi-jointure, exists
 PROMPT "Q25 - Version algébrique";
 
 SELECT DISTINCT nomPil
@@ -686,6 +835,19 @@ FROM Pilote P, Vol V
 WHERE
     P.numPil = V.numPil
     AND adresse = villeDep;
+
+-- Version existentielle.
+PROMPT "Q25 - Version existentielle";
+
+SELECT DISTINCT nomPil
+FROM Pilote P
+WHERE EXISTS (
+    SELECT *
+    FROM Vol V
+    WHERE
+        V.numPil = P.numPil -- noqa: RF03
+        AND V.villeDep = P.adresse -- noqa: RF03
+);
 
 -- Q26 - c:3, t:1
 -- Quels sont les numéros, noms et salaires des pilotes domiciliés dans les mêmes villes que les pilotes nommés Martin tout en ayant un salaire supérieur à eux ?
@@ -740,7 +902,7 @@ WHERE heureDep >= ALL(
 -- Q28 - c:1, t:1
 -- Donnez le nombre de vols effectués par les pilotes ayant les plus petits salaires.
 -- @difficulty 3
--- @tags jointure, imbrication, calcul-vertical
+-- @tags jointure, imbrication, semi-jointure, calcul-vertical, exists
 PROMPT "Q28 - V1";
 
 SELECT COUNT(*)
@@ -774,4 +936,20 @@ FROM Vol V
 WHERE salaire <= ALL(
     SELECT salaire
     FROM Pilote
+);
+
+-- Version existentielle.
+PROMPT "Q28 - Version existentielle";
+
+SELECT COUNT(*)
+FROM Vol V
+WHERE EXISTS (
+    SELECT *
+    FROM Pilote P
+    WHERE
+        P.numPil = V.numPil -- noqa: RF03
+        AND salaire = ( -- noqa: RF03
+            SELECT MIN(salaire)
+            FROM Pilote
+        )
 );

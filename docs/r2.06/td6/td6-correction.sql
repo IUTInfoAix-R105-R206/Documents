@@ -208,7 +208,7 @@ INSERT INTO Q8 (code, libelle, heureCMPrev, heureCMReal, heureTPPrev, heureTPRea
 -- Q9 - c:3, t:19
 -- Quels sont les numéros, noms et prénoms des étudiants ayant eu une note dans le module Principes des BD ou dans un de ses sous-modules direct ou pas ?
 -- @difficulty 3
--- @tags récursion, jointure, imbrication
+-- @tags récursion, jointure, imbrication, semi-jointure
 PROMPT "Q9";
 
 SELECT DISTINCT Et.numEt, nomEt, prenomEt

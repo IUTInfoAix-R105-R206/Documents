@@ -147,7 +147,7 @@ ORDER BY lvl DESC;
 -- Q7 - c:2, t:28
 -- Quels sont les identifiants des questions et numéros de TP se rapportant à un thème subordonné directement ou indirectement au thème Jointure ?
 -- @difficulty 3
--- @tags récursion, jointure, imbrication
+-- @tags récursion, jointure, imbrication, semi-jointure
 PROMPT "Q7 - V1";
 
 SELECT DISTINCT Q.idQ, Q.numTP
@@ -574,7 +574,7 @@ HAVING COUNT(DISTINCT numTP) = (
 -- Q16 - c:3, t:1
 -- Donnez les numéros, noms et prénoms des étudiants ayant eu au moins un résultat faux au TP numéro 2 et au TP numéro 3. Proposer trois formulations différentes.
 -- @difficulty 3
--- @tags jointure, imbrication, intersection, sélection
+-- @tags jointure, imbrication, semi-jointure, intersection, sélection
 PROMPT "Q16 - V1";
 
 SELECT DISTINCT Et.numEt, nom, prenom
@@ -688,7 +688,7 @@ WHERE groupe NOT IN (
 -- Q18 - c:3, t:7
 -- Donnez les numéros, noms et prénoms des étudiants dans le même groupe et ayant le même type de Bac que l'étudiante Marie Dujardin.
 -- @difficulty 2
--- @tags jointure, imbrication
+-- @tags jointure, imbrication, semi-jointure
 PROMPT "Q18 - V1";
 
 SELECT Et.numEt, Et.nom, Et.prenom
@@ -716,7 +716,7 @@ WHERE (groupe, typeBAC) IN (
 -- Q19 - c:3, t:19
 -- Donnez les numéros, noms et prénoms des étudiants ayant réalisés le nombre de variantes demandées pour au moins une Question du TP numéro 2.
 -- @difficulty 2
--- @tags jointure, imbrication, sélection
+-- @tags jointure, imbrication, semi-jointure, sélection
 PROMPT "Q19 - V1";
 
 SELECT DISTINCT Et.numEt, Et.nom, Et.prenom
@@ -744,7 +744,7 @@ WHERE (idQ, nbVariantes) IN (
 -- Q20 - c:2, t:2
 -- Donnez l'identifiant des questions et les numéros de TP portant à la fois sur le thème Jointure imbriquée et sur le thème Fonction agrégative ou statistique.
 -- @difficulty 3
--- @tags jointure, imbrication, intersection
+-- @tags jointure, imbrication, semi-jointure, intersection
 PROMPT "Q20 - V1";
 
 SELECT Q.idQ, Q.numTP
@@ -822,7 +822,7 @@ HAVING COUNT(*) >= 3;
 -- Q23 - c:3, t:12
 -- Donnez, pour chaque étudiant ayant au moins une réponse juste au TP numéro 3, le nombre de réponses effectivement justes à ce TP.
 -- @difficulty 3
--- @tags jointure, imbrication, groupement, calcul-vertical, sélection
+-- @tags jointure, imbrication, semi-jointure, groupement, calcul-vertical, sélection
 PROMPT "Q23";
 
 SELECT Et.numEt, Et.nom, COUNT(*) AS nbJustes

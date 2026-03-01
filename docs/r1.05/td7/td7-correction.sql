@@ -84,7 +84,7 @@ WHERE adresse IS NULL;
 -- Q6 - c:1, t:2
 -- Donnez les identifiants des voyages pour lesquels le client Hubert Marin a fait une réservation.
 -- @difficulty 2
--- @tags jointure, imbrication
+-- @tags jointure, imbrication, semi-jointure
 -- Version algébrique.
 PROMPT "Q6 - Version algébrique";
 
@@ -121,7 +121,7 @@ WHERE
 -- Q7 - c:3, t:15
 -- Donnez les numéros des clients ainsi que les dates de réservation et villes d'arrivée des voyages réservés par des clients habitant Marseille.
 -- @difficulty 2
--- @tags jointure, imbrication
+-- @tags jointure, imbrication, semi-jointure
 -- Version algébrique.
 PROMPT "Q7 - Version algébrique";
 
@@ -160,7 +160,7 @@ WHERE
 -- Q8 - c:1, t:2
 -- Quelles sont les libellés des options proposées pour le voyage d'identifiant 862 ?
 -- @difficulty 2
--- @tags jointure, imbrication
+-- @tags jointure, imbrication, semi-jointure
 -- Version algébrique.
 PROMPT "Q8 - Version algébrique";
 
@@ -192,7 +192,7 @@ WHERE
 -- Q9 - c:1, t:6
 -- Quels sont les libellés d’option proposées pour les voyages réservés par le client Thomas Jarolim ?
 -- @difficulty 3
--- @tags jointure, imbrication
+-- @tags jointure, imbrication, semi-jointure
 -- Version algébrique.
 PROMPT "Q9 - Version algébrique";
 
@@ -241,7 +241,7 @@ WHERE
 -- Q10 - c:3, t:16
 -- Quels sont les noms, prénoms et villes des clients ayant réservé au moins un voyage partant de leur ville de résidence ?
 -- @difficulty 3
--- @tags jointure, imbrication
+-- @tags jointure, imbrication, semi-jointure
 -- Version algébrique.
 PROMPT "Q10 - Version algébrique";
 
@@ -379,7 +379,7 @@ WHERE tarif >= ALL(
 -- Q18 - c:1, t:1 (1629)
 -- Donnez, en tenant compte du nombre de personnes, le prix total des réservations du client Arnaud Peyroche.
 -- @difficulty 3
--- @tags jointure, imbrication, calcul-vertical, calcul-horizontal
+-- @tags jointure, imbrication, semi-jointure, calcul-vertical, calcul-horizontal
 PROMPT "Q18 - V1";
 
 SELECT SUM(tarif * nbPers)

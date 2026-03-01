@@ -32,7 +32,7 @@ WHERE
 -- Q2 - c:3, t:2
 -- Donnez les dates de départ, villes d'arrivée et pays d'arrivée des voyages réservés des clients ne résidant ni à Paris ni à Marseille.
 -- @difficulty 2
--- @tags jointure, imbrication
+-- @tags jointure, imbrication, semi-jointure
 -- Version algébrique.
 PROMPT "Q2 - Version algébrique";
 
@@ -73,7 +73,7 @@ WHERE
 -- Q3 - c:1, t:3
 -- Quels sont les libellés des options gratuites proposées pour les voyages réservés par le client Nicolas Barbier ?
 -- @difficulty 3
--- @tags jointure, imbrication, null
+-- @tags jointure, imbrication, semi-jointure, null
 -- Version algébrique.
 PROMPT "Q3 - Version algébrique";
 
@@ -129,7 +129,7 @@ WHERE
 -- Q4 - c:3, t:5
 -- Quels sont les noms, prénoms et villes de résidence des clients ayant réservé un voyage à destination d'Istanbul partant de leur ville de résidence ?
 -- @difficulty 3
--- @tags jointure, imbrication
+-- @tags jointure, imbrication, semi-jointure
 -- Version algébrique.
 PROMPT "Q4 - Version algébrique";
 
@@ -246,7 +246,7 @@ WHERE code IN (
 -- Q9 - c:3, t:1
 -- Quels sont les identifiants, villes d'arrivée et pays d'arrivée des voyages offrant à la fois les options de visite guidée et de piscine ?
 -- @difficulty 3
--- @tags jointure, imbrication
+-- @tags jointure, imbrication, semi-jointure
 -- Version algébrique.
 PROMPT "Q9 - Version algébrique";
 
@@ -426,7 +426,7 @@ DESCRIBE Capacite;
 -- Q16 - t:4
 -- Le client numéro 2103 réserve toujours avec ses deux enfants et le client Thomas Jarolim avec son enfant unique.
 -- @difficulty 2
--- @tags dml, imbrication
+-- @tags dml, imbrication, semi-jointure
 PROMPT "Q16";
 
 ALTER TABLE Planning ADD (tarifEnf NUMBER(6, 2));

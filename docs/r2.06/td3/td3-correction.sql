@@ -4,9 +4,9 @@
 -- @instruction Quand cela possible, formulez les requêtes suivantes de trois manières différentes.
 
 -- Q1 - c:2, t:9
--- Donnez, pour l'étudiant Stéphane Rocchi, les moyennes de test obtenues par ordre décroissant avec le code du module associé. 
+-- Donnez, pour l'étudiant Stéphane Rocchi, les moyennes de test obtenues par ordre décroissant avec le code du module associé.
 -- @difficulty 2
--- @tags jointure, imbrication, sélection, tri
+-- @tags jointure, imbrication, semi-jointure, sélection, tri
 -- Version algébrique.
 PROMPT "Q1 - Version algébrique";
 
@@ -47,7 +47,7 @@ ORDER BY moyTest DESC;
 -- Q2 - c:2, t:2
 -- Donnez les codes et libellés des modules enseignés par Didier Boitard.
 -- @difficulty 2
--- @tags jointure, imbrication, distinct
+-- @tags jointure, imbrication, semi-jointure, distinct
 -- Version algébrique.
 PROMPT "Q2 - Version algébrique";
 
@@ -93,7 +93,7 @@ WHERE
 -- Q3 - c:1, t:2
 -- Quels sont les groupes de seconde année pour lesquels Marc Laporte a effectué un enseignement ?
 -- @difficulty 2
--- @tags jointure, imbrication, sélection, distinct
+-- @tags jointure, imbrication, semi-jointure, sélection, distinct
 -- Version algébrique.
 PROMPT "Q3 - Version algébrique";
 
@@ -145,7 +145,7 @@ WHERE
 -- Q4 - c:2, t:18
 -- Donnez les numéros et, par ordre alphabétique, les noms des étudiants ayant suivi un enseignement effectué par un professeur, par ailleurs responsable d'un module quelconque.
 -- @difficulty 2
--- @tags jointure, imbrication, tri, distinct
+-- @tags jointure, imbrication, semi-jointure, tri, distinct
 -- Version algébrique.
 PROMPT "Q4 - Version algébrique";
 
@@ -187,7 +187,7 @@ ORDER BY nomEt ASC;
 -- Q5 - c:2, t:12
 -- Donnez les numéros et, par ordre alphabétique, les noms des étudiants ayant suivi un enseignement effectué par le professeur responsable de ce module.
 -- @difficulty 3
--- @tags jointure, imbrication, tri, distinct
+-- @tags jointure, imbrication, semi-jointure, tri, distinct
 -- Version algébrique.
 PROMPT "Q5 - Version algébrique";
 
@@ -432,7 +432,7 @@ WHERE code IN (
 -- Q18 - c:2, t:4 [= Q16]
 -- Quels sont les numéros des professeurs responsables d'un module qu'ils enseignent ainsi que le code du module correspondant ?
 -- @difficulty 2
--- @tags jointure, imbrication, distinct
+-- @tags jointure, imbrication, semi-jointure, distinct, exists
 PROMPT "Q18 - V1";
 
 SELECT DISTINCT resp, M.code
@@ -456,6 +456,21 @@ WHERE (
 );
 
 -- @remark Il est inutile de contrôler que la sous-requête puisse retourner des valeurs nulles. En effet, ce cas est impossible : numProf et code font partie de la clef primaire de Enseigne.
+
+-- Version alternative.
+PROMPT "Q18 - V3";
+
+SELECT resp, code
+FROM Module M
+WHERE EXISTS (
+    SELECT *
+    FROM Enseigne E
+    WHERE
+        E.numProf = M.resp -- noqa: RF03
+        AND E.code = M.code
+);
+
+-- @remark Avec EXISTS, la sous-requête est corrélée : elle fait référence à la table Module du bloc externe. Pour chaque ligne de Module, la sous-requête vérifie s'il existe au moins un enseignement correspondant. Le mot clef DISTINCT n'est pas nécessaire car la projection porte sur la clef primaire de Module (code) et un attribut fonctionnellement dépendant (resp).
 
 -- Q19 - c:1, t:23 [= Q17]
 -- Donnez les libellés des modules ne correspondant à la spécialité d'aucun professeur.
