@@ -90,6 +90,13 @@ def collect_questions(docs_dir):
                 # (ex: Q3 suivi de Q3a, Q3b dans R2.06 TD2).
                 if not item.get("tags") and not item.get("difficulty"):
                     continue
+                variants = []
+                for v in item.get("variants", []):
+                    if v.get("sql"):
+                        variants.append({
+                            "label": v.get("label"),
+                            "sql": v["sql"],
+                        })
                 questions.append({
                     "td_id": td_id,
                     "td_title": td_title,
@@ -99,6 +106,7 @@ def collect_questions(docs_dir):
                     "difficulty": item.get("difficulty"),
                     "tags": item.get("tags", []),
                     "section": section["name"],
+                    "variants": variants,
                 })
 
     return questions, titles
@@ -234,6 +242,16 @@ CSS = """\
     #filter-controls select { padding: 0.3rem; border: 1px solid #d0d7de;
                               border-radius: 4px; font-size: 0.85rem; }
     .hidden { display: none; }
+    .question-card { cursor: pointer; }
+    .question-card:hover { background: #f6f8fa; }
+    .question-variants { display: none; margin: 0.4rem 0 0.2rem 0; }
+    .question-variants.open { display: block; }
+    .variant-block { margin-bottom: 0.5rem; }
+    .variant-label { font-size: 0.8rem; font-weight: bold; color: #555; margin-bottom: 0.2rem; }
+    .variant-sql { background: #f6f8fa; border: 1px solid #e1e4e8; border-radius: 4px;
+                   padding: 0.5rem; font-family: monospace; font-size: 0.8rem;
+                   white-space: pre-wrap; overflow-x: auto; color: #24292e; }
+    .toggle-indicator { font-size: 0.7rem; color: #888; margin-left: auto; }
     .td-nav { margin: 0.75rem 0; display: flex; gap: 0.4rem; flex-wrap: wrap; }
     .td-nav-item { display: inline-block; font-size: 0.8rem; padding: 0.2rem 0.5rem;
                    border-radius: 3px; border: 1px solid #d0d7de; background: #f0f4f8; }
@@ -337,16 +355,33 @@ function renderQuestions(questions) {
                 '<span class="tag-badge" onclick="selectTag(\\'' + t + '\\')">'
                 + t + '</span>'
             ).join('');
-            html += '<div class="question-card">'
+            const qId = q.td_id.replace('/', '-') + '-q' + q.num;
+            const hasVariants = q.variants && q.variants.length > 0;
+            const toggle = hasVariants
+                ? '<span class="toggle-indicator">\\u25B6 SQL</span>' : '';
+            let variantsHtml = '';
+            if (hasVariants) {
+                variantsHtml = '<div class="question-variants" id="' + qId + '">';
+                for (const v of q.variants) {
+                    const lbl = v.label ? '<div class="variant-label">' + escapeHtml(v.label) + '</div>' : '';
+                    variantsHtml += '<div class="variant-block">' + lbl
+                        + '<pre class="variant-sql">' + escapeHtml(v.sql) + '</pre></div>';
+                }
+                variantsHtml += '</div>';
+            }
+            const onclick = hasVariants
+                ? ' onclick="toggleVariants(\\'' + qId + '\\', this)"' : '';
+            html += '<div class="question-card"' + onclick + '>'
                 + '<div class="question-header">'
                 + '<span class="question-id">'
                 + q.resource.toUpperCase() + ' '
                 + q.td_id.split('/')[1].toUpperCase()
                 + ' \\u2014 Q' + q.num + '</span> '
-                + diffBadge
+                + diffBadge + toggle
                 + '</div>'
                 + '<p class="question-desc">' + escapeHtml(q.description) + '</p>'
                 + '<div class="question-tags">' + tagBadges + '</div>'
+                + variantsHtml
                 + '</div>';
         }
     }
@@ -357,6 +392,14 @@ function escapeHtml(s) {
     const d = document.createElement('div');
     d.textContent = s;
     return d.innerHTML;
+}
+
+function toggleVariants(id, card) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const open = el.classList.toggle('open');
+    const indicator = card.querySelector('.toggle-indicator');
+    if (indicator) indicator.textContent = open ? '\\u25BC SQL' : '\\u25B6 SQL';
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -537,11 +580,6 @@ def generate_html(questions, stats, title=None, subtitle=None,
 
   {stat_boxes}
 
-  <h2>Fréquence des tags</h2>
-  <div class="chart-container">
-    {bar_chart}
-  </div>
-
   <h2>Répartition par difficulté</h2>
   <div class="difficulty-chart">
     {diff_chart}
@@ -554,6 +592,11 @@ def generate_html(questions, stats, title=None, subtitle=None,
       {matrix_body}
     </tbody>
   </table>
+
+  <h2>Fréquence des tags</h2>
+  <div class="chart-container">
+    {bar_chart}
+  </div>
 
   <h2>Questions <span id="filter-label"></span></h2>
   <div id="filter-controls" class="hidden">
