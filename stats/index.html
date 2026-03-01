@@ -119,6 +119,13 @@
 <div class="bar-row" data-tag="transaction" onclick="selectTag('transaction')"><span class="bar-label">transaction</span><div class="bar" style="width: 3%;">2</div></div>
   </div>
 
+  <h2>Questions <span id="filter-label"></span></h2>
+  <div id="filter-controls" class="hidden">
+    <button onclick="clearFilter()">Tout afficher</button>
+    <select id="td-filter" onchange="applyTdFilter()"><option value="">Tous les TD</option><option value="r1.05/td6">r1.05/td6</option><option value="r1.05/td7">r1.05/td7</option><option value="r2.06/td1">r2.06/td1</option><option value="r2.06/td2">r2.06/td2</option><option value="r2.06/td3">r2.06/td3</option><option value="r2.06/td4">r2.06/td4</option><option value="r2.06/td5">r2.06/td5</option><option value="r2.06/td6">r2.06/td6</option></select>
+  </div>
+  <div id="question-list"></div>
+
   <h2>Répartition par difficulté</h2>
   <div class="difficulty-chart">
     <div class="diff-col" data-difficulty="1" onclick="selectDifficulty(1)"><div class="diff-bar diff-1" style="height: 38%;">39</div><span class="diff-label">Facile</span></div>
@@ -157,13 +164,6 @@
 <tr><td class="tag-label">transaction</td><td class="" ></td><td class="" ></td><td class="clickable" onclick="selectCell('transaction', 3)">2</td><td class="total-col">2</td></tr>
     </tbody>
   </table>
-
-  <h2>Questions <span id="filter-label"></span></h2>
-  <div id="filter-controls" class="hidden">
-    <button onclick="clearFilter()">Tout afficher</button>
-    <select id="td-filter" onchange="applyTdFilter()"><option value="">Tous les TD</option><option value="r1.05/td6">r1.05/td6</option><option value="r1.05/td7">r1.05/td7</option><option value="r2.06/td1">r2.06/td1</option><option value="r2.06/td2">r2.06/td2</option><option value="r2.06/td3">r2.06/td3</option><option value="r2.06/td4">r2.06/td4</option><option value="r2.06/td5">r2.06/td5</option><option value="r2.06/td6">r2.06/td6</option></select>
-  </div>
-  <div id="question-list"></div>
 
   <p class="footer">IUT d'Aix-Marseille &mdash; Département Informatique</p>
 

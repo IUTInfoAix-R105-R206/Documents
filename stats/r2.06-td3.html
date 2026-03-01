@@ -119,6 +119,13 @@
 <div class="bar-row bar-row-zero" data-tag="vue" onclick="selectTag('vue')"><span class="bar-label">vue</span><span class="bar-zero">0</span></div>
   </div>
 
+  <h2>Questions <span id="filter-label"></span></h2>
+  <div id="filter-controls" class="hidden">
+    <button onclick="clearFilter()">Tout afficher</button>
+    
+  </div>
+  <div id="question-list"></div>
+
   <h2>Répartition par difficulté</h2>
   <div class="difficulty-chart">
     <div class="diff-col" data-difficulty="1" onclick="selectDifficulty(1)"><div class="diff-bar diff-1" style="height: 37%;">6</div><span class="diff-label">Facile</span></div>
@@ -157,13 +164,6 @@
 <tr><td class="tag-label">vue</td><td class="" ></td><td class="" ></td><td class="" ></td><td class="total-col">0</td></tr>
     </tbody>
   </table>
-
-  <h2>Questions <span id="filter-label"></span></h2>
-  <div id="filter-controls" class="hidden">
-    <button onclick="clearFilter()">Tout afficher</button>
-    
-  </div>
-  <div id="question-list"></div>
 
   <p class="footer">IUT d'Aix-Marseille &mdash; Département Informatique</p>
 
