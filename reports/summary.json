@@ -2,36 +2,36 @@
   "r1.05/td6": {
     "title": "TD6 : Interrogation en SQL",
     "report_file": "r1.05-td6.html",
-    "total": 192,
-    "pass": 187,
+    "total": 228,
+    "pass": 223,
     "error": 5,
     "fail": 0,
     "skip": 0,
-    "tested": 192,
+    "tested": 228,
     "dbms": {
       "postgres": {
-        "total": 64,
-        "pass": 64,
+        "total": 76,
+        "pass": 76,
         "error": 0,
         "fail": 0,
         "skip": 0,
-        "tested": 64
+        "tested": 76
       },
       "sqlite": {
-        "total": 64,
-        "pass": 59,
+        "total": 76,
+        "pass": 71,
         "error": 5,
         "fail": 0,
         "skip": 0,
-        "tested": 64
+        "tested": 76
       },
       "oracle": {
-        "total": 64,
-        "pass": 64,
+        "total": 76,
+        "pass": 76,
         "error": 0,
         "fail": 0,
         "skip": 0,
-        "tested": 64
+        "tested": 76
       }
     }
   },
@@ -146,36 +146,36 @@
   "r2.06/td3": {
     "title": "TD3 : Interrogations en SQL",
     "report_file": "r2.06-td3.html",
-    "total": 153,
-    "pass": 148,
+    "total": 156,
+    "pass": 151,
     "error": 5,
     "fail": 0,
     "skip": 0,
-    "tested": 153,
+    "tested": 156,
     "dbms": {
       "postgres": {
-        "total": 51,
-        "pass": 51,
+        "total": 52,
+        "pass": 52,
         "error": 0,
         "fail": 0,
         "skip": 0,
-        "tested": 51
+        "tested": 52
       },
       "sqlite": {
-        "total": 51,
-        "pass": 46,
+        "total": 52,
+        "pass": 47,
         "error": 5,
         "fail": 0,
         "skip": 0,
-        "tested": 51
+        "tested": 52
       },
       "oracle": {
-        "total": 51,
-        "pass": 51,
+        "total": 52,
+        "pass": 52,
         "error": 0,
         "fail": 0,
         "skip": 0,
-        "tested": 51
+        "tested": 52
       }
     }
   },
