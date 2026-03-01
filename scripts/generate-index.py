@@ -237,6 +237,15 @@ def generate_index(titles, pdfs, summary, guides, output_file):
             "</ul>\n</div>"
         )
 
+    # Section statistiques
+    stats_section = (
+        '<div class="section-reports">\n'
+        "<h2>Statistiques</h2>\n<ul>\n"
+        '<li><a href="stats/">Statistiques des questions SQL '
+        "(tags, difficulté)</a></li>\n"
+        "</ul>\n</div>"
+    )
+
     html = f"""<!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -250,6 +259,7 @@ def generate_index(titles, pdfs, summary, guides, output_file):
   {"".join(sections_html)}
   {guides_section}
   {reports_section}
+  {stats_section}
   <p class="footer">IUT d'Aix-Marseille — Département Informatique</p>
 </body>
 </html>"""

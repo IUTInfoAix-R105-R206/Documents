@@ -96,6 +96,13 @@ jobs:
             --output site/index.html
           rm -f site/reports-summary.json
 
+      - name: Generate statistics page
+        if: github.ref == 'refs/heads/main'
+        run: |
+          python3 scripts/generate-stats.py \
+            --docs-dir docs \
+            --output site/stats/index.html
+
       - name: Deploy to GitHub Pages
         if: github.ref == 'refs/heads/main'
         uses: peaceiris/actions-gh-pages@v3
