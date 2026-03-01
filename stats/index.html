@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Statistiques — Questions SQL</title>
+  <title>Statistiques — Statistiques des questions SQL</title>
   <style>    body { font-family: sans-serif; max-width: 900px; margin: 2rem auto;
            padding: 0 1rem; color: #333; }
     h1 { font-size: 1.4rem; color: #2c3e50; }
@@ -28,6 +28,8 @@
     .bar { background: #0366d6; color: white; padding: 0.15rem 0.5rem;
            border-radius: 3px; font-size: 0.8rem; min-width: 25px;
            text-align: right; transition: width 0.3s; }
+    .bar-row-zero { opacity: 0.5; }
+    .bar-zero { font-size: 0.8rem; color: #999; }
     .difficulty-chart { display: flex; gap: 2rem; align-items: flex-end;
                         height: 180px; margin: 1rem 0; justify-content: center; }
     .diff-col { display: flex; flex-direction: column; align-items: center;
@@ -73,12 +75,18 @@
     #filter-controls button:hover { background: #e1e4e8; }
     #filter-controls select { padding: 0.3rem; border: 1px solid #d0d7de;
                               border-radius: 4px; font-size: 0.85rem; }
-    .hidden { display: none; }</style>
+    .hidden { display: none; }
+    .td-nav { margin: 0.75rem 0; display: flex; gap: 0.4rem; flex-wrap: wrap; }
+    .td-nav-item { display: inline-block; font-size: 0.8rem; padding: 0.2rem 0.5rem;
+                   border-radius: 3px; border: 1px solid #d0d7de; background: #f0f4f8; }
+    .td-nav-item:hover { background: #e1e4e8; text-decoration: none; }
+    .td-nav-current { background: #2c3e50; color: white; border-color: #2c3e50; }</style>
 </head>
 <body>
   <p class="back-link"><a href="../index.html">&larr; Retour à l'index</a></p>
   <h1>Statistiques des questions SQL</h1>
   <p class="subtitle">199 questions &mdash; 8 TD &mdash; 2 ressources</p>
+  <h2>Par TD</h2><div class="td-nav"><a href="r1.05-td6.html" class="td-nav-item">TD6 (28)</a> <a href="r1.05-td7.html" class="td-nav-item">TD7 (23)</a> <a href="r2.06-td1.html" class="td-nav-item">TD1 (20)</a> <a href="r2.06-td2.html" class="td-nav-item">TD2 (38)</a> <a href="r2.06-td3.html" class="td-nav-item">TD3 (26)</a> <a href="r2.06-td4.html" class="td-nav-item">TD4 (23)</a> <a href="r2.06-td5.html" class="td-nav-item">TD5 (22)</a> <a href="r2.06-td6.html" class="td-nav-item">TD6 (19)</a></div>
 
   <div class="stats"><div class="stat-box"><strong>199</strong><small>Questions</small></div><div class="stat-box"><strong>2.1</strong><small>Difficulté moy.</small></div><div class="stat-box"><strong>21/22</strong><small>Tags utilisés</small></div><div class="stat-box"><strong>8</strong><small>TD (2 ressources)</small></div></div>
 
@@ -105,6 +113,7 @@
 <div class="bar-row" data-tag="dml" onclick="selectTag('dml')"><span class="bar-label">dml</span><div class="bar" style="width: 6%;">6</div></div>
 <div class="bar-row" data-tag="union" onclick="selectTag('union')"><span class="bar-label">union</span><div class="bar" style="width: 4%;">4</div></div>
 <div class="bar-row" data-tag="transaction" onclick="selectTag('transaction')"><span class="bar-label">transaction</span><div class="bar" style="width: 3%;">2</div></div>
+<div class="bar-row bar-row-zero" data-tag="exists" onclick="selectTag('exists')"><span class="bar-label">exists</span><span class="bar-zero">0</span></div>
   </div>
 
   <h2>Répartition par difficulté</h2>
@@ -139,16 +148,14 @@
 <tr><td class="tag-label">dml</td><td class="clickable" onclick="selectCell('dml', 1)">2</td><td class="clickable" onclick="selectCell('dml', 2)">2</td><td class="clickable" onclick="selectCell('dml', 3)">2</td><td class="total-col">6</td></tr>
 <tr><td class="tag-label">union</td><td class="clickable" onclick="selectCell('union', 1)">1</td><td class="clickable" onclick="selectCell('union', 2)">3</td><td class="" ></td><td class="total-col">4</td></tr>
 <tr><td class="tag-label">transaction</td><td class="" ></td><td class="" ></td><td class="clickable" onclick="selectCell('transaction', 3)">2</td><td class="total-col">2</td></tr>
+<tr><td class="tag-label">exists</td><td class="" ></td><td class="" ></td><td class="" ></td><td class="total-col">0</td></tr>
     </tbody>
   </table>
 
   <h2>Questions <span id="filter-label"></span></h2>
   <div id="filter-controls" class="hidden">
     <button onclick="clearFilter()">Tout afficher</button>
-    <select id="td-filter" onchange="applyTdFilter()">
-      <option value="">Tous les TD</option>
-      <option value="r1.05/td6">r1.05/td6</option><option value="r1.05/td7">r1.05/td7</option><option value="r2.06/td1">r2.06/td1</option><option value="r2.06/td2">r2.06/td2</option><option value="r2.06/td3">r2.06/td3</option><option value="r2.06/td4">r2.06/td4</option><option value="r2.06/td5">r2.06/td5</option><option value="r2.06/td6">r2.06/td6</option>
-    </select>
+    <select id="td-filter" onchange="applyTdFilter()"><option value="">Tous les TD</option><option value="r1.05/td6">r1.05/td6</option><option value="r1.05/td7">r1.05/td7</option><option value="r2.06/td1">r2.06/td1</option><option value="r2.06/td2">r2.06/td2</option><option value="r2.06/td3">r2.06/td3</option><option value="r2.06/td4">r2.06/td4</option><option value="r2.06/td5">r2.06/td5</option><option value="r2.06/td6">r2.06/td6</option></select>
   </div>
   <div id="question-list"></div>
 
