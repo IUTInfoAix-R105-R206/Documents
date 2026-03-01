@@ -79,12 +79,12 @@ FROM Client
 WHERE adresse IS NULL;
 
 -- @section Expression des jointures
--- @instruction Quand cela possible, formulez les requêtes suivantes de trois manières différentes.
+-- @instruction Quand cela possible, formulez les requêtes suivantes de toutes les manières différentes.
 
 -- Q6 - c:1, t:2
 -- Donnez les identifiants des voyages pour lesquels le client Hubert Marin a fait une réservation.
 -- @difficulty 2
--- @tags jointure, imbrication, semi-jointure
+-- @tags jointure, imbrication, semi-jointure, exists
 -- Version algébrique.
 PROMPT "Q6 - Version algébrique";
 
@@ -118,10 +118,24 @@ WHERE
     AND nom = 'MARIN'
     AND prenom = 'HUBERT';
 
+-- Version existentielle.
+PROMPT "Q6 - Version existentielle";
+
+SELECT idV
+FROM Reservation R
+WHERE EXISTS (
+    SELECT *
+    FROM Client C
+    WHERE
+        C.numCl = R.numCl -- noqa: RF03
+        AND nom = 'MARIN' -- noqa: RF03
+        AND prenom = 'HUBERT' -- noqa: RF03
+);
+
 -- Q7 - c:3, t:15
 -- Donnez les numéros des clients ainsi que les dates de réservation et villes d'arrivée des voyages réservés par des clients habitant Marseille.
 -- @difficulty 2
--- @tags jointure, imbrication, semi-jointure
+-- @tags jointure, imbrication, semi-jointure, exists
 -- Version algébrique.
 PROMPT "Q7 - Version algébrique";
 
@@ -157,10 +171,26 @@ WHERE
     AND R.numCl = C.numCl
     AND ville = 'MARSEILLE';
 
+-- Version existentielle.
+PROMPT "Q7 - Version existentielle";
+
+SELECT DISTINCT R.numCl, dateRes, villeArr
+FROM Voyage V
+    INNER JOIN Reservation R ON V.idV = R.idV
+WHERE EXISTS (
+    SELECT *
+    FROM Client C
+    WHERE
+        C.numCl = R.numCl -- noqa: RF03
+        AND ville = 'MARSEILLE' -- noqa: RF03
+);
+
+-- @remark Comme pour la version imbriquée, la version existentielle ne peut porter que sur la partie Client, car les attributs de la projection proviennent de relations différentes (Voyage et Reservation).
+
 -- Q8 - c:1, t:2
 -- Quelles sont les libellés des options proposées pour le voyage d'identifiant 862 ?
 -- @difficulty 2
--- @tags jointure, imbrication, semi-jointure
+-- @tags jointure, imbrication, semi-jointure, exists
 -- Version algébrique.
 PROMPT "Q8 - Version algébrique";
 
@@ -189,10 +219,23 @@ WHERE
     O.code = Ca.code
     AND idV = 862;
 
+-- Version existentielle.
+PROMPT "Q8 - Version existentielle";
+
+SELECT libelle
+FROM OptionV O
+WHERE EXISTS (
+    SELECT *
+    FROM Carac Ca
+    WHERE
+        Ca.code = O.code -- noqa: RF03
+        AND idV = 862 -- noqa: RF03
+);
+
 -- Q9 - c:1, t:6
 -- Quels sont les libellés d’option proposées pour les voyages réservés par le client Thomas Jarolim ?
 -- @difficulty 3
--- @tags jointure, imbrication, semi-jointure
+-- @tags jointure, imbrication, semi-jointure, exists
 -- Version algébrique.
 PROMPT "Q9 - Version algébrique";
 
@@ -238,10 +281,26 @@ WHERE
     AND nom = 'JAROLIM'
     AND prenom = 'THOMAS';
 
+-- Version existentielle.
+PROMPT "Q9 - Version existentielle";
+
+SELECT libelle
+FROM OptionV O
+WHERE EXISTS (
+    SELECT *
+    FROM Carac Ca
+        INNER JOIN Reservation R ON Ca.idV = R.idV
+        INNER JOIN Client C ON R.numCl = C.numCl
+    WHERE
+        Ca.code = O.code -- noqa: RF03
+        AND nom = 'JAROLIM'
+        AND prenom = 'THOMAS'
+);
+
 -- Q10 - c:3, t:16
 -- Quels sont les noms, prénoms et villes des clients ayant réservé au moins un voyage partant de leur ville de résidence ?
 -- @difficulty 3
--- @tags jointure, imbrication, semi-jointure
+-- @tags jointure, imbrication, semi-jointure, exists
 -- Version algébrique.
 PROMPT "Q10 - Version algébrique";
 
@@ -272,6 +331,22 @@ WHERE
     C.numCl = R.numCl
     AND R.idV = V.idV
     AND ville = villeDep;
+
+-- Version existentielle.
+PROMPT "Q10 - Version existentielle";
+
+SELECT DISTINCT nom, prenom, ville
+FROM Client C
+WHERE EXISTS (
+    SELECT *
+    FROM Reservation R
+        INNER JOIN Voyage V ON R.idV = V.idV
+    WHERE
+        R.numCl = C.numCl -- noqa: RF03
+        AND V.villeDep = C.ville -- noqa: RF03
+);
+
+-- @remark Contrairement aux versions imbriquée et prédicative, la version existentielle permet de ne garder que la relation Client dans la requête englobante. La corrélation porte sur numCl (lien Reservation) et ville = villeDep (condition de semi-jointure).
 
 -- @section Formulation de calculs verticaux et horizontaux
 -- @instruction Formulez les requêtes suivantes en gérant les valeurs nulles pour les calculs horizontaux.
@@ -379,7 +454,7 @@ WHERE tarif >= ALL(
 -- Q18 - c:1, t:1 (1629)
 -- Donnez, en tenant compte du nombre de personnes, le prix total des réservations du client Arnaud Peyroche.
 -- @difficulty 3
--- @tags jointure, imbrication, semi-jointure, calcul-vertical, calcul-horizontal
+-- @tags jointure, imbrication, semi-jointure, calcul-vertical, calcul-horizontal, exists
 PROMPT "Q18 - V1";
 
 SELECT SUM(tarif * nbPers)
@@ -410,6 +485,24 @@ WHERE R.numCl IN (
     WHERE
         NOM = 'PEYROCHE'
         AND PRENOM = 'ARNAUD'
+);
+
+-- Version existentielle.
+PROMPT "Q18 - Version existentielle";
+
+SELECT SUM(tarif * nbPers)
+FROM Planning P
+    INNER JOIN Reservation R
+        ON
+            P.idV = R.idV
+            AND P.dateDep = R.dateDep
+WHERE EXISTS (
+    SELECT *
+    FROM Client C
+    WHERE
+        C.numCl = R.numCl -- noqa: RF03
+        AND nom = 'PEYROCHE' -- noqa: RF03
+        AND prenom = 'ARNAUD' -- noqa: RF03
 );
 
 -- Q19 - c:1, t:1 (35)
