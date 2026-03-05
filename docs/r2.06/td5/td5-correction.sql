@@ -127,6 +127,20 @@ HAVING COUNT(DISTINCT code) = (
 -- @tags groupement, calcul-vertical, sélection, sous-requête
 PROMPT "Q5 - V1";
 
+WITH
+    T (groupeEt, nbEtudiant) AS (
+        SELECT groupeEt, COUNT(*)
+        FROM Etudiant
+        WHERE anneeEt = 2
+        GROUP BY groupeEt
+    )
+
+SELECT AVG(nbEtudiant)
+FROM T;
+
+-- Version alternative (sous-requête dans le FROM).
+PROMPT "Q5 - V2";
+
 SELECT AVG(nbEtudiant)
 FROM (
     SELECT groupeEt, COUNT(*) AS nbEtudiant
@@ -135,7 +149,7 @@ FROM (
     GROUP BY groupeEt
 );
 
-PROMPT "Q5 - V2";
+PROMPT "Q5 - V3";
 
 SELECT COUNT(numEt) / COUNT(DISTINCT groupeEt)
 FROM Etudiant
@@ -145,7 +159,20 @@ WHERE anneeEt = 2;
 -- Quel est le plus grand nombre d'étudiants à qui un professeur enseigne ?
 -- @difficulty 2
 -- @tags groupement, calcul-vertical, sous-requête, distinct
-PROMPT "Q6";
+PROMPT "Q6 - V1";
+
+WITH
+    T (numProf, nbEtudiant) AS (
+        SELECT numProf, COUNT(DISTINCT numEt)
+        FROM Enseigne
+        GROUP BY numProf
+    )
+
+SELECT MAX(nbEtudiant)
+FROM T;
+
+-- Version alternative (sous-requête dans le FROM).
+PROMPT "Q6 - V2";
 
 SELECT MAX(nbEtudiant)
 FROM (
@@ -158,7 +185,24 @@ FROM (
 -- Donnez les codes et libellés des modules, et lorsqu'il existe, le pourcentage de la somme d'heures de cours par rapport au total des heures de cours dans la discipline correspondante.
 -- @difficulty 3
 -- @tags jointure, groupement, calcul-vertical, sous-requête, null
-PROMPT "Q7";
+PROMPT "Q7 - V1";
+
+WITH
+    NbH (total, discipline) AS (
+        SELECT SUM(heureCMPrev), discipline
+        FROM MODULE
+        GROUP BY discipline
+    )
+
+SELECT code, libelle, heureCMPrev / total AS pourcentageDiscipline
+FROM MODULE
+    INNER JOIN NbH ON MODULE.discipline = NbH.discipline
+WHERE
+    heureCMPrev IS NOT NULL
+    AND total IS NOT NULL;
+
+-- Version alternative (sous-requête dans le FROM).
+PROMPT "Q7 - V2";
 
 SELECT code, libelle, heureCMPrev / total AS pourcentageDiscipline
 FROM MODULE
@@ -180,6 +224,26 @@ WHERE
 -- @tags jointure, groupement, calcul-vertical, sous-requête, distinct
 PROMPT "Q8 - V1";
 
+WITH
+    E (code, nbProf) AS (
+        SELECT code, COUNT(DISTINCT numProf)
+        FROM Enseigne
+        GROUP BY code
+    )
+
+    , N (code, moyMax) AS (
+        SELECT code, MAX(moyTest)
+        FROM Note
+        GROUP BY code
+    )
+
+SELECT E.code, nbProf, moyMax
+FROM E
+    INNER JOIN N ON E.code = N.code;
+
+-- Version alternative (sous-requêtes dans le FROM).
+PROMPT "Q8 - V2";
+
 SELECT E.code, NB_Prof, moy_max
 FROM (
     SELECT code, COUNT(DISTINCT numProf) AS NB_Prof
@@ -193,7 +257,7 @@ FROM (
     ) N
         ON E.code = N.code;
 
-PROMPT "Q8 - V2";
+PROMPT "Q8 - V3";
 
 SELECT E.code, COUNT(DISTINCT numProf) AS nbProfs, MAX(moyTest) AS maxMoyTest
 FROM Enseigne E
