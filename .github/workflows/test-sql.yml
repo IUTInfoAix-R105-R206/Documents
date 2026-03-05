@@ -13,6 +13,7 @@ on:
       - 'docs/shared/data/**'
       - 'scripts/test-sql.py'
       - 'scripts/generate-sql-report.py'
+      - 'scripts/generate-questions.py'
       - '.sqlfluff'
       - '.sqlfluffignore'
       - '.github/workflows/test-sql.yml'
@@ -21,6 +22,9 @@ on:
     paths:
       - 'docs/**/*correction*.sql'
       - 'docs/shared/data/**'
+      - 'scripts/test-sql.py'
+      - 'scripts/generate-sql-report.py'
+      - 'scripts/generate-questions.py'
       - '.sqlfluff'
       - '.sqlfluffignore'
       - '.github/workflows/test-sql.yml'

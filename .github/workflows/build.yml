@@ -20,6 +20,7 @@ on:
       - 'docs/**'
       - 'templates/**'
       - 'scripts/**'
+      - 'Makefile'
       - '.github/workflows/build.yml'
 
 jobs:
