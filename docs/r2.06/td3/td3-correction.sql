@@ -614,6 +614,24 @@ FROM Etudiant Et
         ON Et.numEt = T.numEt
 WHERE T.numEt IS NULL;
 
+-- Version alternative (CTE).
+PROMPT "Q21 - V5";
+
+WITH
+    EtudiantDeMarcLaporte (numEt) AS (
+        SELECT numEt
+        FROM Enseigne E
+            INNER JOIN Professeur P ON E.numProf = P.numProf
+        WHERE
+            nomProf = 'LAPORTE'
+            AND prenomProf = 'MARC'
+    )
+
+SELECT nomEt, prenomEt
+FROM Etudiant Et
+    LEFT OUTER JOIN EtudiantDeMarcLaporte ON Et.numEt = EtudiantDeMarcLaporte.numEt
+WHERE EtudiantDeMarcLaporte.numEt IS NULL;
+
 -- Q22 - c:2, t:8
 -- Quels sont les noms et prénoms des professeurs n'étant pas responsables de modules ?
 -- @difficulty 2

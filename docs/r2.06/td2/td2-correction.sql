@@ -304,18 +304,18 @@ GROUP BY P.idV, P.dateDep;
 PROMPT "Q19";
 
 WITH
-    T (paysArr) AS (
+    ReservationParPays (paysArr) AS (
         SELECT paysArr
         FROM Voyage V
             INNER JOIN Reservation R ON V.idV = R.idV
     )
 
 SELECT paysArr
-FROM T
+FROM ReservationParPays
 GROUP BY paysArr
 HAVING COUNT(*) > (
     SELECT COUNT(*)
-    FROM T
+    FROM ReservationParPays
     WHERE paysArr = 'ESPAGNE'
 );
 
@@ -326,7 +326,7 @@ HAVING COUNT(*) > (
 PROMPT "Q20";
 
 WITH
-    T (categorie, nbClients) AS (
+    NbClientParCategorie (categorie, nbClients) AS (
         SELECT categorie, COUNT(*)
         FROM Client
         WHERE categorie IS NOT NULL
@@ -334,10 +334,10 @@ WITH
     )
 
 SELECT categorie
-FROM T
+FROM NbClientParCategorie
 WHERE nbClients >= ALL(
     SELECT nbClients
-    FROM T
+    FROM NbClientParCategorie
 );
 
 -- Q21 - c:1, t:2
@@ -347,7 +347,7 @@ WHERE nbClients >= ALL(
 PROMPT "Q21";
 
 WITH
-    T (paysArr, nbRes) AS (
+    NbResParPays (paysArr, nbRes) AS (
         SELECT paysArr, COUNT(*)
         FROM Voyage V
             INNER JOIN Reservation R ON V.idV = R.idV
@@ -355,10 +355,10 @@ WITH
     )
 
 SELECT paysArr
-FROM T
+FROM NbResParPays
 WHERE nbRes >= ALL(
     SELECT nbRes
-    FROM T
+    FROM NbResParPays
 );
 
 -- Q22 - c:3, t:6
@@ -434,19 +434,19 @@ WHERE
 PROMPT "Q25 - V2";
 
 WITH
-    T (code, libelle, prix) AS (
+    CaracParOption (code, libelle, prix) AS (
         SELECT C.code, libelle, prix
         FROM Carac C
             INNER JOIN OptionV O ON C.code = O.code
     )
 
 SELECT DISTINCT libelle
-FROM T
+FROM CaracParOption
 WHERE
     (prix = 0 OR prix IS NULL)
     AND code IN (
         SELECT code
-        FROM T
+        FROM CaracParOption
         WHERE (prix <> 0 OR prix IS NOT NULL)
     );
 
@@ -520,19 +520,19 @@ WHERE code IN (
 PROMPT "Q27";
 
 WITH
-    T (numCl, nom, prenom, idV) AS (
+    ReservationParClient (numCl, nom, prenom, idV) AS (
         SELECT C.numCl, nom, prenom, idV
         FROM Client C
             INNER JOIN Reservation R ON C.numCl = R.numCl
     )
 
 SELECT DISTINCT numCl, nom, prenom
-FROM T
+FROM ReservationParClient
 WHERE
     (nom <> 'PEYROCHE' OR prenom <> 'ARNAUD')
     AND idV IN (
         SELECT idV
-        FROM T
+        FROM ReservationParClient
         WHERE
             nom = 'PEYROCHE'
             AND prenom = 'ARNAUD'
@@ -558,17 +558,17 @@ WHERE categorie = 'PRIVILEGIE';
 PROMPT "Q29";
 
 WITH
-    T (numCl, nom, prenom, nbPers) AS (
+    ClientReservation (numCl, nom, prenom, nbPers) AS (
         SELECT C.numCl, nom, prenom, nbPers
         FROM Client C
             INNER JOIN Reservation R ON C.numCl = R.numCl
     )
 
 SELECT numCl, nom, prenom
-FROM T
+FROM ClientReservation
 WHERE COALESCE(nbPers, 0) = (
     SELECT MAX(COALESCE(nbPers, 0))
-    FROM T
+    FROM ClientReservation
 );
 
 -- Q30 - c:1, t:1 (14484)
@@ -642,6 +642,22 @@ FROM Client C
     ) T
         ON C.numCl = T.numCl
 WHERE T.numCl IS NULL;
+
+-- Version avec jointure externe et CTE.
+PROMPT "Q34 - Version CTE";
+
+WITH
+    ReservationMaroc AS (
+        SELECT *
+        FROM Voyage V
+            INNER JOIN Reservation R ON V.idV = R.idV
+        WHERE paysArr = 'MAROC'
+    )
+
+SELECT C.numCl, nom
+FROM Client C
+    LEFT OUTER JOIN ReservationMaroc ON C.numCl = ReservationMaroc.numCl
+WHERE ReservationMaroc.numCl IS NULL;
 
 -- Version avec test de non existence.
 PROMPT "Q34 - Version avec test de non existence";
