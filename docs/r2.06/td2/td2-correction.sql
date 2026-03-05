@@ -300,7 +300,7 @@ GROUP BY P.idV, P.dateDep;
 -- Q19 - c:1, t:6
 -- Quels sont les pays pour lesquels il y a plus de réservations que pour l'Espagne ?
 -- @difficulty 3
--- @tags jointure, groupement, calcul-vertical, imbrication, sous-requête
+-- @tags jointure, groupement, calcul-vertical, imbrication, sous-requête, cte
 PROMPT "Q19";
 
 WITH
@@ -322,7 +322,7 @@ HAVING COUNT(*) > (
 -- Q20 - c:1, t:1 (PRIVILEGIE)
 -- Quelles sont les catégories effectives comportant le plus de clients ?
 -- @difficulty 3
--- @tags groupement, calcul-vertical, imbrication, sous-requête, extrémum, null
+-- @tags groupement, calcul-vertical, imbrication, sous-requête, extrémum, null, cte
 PROMPT "Q20";
 
 WITH
@@ -343,7 +343,7 @@ WHERE nbClients >= ALL(
 -- Q21 - c:1, t:2
 -- Quels sont les pays pour lesquels il y a le plus de réservations ?
 -- @difficulty 3
--- @tags jointure, groupement, calcul-vertical, imbrication, sous-requête, extrémum
+-- @tags jointure, groupement, calcul-vertical, imbrication, sous-requête, extrémum, cte
 PROMPT "Q21";
 
 WITH
@@ -419,7 +419,7 @@ WHERE
 -- Q25 - c:1, t:2
 -- Quelles sont les libellés des options gratuites pour au moins un voyage et payante pour au moins un autre ? Donner deux formulations différentes.
 -- @difficulty 3
--- @tags jointure, imbrication, semi-jointure, null
+-- @tags jointure, imbrication, semi-jointure, null, cte
 PROMPT "Q25 - V1";
 
 SELECT DISTINCT libelle
@@ -516,7 +516,7 @@ WHERE code IN (
 -- Q27 - c:3, t:7
 -- Quels sont les numéros, noms et prénoms des autres clients ayant réservé pour un des voyages réservé par Arnaud Peyroche ?
 -- @difficulty 3
--- @tags jointure, imbrication, semi-jointure, sous-requête
+-- @tags jointure, imbrication, semi-jointure, sous-requête, cte
 PROMPT "Q27";
 
 WITH
@@ -554,7 +554,7 @@ WHERE categorie = 'PRIVILEGIE';
 -- Q29 - c:3, t:1
 -- Quels sont les numéros, noms et prénoms des clients ayant fait une réservation avec un nombre total maximal de personnes ?
 -- @difficulty 3
--- @tags jointure, calcul-vertical, imbrication, sous-requête, extrémum, null
+-- @tags jointure, calcul-vertical, imbrication, sous-requête, extrémum, null, cte
 PROMPT "Q29";
 
 WITH
@@ -628,7 +628,7 @@ FROM Client
 -- Q34 - c:2, t:26
 -- Quels sont les numéros et noms des clients qui n'ont fait aucune réservation pour un voyage au Maroc ? Donnez deux formulations : une avec jointure externe et une avec test de non-existence.
 -- @difficulty 3
--- @tags jointure-externe, jointure, imbrication, not-exists, anti-jointure
+-- @tags jointure-externe, jointure, imbrication, not-exists, anti-jointure, cte
 -- Version avec jointure externe.
 PROMPT "Q34 - Version avec jointure externe";
 

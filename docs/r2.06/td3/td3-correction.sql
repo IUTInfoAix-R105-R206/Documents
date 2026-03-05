@@ -555,7 +555,7 @@ WHERE N.numEt IS NULL;
 -- Q21 - c:2, t:41
 -- Quels sont les noms et prénoms des étudiants n'ayant eu aucun enseignement de Marc Laporte ?
 -- @difficulty 3
--- @tags jointure, anti-jointure, imbrication, not-exists, jointure-externe
+-- @tags jointure, anti-jointure, imbrication, not-exists, jointure-externe, cte
 PROMPT "Q21 - V1";
 
 SELECT nomEt, prenomEt
