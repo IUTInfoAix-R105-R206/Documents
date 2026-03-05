@@ -277,7 +277,7 @@ WHERE codePere IS NULL;
 -- Q10 - c:1, t:16
 -- Présenter, de manière hiérarchique, les libellés de tous les sous-modules du module Informatique 2de année.
 -- @difficulty 2
--- @tags récursion
+-- @tags récursion, cte
 PROMPT "Q10";
 
 SELECT LPAD('-', 2 * LEVEL, '-') || libelle
@@ -307,7 +307,7 @@ WHERE libelle <> 'INFORMATIQUE 2DE ANNEE';
 -- Q11 - c:1, t:7
 -- Présenter, de manière hiérarchique, les libellés du module Outils modèles génie logiciel et de tous ses sous-modules.
 -- @difficulty 2
--- @tags récursion
+-- @tags récursion, cte
 PROMPT "Q11";
 
 SELECT LPAD('-', 2 * LEVEL, '-') || libelle
@@ -335,7 +335,7 @@ FROM DescModule;
 -- Q12 - c:1, t:5
 -- Présenter, de manière hiérarchique, les libellés de tous les modules d'où est issu le module Bases de données.
 -- @difficulty 2
--- @tags récursion, tri
+-- @tags récursion, tri, cte
 PROMPT "Q12";
 
 SELECT LPAD('-', 2 * (MAX(LEVEL) OVER () + 1 - LEVEL), '-') || libelle
@@ -365,7 +365,7 @@ ORDER BY lvl DESC;
 -- Q13 - c:1, t:13
 -- Présenter, de manière hiérarchique, les libellés de tous les sous-modules de la discipline Informatique, subordonnés au module Informatique 2e année, à l'exception du module Bases de données.
 -- @difficulty 3
--- @tags récursion, sélection
+-- @tags récursion, sélection, cte
 PROMPT "Q13";
 
 SELECT LPAD('-', 2 * LEVEL, '-') || libelle
@@ -469,7 +469,7 @@ WHERE NOT EXISTS (
 -- Q16 - c:3, t:3
 -- Quels sont les numéros, noms et prénoms des étudiants ayant eu, pour le module Conception de SI, tous les Professeurs enseignant ce module ?
 -- @difficulty 3
--- @tags division, not-exists, jointure, groupement, calcul-vertical
+-- @tags division, not-exists, jointure, groupement, calcul-vertical, cte
 PROMPT "Q16 - Version double NOT EXISTS";
 
 SELECT numEt, nomEt, prenomEt
@@ -564,7 +564,7 @@ HAVING COUNT(DISTINCT Et.numEt) = (
 -- Q18 - c:1, t:13
 -- Présenter, de manière hiérarchique, les libellés de tous les sous-modules de la discipline Informatique subordonnés au module Informatique 2de année à l'exception du module Codage et circuits et de tous ses éventuels sous-modules.
 -- @difficulty 3
--- @tags récursion, sélection
+-- @tags récursion, sélection, cte
 PROMPT "Q18";
 
 SELECT LPAD('-', 2 * LEVEL, '-') || libelle
@@ -596,7 +596,7 @@ WHERE discipline = 'INFORMATIQUE';
 -- Q19 - c:1, t:24
 -- Présenter, de manière hiérarchique, les modules suivis par l'étudiant Jérôme Atlani ?
 -- @difficulty 3
--- @tags récursion, jointure, imbrication, semi-jointure
+-- @tags récursion, jointure, imbrication, semi-jointure, cte
 PROMPT "Q19";
 
 SELECT LPAD('-', 2 * (MAX(LEVEL) OVER () + 1 - LEVEL), '-') || libelle
@@ -670,7 +670,7 @@ HAVING MIN(moyTest) >= 10;
 -- Q21 - c:3, t:19
 -- Quels sont les numéros, noms et prénoms des étudiants ayant des moyennes dans un module subordonnés au module Principes des BD ?
 -- @difficulty 2
--- @tags jointure, imbrication, semi-jointure, récursion, distinct
+-- @tags jointure, imbrication, semi-jointure, récursion, distinct, cte
 PROMPT "Q21";
 
 SELECT DISTINCT Et.numEt, nomEt, prenomEt
@@ -705,7 +705,7 @@ WHERE code IN (SELECT code FROM DescModule);
 -- Q22 - c:3, t:29
 -- Donnez les numéros des étudiants, les écarts entre leurs éventuelles moyennes de test et la moins bonne moyenne de test du module ACSI ainsi que les écarts entre leurs éventuelles moyennes de test et la meilleure moyenne de test du module ACSI.
 -- @difficulty 3
--- @tags calcul-vertical, imbrication, sous-requête, sélection
+-- @tags calcul-vertical, imbrication, sous-requête, sélection, cte
 
 PROMPT "Q22 - V1";
 
