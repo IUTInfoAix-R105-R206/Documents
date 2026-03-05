@@ -110,72 +110,72 @@
   "r2.06/td2": {
     "title": "TD2 : Jointures externes, partitionnement et synthèse des requêtes",
     "report_file": "r2.06-td2.html",
-    "total": 141,
-    "pass": 135,
+    "total": 144,
+    "pass": 138,
     "error": 6,
     "fail": 0,
     "skip": 0,
-    "tested": 141,
+    "tested": 144,
     "dbms": {
       "postgres": {
-        "total": 47,
-        "pass": 47,
+        "total": 48,
+        "pass": 48,
         "error": 0,
         "fail": 0,
         "skip": 0,
-        "tested": 47
+        "tested": 48
       },
       "sqlite": {
-        "total": 47,
-        "pass": 41,
+        "total": 48,
+        "pass": 42,
         "error": 6,
         "fail": 0,
         "skip": 0,
-        "tested": 47
+        "tested": 48
       },
       "oracle": {
-        "total": 47,
-        "pass": 47,
+        "total": 48,
+        "pass": 48,
         "error": 0,
         "fail": 0,
         "skip": 0,
-        "tested": 47
+        "tested": 48
       }
     }
   },
   "r2.06/td3": {
     "title": "TD3 : Interrogations en SQL",
     "report_file": "r2.06-td3.html",
-    "total": 156,
-    "pass": 151,
+    "total": 159,
+    "pass": 154,
     "error": 5,
     "fail": 0,
     "skip": 0,
-    "tested": 156,
+    "tested": 159,
     "dbms": {
       "postgres": {
-        "total": 52,
-        "pass": 52,
+        "total": 53,
+        "pass": 53,
         "error": 0,
         "fail": 0,
         "skip": 0,
-        "tested": 52
+        "tested": 53
       },
       "sqlite": {
-        "total": 52,
-        "pass": 47,
+        "total": 53,
+        "pass": 48,
         "error": 5,
         "fail": 0,
         "skip": 0,
-        "tested": 52
+        "tested": 53
       },
       "oracle": {
-        "total": 52,
-        "pass": 52,
+        "total": 53,
+        "pass": 53,
         "error": 0,
         "fail": 0,
         "skip": 0,
-        "tested": 52
+        "tested": 53
       }
     }
   },
@@ -218,36 +218,36 @@
   "r2.06/td5": {
     "title": "TD5 : Interrogations avancées en SQL",
     "report_file": "r2.06-td5.html",
-    "total": 120,
-    "pass": 100,
+    "total": 132,
+    "pass": 112,
     "error": 20,
     "fail": 0,
     "skip": 0,
-    "tested": 120,
+    "tested": 132,
     "dbms": {
       "postgres": {
-        "total": 40,
-        "pass": 33,
+        "total": 44,
+        "pass": 37,
         "error": 7,
         "fail": 0,
         "skip": 0,
-        "tested": 40
+        "tested": 44
       },
       "sqlite": {
-        "total": 40,
-        "pass": 27,
+        "total": 44,
+        "pass": 31,
         "error": 13,
         "fail": 0,
         "skip": 0,
-        "tested": 40
+        "tested": 44
       },
       "oracle": {
-        "total": 40,
-        "pass": 40,
+        "total": 44,
+        "pass": 44,
         "error": 0,
         "fail": 0,
         "skip": 0,
-        "tested": 40
+        "tested": 44
       }
     }
   },
