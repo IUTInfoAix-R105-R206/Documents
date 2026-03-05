@@ -74,11 +74,11 @@ GROUP BY groupeEt;
 -- Q4 - c:3, t:4
 -- Quels sont les numéros, noms et prénoms des enseignants ayant autant de modules que Bernard Faure ?
 -- @difficulty 3
--- @tags jointure, groupement, calcul-vertical, imbrication, sous-requête
+-- @tags jointure, groupement, calcul-vertical, imbrication, sous-requête, cte
 PROMPT "Q4 - V1";
 
 WITH
-    T (numProf, nomProf, prenomProf, nbCode) AS (
+    NbModuleParProf (numProf, nomProf, prenomProf, nbCode) AS (
         SELECT E.numProf, nomProf, prenomProf, COUNT(DISTINCT code)
         FROM Enseigne E
             INNER JOIN Professeur P ON E.numProf = P.numProf
@@ -86,12 +86,12 @@ WITH
     )
 
 SELECT DISTINCT numProf, nomProf, prenomProf
-FROM T
+FROM NbModuleParProf
 WHERE
     (nomProf <> 'FAURE' OR prenomProf <> 'BERNARD')
     AND nbCode IN (
         SELECT nbCode
-        FROM T
+        FROM NbModuleParProf
         WHERE
             nomProf = 'FAURE'
             AND prenomProf = 'BERNARD'
@@ -101,21 +101,21 @@ WHERE
 PROMPT "Q4 - V2";
 
 WITH
-    T (numProf, nomProf, prenomProf, code) AS (
+    EnseignementParProf (numProf, nomProf, prenomProf, code) AS (
         SELECT E.numProf, nomProf, prenomProf, code
         FROM Enseigne E
             INNER JOIN Professeur P ON E.numProf = P.numProf
     )
 
 SELECT numProf, nomProf, prenomProf
-FROM T
+FROM EnseignementParProf
 WHERE
     nomProf <> 'FAURE'
     OR prenomProf <> 'BERNARD'
 GROUP BY numProf, nomProf, prenomProf
 HAVING COUNT(DISTINCT code) = (
     SELECT COUNT(DISTINCT code)
-    FROM T
+    FROM EnseignementParProf
     WHERE
         nomProf = 'FAURE'
         AND prenomProf = 'BERNARD'
@@ -124,11 +124,11 @@ HAVING COUNT(DISTINCT code) = (
 -- Q5 - c:1, t:1 (9)
 -- Donnez le nombre moyen d'étudiants des groupes de seconde année.
 -- @difficulty 2
--- @tags groupement, calcul-vertical, sélection, sous-requête
+-- @tags groupement, calcul-vertical, sélection, sous-requête, cte
 PROMPT "Q5 - V1";
 
 WITH
-    T (groupeEt, nbEtudiant) AS (
+    EffectifParGroupe (groupeEt, nbEtudiant) AS (
         SELECT groupeEt, COUNT(*)
         FROM Etudiant
         WHERE anneeEt = 2
@@ -136,7 +136,7 @@ WITH
     )
 
 SELECT AVG(nbEtudiant)
-FROM T;
+FROM EffectifParGroupe;
 
 -- Version alternative (sous-requête dans le FROM).
 PROMPT "Q5 - V2";
@@ -158,18 +158,18 @@ WHERE anneeEt = 2;
 -- Q6 - c:1, t:1 (45)
 -- Quel est le plus grand nombre d'étudiants à qui un professeur enseigne ?
 -- @difficulty 2
--- @tags groupement, calcul-vertical, sous-requête, distinct
+-- @tags groupement, calcul-vertical, sous-requête, distinct, cte
 PROMPT "Q6 - V1";
 
 WITH
-    T (numProf, nbEtudiant) AS (
+    NbEtudiantParProf (numProf, nbEtudiant) AS (
         SELECT numProf, COUNT(DISTINCT numEt)
         FROM Enseigne
         GROUP BY numProf
     )
 
 SELECT MAX(nbEtudiant)
-FROM T;
+FROM NbEtudiantParProf;
 
 -- Version alternative (sous-requête dans le FROM).
 PROMPT "Q6 - V2";
@@ -184,11 +184,11 @@ FROM (
 -- Q7 - c:3, t:9
 -- Donnez les codes et libellés des modules, et lorsqu'il existe, le pourcentage de la somme d'heures de cours par rapport au total des heures de cours dans la discipline correspondante.
 -- @difficulty 3
--- @tags jointure, groupement, calcul-vertical, sous-requête, null
+-- @tags jointure, groupement, calcul-vertical, sous-requête, null, cte
 PROMPT "Q7 - V1";
 
 WITH
-    NbH (total, discipline) AS (
+    TotalHParDiscipline (total, discipline) AS (
         SELECT SUM(heureCMPrev), discipline
         FROM MODULE
         GROUP BY discipline
@@ -196,7 +196,7 @@ WITH
 
 SELECT code, libelle, heureCMPrev / total AS pourcentageDiscipline
 FROM MODULE
-    INNER JOIN NbH ON MODULE.discipline = NbH.discipline
+    INNER JOIN TotalHParDiscipline ON MODULE.discipline = TotalHParDiscipline.discipline
 WHERE
     heureCMPrev IS NOT NULL
     AND total IS NOT NULL;
@@ -221,25 +221,25 @@ WHERE
 -- Q8 - c:3, t:6
 -- Donnez, pour chaque code de module, le nombre de professeurs qui les enseignent et la moyenne de test maximale.
 -- @difficulty 2
--- @tags jointure, groupement, calcul-vertical, sous-requête, distinct
+-- @tags jointure, groupement, calcul-vertical, sous-requête, distinct, cte
 PROMPT "Q8 - V1";
 
 WITH
-    E (code, nbProf) AS (
+    NbProfParModule (code, nbProf) AS (
         SELECT code, COUNT(DISTINCT numProf)
         FROM Enseigne
         GROUP BY code
     )
 
-    , N (code, moyMax) AS (
+    , MoyMaxParModule (code, moyMax) AS (
         SELECT code, MAX(moyTest)
         FROM Note
         GROUP BY code
     )
 
-SELECT E.code, nbProf, moyMax
-FROM E
-    INNER JOIN N ON E.code = N.code;
+SELECT NbProfParModule.code, nbProf, moyMax
+FROM NbProfParModule
+    INNER JOIN MoyMaxParModule ON NbProfParModule.code = MoyMaxParModule.code;
 
 -- Version alternative (sous-requêtes dans le FROM).
 PROMPT "Q8 - V2";
@@ -495,20 +495,20 @@ WHERE NOT EXISTS (
 PROMPT "Q16 - Version HAVING";
 
 WITH
-    T (numProf, numEt, libelle) AS (
+    EnseignementParModule (numProf, numEt, libelle) AS (
         SELECT numProf, numEt, libelle
         FROM Enseigne E
             INNER JOIN MODULE M ON E.code = M.code
     )
 
 SELECT Et.numEt, nomEt, prenomEt
-FROM T
-    INNER JOIN Etudiant Et ON T.numEt = Et.numEt
+FROM EnseignementParModule
+    INNER JOIN Etudiant Et ON EnseignementParModule.numEt = Et.numEt
 WHERE libelle = 'CONCEPTION DE SI'
 GROUP BY Et.numEt, nomEt, prenomEt
 HAVING COUNT(DISTINCT numProf) = (
     SELECT COUNT(DISTINCT numProf)
-    FROM T
+    FROM EnseignementParModule
     WHERE libelle = 'CONCEPTION DE SI'
 );
 
@@ -710,20 +710,20 @@ WHERE code IN (SELECT code FROM DescModule);
 PROMPT "Q22 - V1";
 
 WITH
-    T1 (moyMin, moyMax) AS (
+    ExtremumACSI (moyMin, moyMax) AS (
         SELECT MIN(moyTest), MAX(moyTest)
         FROM Note
         WHERE code = 'ACSI'
     )
 
-    , T2 (numEt, moyTest) AS (
+    , NoteACSI (numEt, moyTest) AS (
         SELECT numEt, moyTest
         FROM Note
         WHERE code = 'ACSI'
     )
 
 SELECT numEt, moyTest - moyMin AS ecartMin, moyTest - moyMax AS ecartMax
-FROM T1, T2;
+FROM ExtremumACSI, NoteACSI;
 
 PROMPT "Q22 - V2";
 
