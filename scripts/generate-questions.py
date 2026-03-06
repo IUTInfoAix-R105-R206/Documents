@@ -449,6 +449,21 @@ def _render_remark(remark, mode, out):
         out.append('')
 
 
+_NOQA_LINE_RE = re.compile(r'^--\s*noqa:\s*\S+.*$')
+_NOQA_SUFFIX_RE = re.compile(r'\s*--\s*noqa:\s*\S+')
+
+
+def _strip_noqa(sql):
+    """Retire les annotations sqlfluff noqa du SQL pour le rendu."""
+    lines = []
+    for line in sql.split('\n'):
+        if _NOQA_LINE_RE.match(line.strip()):
+            continue
+        line = _NOQA_SUFFIX_RE.sub('', line)
+        lines.append(line)
+    return '\n'.join(lines)
+
+
 def generate_markdown(parsed, mode='subject'):
     """Génère le Markdown des questions.
 
@@ -510,7 +525,7 @@ def generate_markdown(parsed, mode='subject'):
                         # Bloc SQL
                         if variant['sql']:
                             out.append('```sql')
-                            out.append(variant['sql'])
+                            out.append(_strip_noqa(variant['sql']))
                             out.append('```')
                             out.append('')
 
