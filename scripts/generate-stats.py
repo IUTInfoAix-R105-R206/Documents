@@ -27,6 +27,7 @@ _mod = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_mod)
 parse_sql = _mod.parse_sql
 VALID_TAGS = _mod.VALID_TAGS
+_strip_noqa = _mod._strip_noqa
 
 
 # ---------------------------------------------------------------------------
@@ -95,7 +96,7 @@ def collect_questions(docs_dir):
                     if v.get("sql"):
                         variants.append({
                             "label": v.get("label"),
-                            "sql": v["sql"],
+                            "sql": _strip_noqa(v["sql"]),
                         })
                 questions.append({
                     "td_id": td_id,
