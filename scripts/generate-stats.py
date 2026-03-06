@@ -252,6 +252,10 @@ CSS = """\
                    padding: 0.5rem; font-family: monospace; font-size: 0.8rem;
                    white-space: pre-wrap; overflow-x: auto; color: #24292e; }
     .toggle-indicator { font-size: 0.7rem; color: #888; margin-left: auto; }
+    .improve-link { font-size: 0.7rem; color: #888; text-decoration: none;
+                    border: 1px solid #d0d7de; border-radius: 3px;
+                    padding: 0.1rem 0.4rem; background: #f6f8fa; }
+    .improve-link:hover { background: #e1e4e8; color: #333; text-decoration: none; }
     .td-nav { margin: 0.75rem 0; display: flex; gap: 0.4rem; flex-wrap: wrap; }
     .td-nav-item { display: inline-block; font-size: 0.8rem; padding: 0.2rem 0.5rem;
                    border-radius: 3px; border: 1px solid #d0d7de; background: #f0f4f8; }
@@ -359,6 +363,9 @@ function renderQuestions(questions) {
             const hasVariants = q.variants && q.variants.length > 0;
             const toggle = hasVariants
                 ? '<span class="toggle-indicator">\\u25B6 SQL</span>' : '';
+            const improveBtn = '<a class="improve-link" href="'
+                + issueUrl(q) + '" target="_blank" '
+                + 'onclick="event.stopPropagation()">Proposer une am\\u00e9lioration</a>';
             let variantsHtml = '';
             if (hasVariants) {
                 variantsHtml = '<div class="question-variants" id="' + qId + '">';
@@ -377,7 +384,7 @@ function renderQuestions(questions) {
                 + q.resource.toUpperCase() + ' '
                 + q.td_id.split('/')[1].toUpperCase()
                 + ' \\u2014 Q' + q.num + '</span> '
-                + diffBadge + toggle
+                + diffBadge + toggle + improveBtn
                 + '</div>'
                 + '<p class="question-desc">' + escapeHtml(q.description) + '</p>'
                 + '<div class="question-tags">' + tagBadges + '</div>'
@@ -392,6 +399,21 @@ function escapeHtml(s) {
     const d = document.createElement('div');
     d.textContent = s;
     return d.innerHTML;
+}
+
+const REPO_URL = 'https://github.com/IUTInfoAix-R105-R206/Documents';
+
+function issueUrl(q) {
+    const label = q.resource.toUpperCase() + ' '
+        + q.td_id.split('/')[1].toUpperCase() + ' \\u2014 Q' + q.num;
+    const title = label + ' : Proposition d\\u2019am\\u00e9lioration';
+    const body = '## Question\\n\\n'
+        + '**' + label + '** : ' + q.description + '\\n\\n'
+        + '## Am\\u00e9lioration propos\\u00e9e\\n\\n'
+        + '_D\\u00e9crivez ici l\\u2019am\\u00e9lioration souhait\\u00e9e._\\n';
+    return REPO_URL + '/issues/new?title=' + encodeURIComponent(title)
+        + '&body=' + encodeURIComponent(body)
+        + '&labels=' + encodeURIComponent('amélioration');
 }
 
 function toggleVariants(id, card) {
