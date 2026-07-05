@@ -19,6 +19,8 @@ import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
+from sqlite_compat import filter_schema, filter_insert
+
 # ── Couleurs ANSI ─────────────────────────────────────────────────────────────
 
 RED = "\033[0;31m"
@@ -188,25 +190,12 @@ class SQLiteEngine(DBEngine):
         insert = data_dir / "insert.sql"
         if schema.exists():
             # Filtrer CASCADE (non supporté par SQLite)
-            text = re.sub(r" CASCADE", "", schema.read_text(encoding="utf-8"),
-                          flags=re.IGNORECASE)
+            text = filter_schema(schema.read_text(encoding="utf-8"))
             self._run(self._sqlite(), input=text)
         if insert.exists():
             # Filtrer les blocs ALTER TABLE ... ADD CONSTRAINT ... ;
-            text = insert.read_text(encoding="utf-8")
-            lines = text.splitlines(keepends=True)
-            filtered = []
-            skip = False
-            for line in lines:
-                if re.match(r"^\s*ALTER\s+TABLE.*ADD\s+CONSTRAINT",
-                            line, re.IGNORECASE):
-                    skip = True
-                if skip:
-                    if ";" in line:
-                        skip = False
-                    continue
-                filtered.append(line)
-            self._run(self._sqlite(), input="".join(filtered))
+            text = filter_insert(insert.read_text(encoding="utf-8"))
+            self._run(self._sqlite(), input=text)
 
     def has_data_files(self, data_dir: Path) -> bool:
         return (data_dir / "schema.sql").exists()
