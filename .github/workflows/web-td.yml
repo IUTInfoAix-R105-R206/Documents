@@ -1,0 +1,60 @@
+# .github/workflows/web-td.yml
+# Génère le site web du TD (SQLite WASM) et prouve que le hash calculé côté
+# Python (générateur) est identique au hash calculé côté WASM (navigateur).
+
+name: Web TD (SQLite WASM)
+
+on:
+  workflow_dispatch:
+
+  push:
+    branches: [main]
+    paths:
+      - 'docs/r1.05/td7/td7-correction.sql'
+      - 'docs/shared/data/voyages/**'
+      - 'scripts/generate-web-td.py'
+      - 'scripts/verify-web-td.mjs'
+      - 'scripts/td_correction.py'
+      - 'scripts/sqlite_compat.py'
+      - 'scripts/webtd_canon.py'
+      - 'templates/web-td/**'
+      - '.github/workflows/web-td.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'docs/r1.05/td7/td7-correction.sql'
+      - 'docs/shared/data/voyages/**'
+      - 'scripts/generate-web-td.py'
+      - 'scripts/verify-web-td.mjs'
+      - 'scripts/td_correction.py'
+      - 'scripts/sqlite_compat.py'
+      - 'scripts/webtd_canon.py'
+      - 'templates/web-td/**'
+      - '.github/workflows/web-td.yml'
+
+jobs:
+  build-verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Génère et vérifie le site du TD7 (hash Python == hash WASM)
+        run: make verify-web-td7
+
+      - name: Publie le site comme artefact
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-td7
+          path: output/web/td7
+          retention-days: 30
