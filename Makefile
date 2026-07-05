@@ -71,6 +71,7 @@ R206_TEACHER_PDFS = \
 	test-sql-oracle-local    test-sql-oracle-docker    \
 	test-sql-local test-sql-docker \
 	web-td7 verify-web-td7 serve-web-td7 publish-web-td7 \
+	web-td6 verify-web-td6 serve-web-td6 publish-web-td6 \
 	clean-corrections bump help
 
 help: ## Affiche cette aide
@@ -933,6 +934,24 @@ publish-web-td7: verify-web-td7 ## Publie le site du TD7 dans le dépôt étudia
 	@if [ -z "$(WEB_TD7_REPO)" ]; then \
 		echo "Erreur : définissez WEB_TD7_REPO=chemin/vers/depot"; exit 1; fi
 	scripts/publish-web-td.sh $(OUTPUT_DIR)/web/td7 $(WEB_TD7_REPO)
+
+web-td6: ## Génère le site web du TD6 R1.05 (output/web/td6)
+	$(PYTHON) scripts/generate-web-td.py docs/r1.05/td6/td6-correction.sql \
+		--data-dir docs/shared/data/airbase \
+		--output $(OUTPUT_DIR)/web/td6 --verify-out $(OUTPUT_DIR)/web-verify/td6 \
+		--td-id r1.05-td6 --td-label "R1.05 — TD6" --template-dir $(WEB_TD_TEMPLATE)
+
+verify-web-td6: web-td6 ## Vérifie hash Python == hash WASM pour toutes les questions du TD6
+	$(NODE) scripts/verify-web-td.mjs $(OUTPUT_DIR)/web/td6 $(OUTPUT_DIR)/web-verify/td6
+
+serve-web-td6: web-td6 ## Sert le site du TD6 en local (http://localhost:8000)
+	@echo "→ http://localhost:8000  (Ctrl-C pour arrêter)"
+	@cd $(OUTPUT_DIR)/web/td6 && $(PYTHON) -m http.server 8000
+
+publish-web-td6: verify-web-td6 ## Publie le site du TD6 dans le dépôt étudiant (WEB_TD6_REPO=chemin)
+	@if [ -z "$(WEB_TD6_REPO)" ]; then \
+		echo "Erreur : définissez WEB_TD6_REPO=chemin/vers/depot"; exit 1; fi
+	scripts/publish-web-td.sh $(OUTPUT_DIR)/web/td6 $(WEB_TD6_REPO)
 
 # ==============================================================================
 # Versionnage

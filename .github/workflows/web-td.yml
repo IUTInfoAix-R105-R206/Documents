@@ -1,5 +1,5 @@
 # .github/workflows/web-td.yml
-# Génère le site web du TD (SQLite WASM) et prouve que le hash calculé côté
+# Génère les sites web des TD (SQLite WASM) et prouve que le hash calculé côté
 # Python (générateur) est identique au hash calculé côté WASM (navigateur).
 
 name: Web TD (SQLite WASM)
@@ -11,7 +11,9 @@ on:
     branches: [main]
     paths:
       - 'docs/r1.05/td7/td7-correction.sql'
+      - 'docs/r1.05/td6/td6-correction.sql'
       - 'docs/shared/data/voyages/**'
+      - 'docs/shared/data/airbase/**'
       - 'scripts/generate-web-td.py'
       - 'scripts/verify-web-td.mjs'
       - 'scripts/td_correction.py'
@@ -23,7 +25,9 @@ on:
     branches: [main]
     paths:
       - 'docs/r1.05/td7/td7-correction.sql'
+      - 'docs/r1.05/td6/td6-correction.sql'
       - 'docs/shared/data/voyages/**'
+      - 'docs/shared/data/airbase/**'
       - 'scripts/generate-web-td.py'
       - 'scripts/verify-web-td.mjs'
       - 'scripts/td_correction.py'
@@ -35,6 +39,9 @@ on:
 jobs:
   build-verify:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        td: [td6, td7]
 
     steps:
       - uses: actions/checkout@v4
@@ -49,12 +56,12 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Génère et vérifie le site du TD7 (hash Python == hash WASM)
-        run: make verify-web-td7
+      - name: Génère et vérifie le site (hash Python == hash WASM)
+        run: make verify-web-${{ matrix.td }}
 
       - name: Publie le site comme artefact
         uses: actions/upload-artifact@v4
         with:
-          name: web-td7
-          path: output/web/td7
+          name: web-${{ matrix.td }}
+          path: output/web/${{ matrix.td }}
           retention-days: 30
