@@ -26,8 +26,10 @@ _spec = importlib.util.spec_from_file_location(
 _mod = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_mod)
 parse_sql = _mod.parse_sql
-VALID_TAGS = _mod.VALID_TAGS
 _strip_noqa = _mod._strip_noqa
+# VALID_TAGS a été extrait dans td_correction (refactor 27359a6) ; generate-questions
+# ne le réexpose plus, on l'importe donc directement de sa source.
+from td_correction import VALID_TAGS
 
 
 # ---------------------------------------------------------------------------
@@ -562,7 +564,7 @@ def generate_html(questions, stats, title=None, subtitle=None,
     if not back_text:
         back_text = "Retour à l'index"
 
-    page_title = title.replace("&mdash;", "—")
+    page_title = title.replace("&mdash;", "-")
     stat_boxes = _render_stat_boxes(stats)
     bar_chart = _render_bar_chart(tag_counts)
     diff_chart = _render_diff_chart(diff_counts, difficulties)
@@ -592,7 +594,7 @@ def generate_html(questions, stats, title=None, subtitle=None,
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Statistiques — {page_title}</title>
+  <title>Statistiques - {page_title}</title>
   <style>{CSS}</style>
 </head>
 <body>
