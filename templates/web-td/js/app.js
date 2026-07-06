@@ -49,10 +49,11 @@ function renderHeader(root) {
     store.save(state);
   });
 
-  const exportBtn = el("button", { class: "btn", text: "Exporter .sql" });
+  // En mode algèbre, l'export est un fichier texte .algebre (pas .sql).
+  const exportExt = mode === "algebra" ? "algebre" : "sql";
+  const exportBtn = el("button", { class: "btn", text: `Exporter .${exportExt}` });
   exportBtn.addEventListener("click", () => {
-    const sql = buildExport(questions, state);
-    downloadText(exportFilename(questions.tdId, state.name), sql);
+    downloadText(exportFilename(questions.tdId, state.name, exportExt), buildExport(questions, state));
   });
 
   const resetBtn = el("button", { class: "btn btn-danger", text: "Tout effacer" });
@@ -152,8 +153,8 @@ function renderHowItWorks(root) {
        de lignes et contenu) et affiche <strong>✓ Résultat exact</strong> si tout correspond —
        <em>sans jamais afficher la correction</em>.</p>
     <p>La base est <strong>réinitialisée à chaque exécution</strong> : vous pouvez tout tester
-       sans risque. Vos réponses restent dans ce navigateur ; le bouton <strong>Exporter .sql</strong>
-       les télécharge pour les rendre.</p>
+       sans risque. Vos réponses restent dans ce navigateur ; le bouton
+       <strong>Exporter .${isAlg ? "algebre" : "sql"}</strong> les télécharge pour les rendre.</p>
     ${isAlg ? "<p>La notation de référence est imposée (voir le rappel de syntaxe) ; toute erreur est signalée précisément avec le numéro de ligne.</p>" : ""}`;
   body.appendChild(intro);
 
