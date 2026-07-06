@@ -1,16 +1,18 @@
 #!/usr/bin/env bash
 # publish-web-td.sh — publie un site de TD généré dans le dépôt étudiant.
 #
-# Usage : publish-web-td.sh <site_dir> <repo_dir>
+# Usage : publish-web-td.sh <site_dir> <repo_dir> [<sous-dossier>]
 #
-# Synchronise le contenu de <site_dir> dans <repo_dir> (dépôt Git déjà cloné du
-# dépôt étudiant), puis commit + push. Le site (README.md compris) est la source
-# de vérité : --delete retire du dépôt étudiant ce qui n'existe plus côté site,
-# sauf le dossier .git.
+# Sans sous-dossier : synchronise <site_dir> à la racine de <repo_dir> (--delete,
+# sauf .git). Avec sous-dossier : publie le site dans <repo_dir>/<sous-dossier>/
+# (utile pour héberger plusieurs pages dans un même dépôt), tout en gardant le
+# workflow de déploiement et .nojekyll à la RACINE du dépôt (les workflows GitHub
+# Actions doivent être à la racine). Puis commit + push.
 set -euo pipefail
 
-SITE_DIR="${1:?Usage: publish-web-td.sh <site_dir> <repo_dir>}"
-REPO_DIR="${2:?Usage: publish-web-td.sh <site_dir> <repo_dir>}"
+SITE_DIR="${1:?Usage: publish-web-td.sh <site_dir> <repo_dir> [subdir]}"
+REPO_DIR="${2:?Usage: publish-web-td.sh <site_dir> <repo_dir> [subdir]}"
+SUBDIR="${3:-}"
 
 if [ ! -f "$SITE_DIR/index.html" ]; then
   echo "Erreur : $SITE_DIR ne ressemble pas à un site généré (index.html absent)." >&2
@@ -21,13 +23,20 @@ if [ ! -d "$REPO_DIR/.git" ]; then
   exit 1
 fi
 
-# Version du dépôt source (pour le message de commit).
 VERSION="$(git describe --exact-match --tags HEAD 2>/dev/null || git rev-parse --short HEAD 2>/dev/null || echo inconnu)"
 
-# Synchronisation : on préserve uniquement le dossier .git du dépôt étudiant.
-rsync -a --delete \
-  --exclude '.git/' \
-  "$SITE_DIR"/ "$REPO_DIR"/
+if [ -n "$SUBDIR" ]; then
+  # Site dans un sous-dossier ; workflow + .nojekyll restent à la racine.
+  mkdir -p "$REPO_DIR/$SUBDIR"
+  rsync -a --delete --exclude '.git/' --exclude '.github/' "$SITE_DIR"/ "$REPO_DIR/$SUBDIR"/
+  if [ -f "$SITE_DIR/.github/workflows/deploy-pages.yml" ]; then
+    mkdir -p "$REPO_DIR/.github/workflows"
+    cp "$SITE_DIR/.github/workflows/deploy-pages.yml" "$REPO_DIR/.github/workflows/deploy-pages.yml"
+  fi
+  touch "$REPO_DIR/.nojekyll"
+else
+  rsync -a --delete --exclude '.git/' "$SITE_DIR"/ "$REPO_DIR"/
+fi
 
 cd "$REPO_DIR"
 git add -A
@@ -36,6 +45,5 @@ if git diff --cached --quiet; then
   exit 0
 fi
 git commit -m "Mise à jour du TP (Documents @ $VERSION)"
-# -u origin HEAD : fonctionne au premier push (dépôt vide, sans upstream) comme aux suivants.
 git push -u origin HEAD
-echo "✓ Publié dans $REPO_DIR (push effectué)."
+echo "✓ Publié dans $REPO_DIR${SUBDIR:+/$SUBDIR} (push effectué)."

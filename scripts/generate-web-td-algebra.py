@@ -41,8 +41,11 @@ def convert_schema_line(l):
     """Convertit une ligne de schéma relationnel Pandoc en HTML.
 
     `Rel` -> gras ; [pk]{.pk} -> souligné ; [*fk#*]{.fk} -> italique ;
-    [*pkfk#*]{.pkfk} -> souligné + italique.
+    [*pkfk#*]{.pkfk} -> souligné + italique. Les annotations de domaine
+    « : D_XXX » sont retirées et les underscores LaTeX déséchappés.
     """
+    l = re.sub(r'\s*:\s*D\\?_[A-Za-z0-9_\\]+', '', l)   # retire les domaines
+    l = l.replace('\\_', '_')                           # déséchappe les underscores
     l = re.sub(r'`([^`]+)`', r'<strong>\1</strong>', l)
     l = re.sub(r'\[\*([^\]]*?)\*\]\{\.pkfk\}', r'<u><em>\1</em></u>', l)
     l = re.sub(r'\[\*([^\]]*?)\*\]\{\.fk\}', r'<em>\1</em>', l)
@@ -50,20 +53,40 @@ def convert_schema_line(l):
     return l
 
 
-def relational_schema_html(path):
-    """Extrait le premier bloc `:::: schema-relationnel ... ::::` en lignes HTML."""
+def relational_schema_html(path, section_marker=None, extra=None):
+    """Extrait le(s) bloc(s) `:::: schema-relationnel ... ::::` en lignes HTML.
+
+    Si section_marker est donné, on se limite à la section `# ... marker ...`.
+    extra : lignes HTML supplémentaires ajoutées en tête (relations de base non
+    présentes dans le bloc, ex. Pilote/Avion/Vol pour l'Airbase étendu du TD2).
+    """
     lines = open(path, encoding="utf-8").read().split("\n")
+    i = 0
+    if section_marker:
+        found = False
+        while i < len(lines):
+            m = RE_H1.match(lines[i])
+            if m and section_marker.lower() in m.group(1).lower():
+                i += 1
+                found = True
+                break
+            i += 1
+        if not found:
+            return list(extra or [])
+    rels = list(extra or [])
     inside = False
-    rels = []
-    for l in lines:
-        if not inside:
-            if RE_SCHEMA_OPEN.match(l):
-                inside = True
-            continue
-        if RE_DIV_CLOSE.match(l):
+    while i < len(lines):
+        if section_marker and RE_H1.match(lines[i]):
             break
-        if l.strip():
-            rels.append(convert_schema_line(l.strip()))
+        if not inside:
+            if RE_SCHEMA_OPEN.match(lines[i]):
+                inside = True
+        else:
+            if RE_DIV_CLOSE.match(lines[i]):
+                break
+            if lines[i].strip():
+                rels.append(convert_schema_line(lines[i].strip()))
+        i += 1
     return rels
 
 ALLOWED_TOP_KEYS = {
@@ -101,23 +124,23 @@ def git_version(repo_root):
             or run(["git", "rev-parse", "--short", "HEAD"]) or "inconnu")
 
 
-def parse_md(path):
+def parse_md(path, section_marker="langage algébrique"):
     """Parse la correction .md. Renvoie (intro, [question...]).
 
     Chaque question : {num, statement, section, blocks:[{text, kind}]}
     kind ∈ {'reference', 'alternative', 'incorrect'}.
-    On ne lit que la région « # Requêtes avec le langage algébrique ».
+    On ne lit que la région dont le titre `#` contient section_marker.
     """
     lines = open(path, encoding="utf-8").read().split("\n")
     # Trouver le début de la région des requêtes.
     start = None
     for i, l in enumerate(lines):
         m = RE_H1.match(l)
-        if m and "langage algébrique" in m.group(1).lower():
+        if m and section_marker.lower() in m.group(1).lower():
             start = i + 1
             break
     if start is None:
-        raise GenError("section « # ... langage algébrique » introuvable dans le .md")
+        raise GenError(f"section « # ... {section_marker} ... » introuvable dans le .md")
 
     intro_lines = []
     section = ""
@@ -258,6 +281,12 @@ def main():
     ap.add_argument("--title", default="Algèbre relationnelle")
     ap.add_argument("--db-name", default=None)
     ap.add_argument("--manifest", default=None)
+    ap.add_argument("--section-marker", default="langage algébrique",
+                    help="Sous-chaîne du titre # de la région à générer (ex. 'Exercice n° 1')")
+    ap.add_argument("--schema-md", default=None,
+                    help="Fichier .md d'où extraire le schéma relationnel (défaut : la correction)")
+    ap.add_argument("--schema-extra", default=None,
+                    help="Lignes HTML de schéma ajoutées en tête (séparées par |), ex. relations de base")
     ap.add_argument("--template-dir",
                     default=os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                                          "templates", "web-td"))
@@ -271,7 +300,7 @@ def main():
     expected_drops = set(str(x) for x in manifest.get("expectedDrops", []))
 
     log(f"→ Parsing {args.correction}")
-    intro, questions = parse_md(args.correction)
+    intro, questions = parse_md(args.correction, args.section_marker)
 
     schema_sql = filter_schema(open(os.path.join(args.data_dir, "schema.sql"), encoding="utf-8").read())
     insert_path = os.path.join(args.data_dir, "insert.sql")
@@ -363,7 +392,10 @@ def main():
         "title": args.title, "intro": intro, "mode": "algebra",
         "database": {"name": db_name, "schemaFile": "data/schema.sql",
                      "insertFile": "data/insert.sql", "catalog": catalog,
-                     "relationalSchema": relational_schema_html(args.correction)},
+                     "relationalSchema": relational_schema_html(
+                         args.schema_md or args.correction,
+                         args.section_marker if args.schema_md else None,
+                         (args.schema_extra.split("|") if args.schema_extra else None))},
         "canon": {"algo": "sha256", "specVersion": 1},
         "generated": generated,
         "sections": [{"name": s, "items": sections_map[s]} for s in order if sections_map[s]],
