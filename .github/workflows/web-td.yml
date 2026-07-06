@@ -18,6 +18,7 @@ on:
       - 'scripts/verify-web-td.mjs'
       - 'scripts/sql_quantifiers.py'
       - 'scripts/test-sql-quantifiers.mjs'
+      - 'scripts/test-autocomplete.mjs'
       - 'scripts/td_correction.py'
       - 'scripts/sqlite_compat.py'
       - 'scripts/webtd_canon.py'
@@ -48,6 +49,7 @@ on:
       - 'scripts/verify-web-td.mjs'
       - 'scripts/sql_quantifiers.py'
       - 'scripts/test-sql-quantifiers.mjs'
+      - 'scripts/test-autocomplete.mjs'
       - 'scripts/td_correction.py'
       - 'scripts/sqlite_compat.py'
       - 'scripts/webtd_canon.py'
@@ -92,6 +94,10 @@ jobs:
       - name: Parité du réécriveur ALL/ANY (Python == JS)
         if: matrix.td == 'r206-td2'
         run: node scripts/test-sql-quantifiers.mjs
+
+      - name: Logique d'autocomplétion contextuelle
+        if: matrix.td == 'r206-td2'
+        run: node scripts/test-autocomplete.mjs
 
       - name: Génère et vérifie le site (hash Python == hash WASM)
         run: make verify-web-${{ matrix.td }}
