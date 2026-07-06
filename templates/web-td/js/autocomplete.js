@@ -100,8 +100,17 @@ function algebraCandidates(textBefore, start, schema) {
   const prev = j >= 0 ? textBefore[j] : "";
   // Après un comparateur ou la flèche « -> » de RENOMMAGE : valeur / nouveau nom (saisie libre).
   if (prev === ">" || prev === "<" || prev === "=") return [];
-  if (prev === "/") return cols; // début de condition / liste d'attributs / renommage -> attributs
-  if (prev === "(" || prev === ",") return [...tables, ...cols];
+  if (prev === "/") {
+    // Attributs de la relation en cours (pas toutes les tables) ; repli si indéterminé.
+    const attrs = contextAttributes(before, schema);
+    const list = attrs && attrs.length ? attrs : (schema.allColumns || []);
+    return list.map((x) => ({ label: x.toUpperCase(), kind: "col" }));
+  }
+  if (prev === "(" || prev === ",") {
+    // Opérande : relation de base OU relation intermédiaire (Rn) déjà définie.
+    const rels = definedRelations(before, schema).names.map((n) => ({ label: n.toUpperCase(), kind: "rel" }));
+    return [...tables, ...rels];
+  }
   return [...ops, ...tables, ...cols];
 }
 
@@ -123,7 +132,114 @@ function enclosingOperator(before) {
     else if (before[i] === ")") d--;
     else if (before[i] === "," && d === 0) commas++;
   }
-  return { op: m ? m[0].toUpperCase() : null, commas };
+  return { op: m ? m[0].toUpperCase() : null, commas, openIdx };
+}
+
+// ── Suivi du schéma des relations (pour proposer les attributs du bon opérande) ──
+
+function topLevelIndex(s, ch) {
+  let depth = 0, inStr = false;
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (inStr) { if (c === "'") { if (s[i + 1] === "'") { i++; continue; } inStr = false; } }
+    else if (c === "'") inStr = true;
+    else if (c === "(") depth++;
+    else if (c === ")") depth--;
+    else if (c === ch && depth === 0) return i;
+  }
+  return -1;
+}
+
+function splitTopLevel(s, ch) {
+  const parts = [];
+  let depth = 0, inStr = false, last = 0;
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (inStr) { if (c === "'") { if (s[i + 1] === "'") { i++; continue; } inStr = false; } }
+    else if (c === "'") inStr = true;
+    else if (c === "(") depth++;
+    else if (c === ")") depth--;
+    else if (c === ch && depth === 0) { parts.push(s.slice(last, i)); last = i + 1; }
+  }
+  parts.push(s.slice(last));
+  return parts;
+}
+
+// Colonnes d'une relation : table de base OU relation intermédiaire déjà définie.
+function relationSchema(name, rels, baseSchema) {
+  if (!name) return null;
+  const nl = name.trim().toLowerCase();
+  if (rels[nl]) return rels[nl];
+  const t = (baseSchema.tables || []).find((x) => x.toLowerCase() === nl);
+  return t ? (baseSchema.columns[t] || []) : null;
+}
+
+// Schéma résultant d'une expression algébrique (approché, pour l'autocomplétion).
+function exprSchema(expr, rels, baseSchema) {
+  const m = /^\s*([A-Za-z_]+)\s*\(([\s\S]*)\)\s*$/.exec(expr);
+  if (!m) {
+    const nm = /^\s*([A-Za-z_][\w.'-]*)\s*$/.exec(expr);
+    return nm ? relationSchema(nm[1], rels, baseSchema) : null;
+  }
+  const op = m[1].toUpperCase();
+  const inner = m[2];
+  const slash = topLevelIndex(inner, "/");
+  const operandsPart = slash >= 0 ? inner.slice(0, slash) : inner;
+  const rest = slash >= 0 ? inner.slice(slash + 1) : "";
+  const operands = splitTopLevel(operandsPart, ",").map((s) => s.trim()).filter(Boolean);
+  const sch = (n) => relationSchema(n, rels, baseSchema) || [];
+  if (op === "SELECTION") return sch(operands[0]);
+  if (op === "PROJECTION") return splitTopLevel(rest, ",").map((s) => s.trim()).filter(Boolean);
+  if (op === "RENOMMAGE") {
+    const renames = {};
+    for (const pair of splitTopLevel(rest, ",")) {
+      const pm = /([A-Za-z_]\w*)\s*->\s*([A-Za-z_]\w*)/.exec(pair);
+      if (pm) renames[pm[1].toLowerCase()] = pm[2];
+    }
+    return sch(operands[0]).map((c) => renames[c.toLowerCase()] || c);
+  }
+  if (op === "UNION" || op === "INTERSECTION" || op === "DIFFERENCE") return sch(operands[0]);
+  if (op === "JOINTURE") return [...sch(operands[0]), ...sch(operands[1])];
+  if (op === "JOINTURE_NATURELLE") {
+    const a = sch(operands[0]), b = sch(operands[1]);
+    const seen = new Set(a.map((c) => c.toLowerCase()));
+    return [...a, ...b.filter((c) => !seen.has(c.toLowerCase()))];
+  }
+  if (op === "DIVISION") {
+    const rm = new Set(sch(operands[1]).map((c) => c.toLowerCase()));
+    return sch(operands[0]).filter((c) => !rm.has(c.toLowerCase()));
+  }
+  return null;
+}
+
+// Relations intermédiaires définies avant la ligne courante : { schemas:{lower:cols}, names:[] }.
+function definedRelations(textBefore, baseSchema) {
+  const schemas = {}, names = [];
+  const lines = textBefore.split("\n");
+  for (let i = 0; i < lines.length - 1; i++) { // sauf la ligne en cours de frappe
+    const am = /^\s*([A-Za-z_][\w.'-]*)\s*:=\s*([\s\S]+)$/.exec(lines[i]);
+    if (!am) continue;
+    const sch = exprSchema(am[2], schemas, baseSchema);
+    if (sch) schemas[am[1].toLowerCase()] = sch;
+    names.push(am[1]);
+  }
+  return { schemas, names };
+}
+
+// Attributs disponibles à l'endroit du curseur (après « / »), = schéma du/des opérande(s)
+// de l'opérateur courant. null si indéterminé (→ repli sur toutes les colonnes).
+export function contextAttributes(textBefore, baseSchema) {
+  const { schemas } = definedRelations(textBefore, baseSchema);
+  const info = enclosingOperator(textBefore);
+  if (!info || info.openIdx < 0) return null;
+  const afterOpen = textBefore.slice(info.openIdx + 1);
+  const slash = topLevelIndex(afterOpen, "/");
+  const operandsPart = slash >= 0 ? afterOpen.slice(0, slash) : afterOpen;
+  const operands = splitTopLevel(operandsPart, ",").map((s) => s.trim()).filter(Boolean);
+  const sch = (n) => relationSchema(n, schemas, baseSchema) || [];
+  // JOINTURE : la condition peut porter sur les attributs des DEUX relations.
+  if (info.op === "JOINTURE") return [...sch(operands[0]), ...sch(operands[1])];
+  return sch(operands[0]);
 }
 
 const AL_UNARY = ["SELECTION", "PROJECTION", "RENOMMAGE"];
@@ -224,7 +340,7 @@ export function suggest(mode, textBefore, schema, force = false) {
 
 // ── Popup (DOM) ──────────────────────────────────────────────────────────────
 
-const KIND_LABEL = { table: "table", col: "colonne", kw: "mot-clé" };
+const KIND_LABEL = { table: "table", rel: "relation", col: "colonne", kw: "mot-clé" };
 
 // Coordonnées (px) du curseur dans le textarea, via un div-miroir.
 function caretCoords(textarea, position) {

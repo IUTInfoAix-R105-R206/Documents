@@ -1,6 +1,6 @@
 // test-autocomplete.mjs - teste la logique de suggestion contextuelle (pure, sans DOM).
 //   node scripts/test-autocomplete.mjs
-import { suggest, buildAliasMap, algebraAcceptSuffix, completionAction } from "../templates/web-td/js/autocomplete.js";
+import { suggest, buildAliasMap, algebraAcceptSuffix, completionAction, contextAttributes } from "../templates/web-td/js/autocomplete.js";
 
 const SCHEMA = {
   tables: ["Client", "Voyage", "Reservation"],
@@ -63,8 +63,9 @@ r = suggest("algebra", "SELECTION (Vo", SCHEMA);
 check("( Vo -> VOYAGE", labels(r).includes("VOYAGE") && r.items[0].kind === "table");
 
 // ── Algèbre : attributs après / (en MAJUSCULES) ──
+// Contextuel : SELECTION(Voyage/ ne propose QUE les attributs de Voyage (pas ceux de Client).
 r = suggest("algebra", "SELECTION (Voyage / vi", SCHEMA);
-check("/ vi -> VILLEARR + VILLE", labels(r).includes("VILLEARR") && labels(r).includes("VILLE"));
+check("/ vi -> VILLEARR (de Voyage), pas VILLE (de Client)", labels(r).includes("VILLEARR") && !labels(r).includes("VILLE"));
 
 // ── Algèbre : séparateur inséré après une relation/attribut accepté ──
 check("relation SELECTION -> /", algebraAcceptSuffix("SELECTION(", "table") === "/");
@@ -99,6 +100,27 @@ for (const ctx of ["SELECTION (VOYAGE / ", "RENOMMAGE (R1 / ", "PROJECTION (R1 /
 // ── ET/OU/NON ne sont jamais proposés (ni en début d'expression) ──
 check("début d'expression -> opérateurs relationnels sans ET/OU/NON",
   !suggest("algebra", "R1 := ", SCHEMA, true).items.some((i) => ["ET", "OU", "NON"].includes(i.label)));
+
+// ── contextAttributes : attributs de l'opérande courant (table de base ET relation intermédiaire) ──
+const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+check("SELECTION(Voyage/ -> attributs de Voyage",
+  eq(contextAttributes("R1 := SELECTION(Voyage/", SCHEMA), ["idV", "dateDep", "villeArr"]));
+check("SELECTION(Client/ -> attributs de Client",
+  eq(contextAttributes("R1 := SELECTION(Client/", SCHEMA), ["numCl", "nom", "ville"]));
+// Relation intermédiaire : PROJECTION restreint le schéma.
+check("PROJECTION puis SELECTION(R1/ -> attributs projetés",
+  eq(contextAttributes("R1 := PROJECTION(Voyage/idV, dateDep)\nR2 := SELECTION(R1/", SCHEMA), ["idV", "dateDep"]));
+// SELECTION préserve le schéma ; RENOMMAGE(R1/ voit donc les attributs de Voyage.
+check("SELECTION puis RENOMMAGE(R1/ -> attributs de Voyage",
+  eq(contextAttributes("R1 := SELECTION(Voyage/dateDep > '2020')\nR2 := RENOMMAGE(R1/", SCHEMA), ["idV", "dateDep", "villeArr"]));
+// JOINTURE : la condition voit les attributs des deux relations.
+check("JOINTURE(Voyage, Reservation/ -> attributs des deux", (() => {
+  const a = contextAttributes("R1 := JOINTURE(Voyage, Reservation/", SCHEMA);
+  return a.includes("dateDep") && a.includes("dateRes");
+})());
+// RENOMMAGE renomme le schéma résultant.
+check("RENOMMAGE renomme le schéma suivi",
+  eq(contextAttributes("R1 := RENOMMAGE(Voyage/villeArr -> destination)\nR2 := SELECTION(R1/", SCHEMA), ["idV", "dateDep", "destination"]));
 
 console.log(`${pass}/${pass + fail} OK - logique d'autocomplétion contextuelle`);
 process.exit(fail === 0 ? 0 : 1);

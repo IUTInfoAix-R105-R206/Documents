@@ -227,6 +227,6 @@ body {
 .ac-active .ac-kind { color: var(--accent-ink); opacity: .8; }
 .ac-label { overflow: hidden; text-overflow: ellipsis; }
 .ac-kind { font-size: .72rem; color: var(--muted); font-family: system-ui, sans-serif; }
-.ac-kind-table { color: #2f855a; }
+.ac-kind-table, .ac-kind-rel { color: #2f855a; }
 .ac-kind-col { color: var(--accent); }
-@media (prefers-color-scheme: dark) { .ac-kind-table { color: #68d391; } }
+@media (prefers-color-scheme: dark) { .ac-kind-table, .ac-kind-rel { color: #68d391; } }
