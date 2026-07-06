@@ -122,5 +122,21 @@ check("JOINTURE(Voyage, Reservation/ -> attributs des deux", (() => {
 check("RENOMMAGE renomme le schéma suivi",
   eq(contextAttributes("R1 := RENOMMAGE(Voyage/villeArr -> destination)\nR2 := SELECTION(R1/", SCHEMA), ["idV", "dateDep", "destination"]));
 
+// ── SQL contextuel : colonnes non qualifiées restreintes aux tables du FROM/JOIN ──
+r = suggest("sql", "SELECT nom FROM Client WHERE ", SCHEMA, true);
+check("WHERE après FROM Client -> colonnes de Client, pas de Voyage",
+  labels(r).includes("NOM") && !labels(r).includes("DATEDEP"));
+// Le FROM peut être APRÈS le curseur (liste du SELECT) : scope via la requête complète.
+r = suggest("sql", "SELECT vi", SCHEMA, false, "SELECT vi FROM Voyage");
+check("SELECT vi ... FROM Voyage -> VILLEARR (Voyage) pas VILLE (Client)",
+  labels(r).includes("VILLEARR") && !labels(r).includes("VILLE"));
+// Plusieurs tables -> union de leurs colonnes.
+r = suggest("sql", "SELECT * FROM Client c, Voyage v WHERE ", SCHEMA, true);
+check("FROM Client, Voyage -> colonnes des deux, pas de Reservation",
+  labels(r).includes("NOM") && labels(r).includes("DATEDEP") && !labels(r).includes("DATERES"));
+// Sans FROM connu -> repli sur toutes les colonnes.
+r = suggest("sql", "SELECT ", SCHEMA, true);
+check("SELECT sans FROM -> repli toutes colonnes", labels(r).includes("NOM") && labels(r).includes("DATEDEP"));
+
 console.log(`${pass}/${pass + fail} OK - logique d'autocomplétion contextuelle`);
 process.exit(fail === 0 ? 0 : 1);

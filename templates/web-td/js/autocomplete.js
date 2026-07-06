@@ -62,6 +62,21 @@ function resolveTable(qualifier, sql, schema) {
   return (schema.tables || []).find((t) => t.toLowerCase() === target) || null;
 }
 
+// Colonnes des tables présentes dans le FROM/JOIN de la requête (null si aucun FROM).
+function inScopeColumns(sql, schema) {
+  const inScope = new Set(Object.values(buildAliasMap(sql)).map((t) => t.toLowerCase()));
+  if (!inScope.size) return null;
+  const cols = [], seen = new Set();
+  for (const t of (schema.tables || [])) {
+    if (!inScope.has(t.toLowerCase())) continue;
+    for (const c of (schema.columns[t] || [])) {
+      const k = c.toLowerCase();
+      if (!seen.has(k)) { seen.add(k); cols.push(c); }
+    }
+  }
+  return cols.length ? cols : null;
+}
+
 function lastClauseKeyword(text) {
   let last = null, m;
   CLAUSE_KW.lastIndex = 0;
@@ -74,17 +89,19 @@ function lastClauseKeyword(text) {
 const upTables = (schema) => (schema.tables || []).map((x) => ({ label: x.toUpperCase(), kind: "table" }));
 const upCols = (list) => (list || []).map((x) => ({ label: x.toUpperCase(), kind: "col" }));
 
-function sqlCandidates(textBefore, start, qualifier, schema) {
+function sqlCandidates(textBefore, start, qualifier, schema, fullText) {
+  const src = fullText || textBefore; // le FROM peut être APRÈS le curseur (liste du SELECT)
   const tables = upTables(schema);
-  const cols = upCols(schema.allColumns);
   const kw = [...SQL_KEYWORDS, ...SQL_FUNCTIONS].map((x) => ({ label: x, kind: "kw" }));
   if (qualifier) {
-    const table = resolveTable(qualifier, textBefore, schema);
+    const table = resolveTable(qualifier, src, schema);
     const list = table && schema.columns[table] ? schema.columns[table] : (schema.allColumns || []);
     return upCols(list);
   }
   const ctx = lastClauseKeyword(textBefore.slice(0, start));
   if (ctx === "FROM" || ctx === "JOIN") return [...tables, ...kw];
+  // Colonnes non qualifiées : restreintes aux tables du FROM/JOIN si connu, sinon toutes.
+  const cols = upCols(inScopeColumns(src, schema) || schema.allColumns);
   return [...cols, ...tables, ...kw];
 }
 
@@ -286,13 +303,13 @@ export function pendingSeparator(textBefore, schema) {
 // Décision d'un déclenchement de complétion, testable sans DOM :
 //   { type:"separator", text } : insère directement le séparateur (nom déjà complet) ;
 //   { type:"list", start, word, items } : affiche la popup ; { type:"none" }.
-export function completionAction(mode, textBefore, schema, force = false) {
+export function completionAction(mode, textBefore, schema, force = false, fullText = null) {
   if (inString(textBefore)) return { type: "none" };
   if (force && mode === "algebra") {
     const sep = pendingSeparator(textBefore, schema);
     if (sep) return { type: "separator", text: sep };
   }
-  const res = suggest(mode, textBefore, schema, force);
+  const res = suggest(mode, textBefore, schema, force, fullText);
   if (!res.items.length) return { type: "none" };
   return { type: "list", start: res.start, word: res.word, items: res.items };
 }
@@ -309,7 +326,7 @@ function inString(text) {
 }
 
 // Renvoie { start, word, items:[{label, kind}] } ; items filtrés par préfixe (casse ignorée).
-export function suggest(mode, textBefore, schema, force = false) {
+export function suggest(mode, textBefore, schema, force = false, fullText = null) {
   if (inString(textBefore)) return { start: textBefore.length, word: "", items: [] };
   const wm = TRAILING_WORD.exec(textBefore);
   const word = wm ? wm[0] : "";
@@ -322,7 +339,7 @@ export function suggest(mode, textBefore, schema, force = false) {
   if (!force && !qualifier && word.length < 1) return { start, word, items: [] };
   const raw = mode === "algebra"
     ? algebraCandidates(textBefore, start, schema)
-    : sqlCandidates(textBefore, start, qualifier, schema);
+    : sqlCandidates(textBefore, start, qualifier, schema, fullText);
   const w = word.toLowerCase();
   const seen = new Set();
   const items = [];
@@ -405,7 +422,7 @@ export function attachAutocomplete(textarea, opts) {
   function update(force = false) {
     if (textarea.selectionStart !== textarea.selectionEnd) return close();
     const pos = textarea.selectionStart;
-    const act = completionAction(opts.getMode(), textarea.value.slice(0, pos), opts.getSchema(), force);
+    const act = completionAction(opts.getMode(), textarea.value.slice(0, pos), opts.getSchema(), force, textarea.value);
     if (act.type === "none") return close();
     if (act.type === "separator") {
       // Nom déjà complet : on insère directement le séparateur, sans proposer le mot lui-même.
