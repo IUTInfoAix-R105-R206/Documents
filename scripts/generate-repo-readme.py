@@ -29,8 +29,7 @@ RES_LABELS = {
 }
 
 AUTO_NOTE = (
-    "Ce dépôt est généré automatiquement depuis le dépôt "
-    "[Documents](https://github.com/IUTInfoAix-R105-R206/Documents) : "
+    "Ce dépôt est généré automatiquement : "
     "toute modification manuelle sera écrasée à la prochaine publication."
 )
 
