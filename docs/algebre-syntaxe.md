@@ -1,4 +1,4 @@
-# Syntaxe de référence — algèbre relationnelle textuelle
+# Syntaxe de référence - algèbre relationnelle textuelle
 
 Cette notation est celle **imposée strictement** par le compilateur des pages web
 d'algèbre (`templates/web-td/js/algebra.js`). Tout écart est rejeté avec un message
@@ -51,7 +51,7 @@ flèche Unicode `→` (utiliser `->`).
 
 `JOINTURE` est la thêta-jointure formelle : le résultat contient **toutes** les
 colonnes des deux relations. Après `JOINTURE (R1, R2 / numPil = numPil)`, l'attribut
-`numPil` est présent **deux fois** — le projeter directement est donc **ambigu**
+`numPil` est présent **deux fois** - le projeter directement est donc **ambigu**
 (erreur). Pour le récupérer, renommer un côté :
 
 ```

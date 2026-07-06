@@ -130,9 +130,9 @@ pas indiquées dans ces ensembles.
 :::
 
 :::: schema-relationnel
-`R1` ([A]{.pk}, [B]{.pk}, C, D, E, F) — \{B $\to$ C ; D $\to$ E ; D $\to$ F\}
+`R1` ([A]{.pk}, [B]{.pk}, C, D, E, F) - \{B $\to$ C ; D $\to$ E ; D $\to$ F\}
 
-`R2` ([G]{.pk}, [H]{.pk}, [I]{.pk}, [J]{.pk}, K, L, M, N) — \{M $\to$ N ; I, J $\to$ K\}
+`R2` ([G]{.pk}, [H]{.pk}, [I]{.pk}, [J]{.pk}, K, L, M, N) - \{M $\to$ N ; I, J $\to$ K\}
 ::::
 
 Q15

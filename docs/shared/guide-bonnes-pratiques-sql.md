@@ -1,6 +1,6 @@
 ---
 title: "Guide de bonnes pratiques SQL"
-course: "Bases de données — IUT d'Aix-Marseille"
+course: "Bases de données - IUT d'Aix-Marseille"
 authors:
   - "Sébastien Nedjar"
   - "Mickaël Martin Nevot"
@@ -48,7 +48,7 @@ Les clauses concernées sont : `SELECT`, `FROM`, `WHERE`, `GROUP BY`, `HAVING`, 
 
 L'indentation utilise **4 espaces** (jamais de tabulations). Elle s'applique dans les cas suivants.
 
-**Conditions composées** — quand une clause (`WHERE`, `ON`, `HAVING`) comporte une **condition unique**, celle-ci reste sur la même ligne que le mot-clé. Quand la clause comporte **plusieurs conditions** (`AND`, `OR`), le mot-clé reste seul sur sa ligne et chaque condition est indentée d'un cran :
+**Conditions composées** - quand une clause (`WHERE`, `ON`, `HAVING`) comporte une **condition unique**, celle-ci reste sur la même ligne que le mot-clé. Quand la clause comporte **plusieurs conditions** (`AND`, `OR`), le mot-clé reste seul sur sa ligne et chaque condition est indentée d'un cran :
 
 Condition unique :
 
@@ -70,7 +70,7 @@ WHERE
 
 Cette règle s'applique de la même manière au `ON` des jointures (cf. ci-dessous) et au `HAVING`.
 
-**Jointures** — les `JOIN` sont indentés par rapport au `FROM` et le `ON` est indenté par rapport au `JOIN`. Pour les conditions du `ON`, la même règle de condition unique / composée s'applique :
+**Jointures** - les `JOIN` sont indentés par rapport au `FROM` et le `ON` est indenté par rapport au `JOIN`. Pour les conditions du `ON`, la même règle de condition unique / composée s'applique :
 
 Condition unique :
 
@@ -92,7 +92,7 @@ FROM Etudiant Et
             AND E.code = 'BD';
 ```
 
-**Sous-requêtes** — chaque niveau de sous-requête est indenté d'un cran supplémentaire :
+**Sous-requêtes** - chaque niveau de sous-requête est indenté d'un cran supplémentaire :
 
 ```sql
 SELECT numEt, nomEt
@@ -108,7 +108,7 @@ WHERE numEt IN (
 );
 ```
 
-**CTE (Common Table Expressions)** — le corps du `WITH` est indenté et suivi d'une ligne vide avant le `SELECT` principal :
+**CTE (Common Table Expressions)** - le corps du `WITH` est indenté et suivi d'une ligne vide avant le `SELECT` principal :
 
 ```sql
 WITH T (numProf, nbCode) AS (
@@ -301,7 +301,7 @@ WHERE N.moyTest >= 10;
 
 L'enseignement présente trois formes de jointure pour une même requête. Il est important de toutes les connaître.
 
-**Version algébrique** — utilise `INNER JOIN ... ON` :
+**Version algébrique** - utilise `INNER JOIN ... ON` :
 
 ```sql
 SELECT DISTINCT Et.numEt, Et.nomEt
@@ -313,7 +313,7 @@ FROM Etudiant Et
 WHERE P.nomProf = 'LAPORTE';
 ```
 
-**Version imbriquée** — utilise des sous-requêtes `IN` :
+**Version imbriquée** - utilise des sous-requêtes `IN` :
 
 ```sql
 SELECT DISTINCT Et.numEt, Et.nomEt
@@ -329,7 +329,7 @@ WHERE Et.numEt IN (
 );
 ```
 
-**Version prédicative** — utilise le produit cartésien avec conditions dans le `WHERE` :
+**Version prédicative** - utilise le produit cartésien avec conditions dans le `WHERE` :
 
 ```sql
 SELECT DISTINCT Et.numEt, Et.nomEt
@@ -369,7 +369,7 @@ WHERE nomPil <> 'DURAND';
 
 L'un des pièges les plus fréquents en SQL. Quand une sous-requête dans un `NOT IN` peut retourner des valeurs `NULL`, **le résultat est toujours vide**.
 
-Exemple problématique — la colonne `resp` contient des `NULL` dans la table `Module` :
+Exemple problématique - la colonne `resp` contient des `NULL` dans la table `Module` :
 
 ```sql
 -- ATTENTION : cette requête ne retourne aucun résultat !

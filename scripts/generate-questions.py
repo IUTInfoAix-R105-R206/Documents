@@ -151,7 +151,7 @@ def main():
         if args.mode == 'correction':
             template_text = re.sub(
                 r'^(title:\s*"[^"]*)"',
-                r'\1 — Corrigé"',
+                r'\1 - Corrigé"',
                 template_text,
                 count=1,
                 flags=re.MULTILINE,
@@ -159,7 +159,7 @@ def main():
         elif args.mode == 'teacher':
             template_text = re.sub(
                 r'^(title:\s*"[^"]*)"',
-                r'\1 — Corrigé enseignant"',
+                r'\1 - Corrigé enseignant"',
                 template_text,
                 count=1,
                 flags=re.MULTILINE,
