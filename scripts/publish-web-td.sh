@@ -46,6 +46,10 @@ else
   rsync -a --delete --exclude '.git/' "${PDF_KEEP[@]}" "$SITE_DIR"/ "$REPO_DIR"/
 fi
 
+# README du dépôt étudiant : en-tête spécifique au TD (titre, lien Pages, sujet
+# PDF), corps générique du template conservé pour les sites interactifs.
+python3 "$(dirname "$0")/generate-repo-readme.py" "$REPO_DIR"
+
 cd "$REPO_DIR"
 git add -A
 if git diff --cached --quiet; then
