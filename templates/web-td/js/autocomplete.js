@@ -97,7 +97,15 @@ function algebraCandidates(textBefore, start, schema) {
   const prev = j >= 0 ? textBefore[j] : "";
   // Après un comparateur ou la flèche « -> » de RENOMMAGE : valeur / nouveau nom (saisie libre).
   if (prev === ">" || prev === "<" || prev === "=") return [];
-  if (prev === "/") return [...cols, { label: "ET", kind: "kw" }, { label: "OU", kind: "kw" }, { label: "NON", kind: "kw" }];
+  if (prev === "/") {
+    // Après « / » : des attributs. Les connecteurs ET/OU/NON ne s'appliquent qu'à la
+    // CONDITION d'une SELECTION (ET seul dans une JOINTURE) ; pas à la liste d'attributs
+    // d'une PROJECTION ni aux renommages d'un RENOMMAGE.
+    const op = (enclosingOperator(textBefore.slice(0, start)) || {}).op;
+    if (op === "SELECTION") return [...cols, { label: "ET", kind: "kw" }, { label: "OU", kind: "kw" }, { label: "NON", kind: "kw" }];
+    if (op === "JOINTURE") return [...cols, { label: "ET", kind: "kw" }];
+    return cols;
+  }
   if (prev === "(" || prev === ",") return [...tables, ...cols];
   return [...ops, ...tables, ...cols];
 }
