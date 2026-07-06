@@ -12,6 +12,9 @@ let questions = null;
 let store = null;
 let mode = "sql";       // "sql" | "algebra"
 let catalog = null;     // schéma des tables (mode algèbre)
+// Option enseignant (masquée aux étudiants) : ?sql dans l'URL affiche, en mode
+// algèbre, le SQL compilé depuis la saisie de l'étudiant (jamais la correction).
+let showSql = false;
 let state = { answers: {}, name: "" };
 const cards = new Map(); // id -> { statusEl, resultEl, feedbackEl }
 
@@ -285,6 +288,12 @@ function renderQuestion(container, question) {
   const hint = el("span", { class: "run-hint", text: "Ctrl/Cmd + Entrée" });
   const resultEl = el("div", { class: "q-result" });
   const feedbackEl = el("div", { class: "q-feedback" });
+  // Encart enseignant « SQL généré » (uniquement si ?sql en mode algèbre).
+  let sqlPre = null, sqlBox = null;
+  if (showSql) {
+    sqlPre = el("pre", { class: "sql-generated-pre" });
+    sqlBox = el("details", { class: "sql-generated" }, [el("summary", { text: "SQL généré (enseignant)" }), sqlPre]);
+  }
 
   async function run() {
     const input = textarea.value.trim();
@@ -301,7 +310,9 @@ function renderQuestion(container, question) {
       if (mode === "algebra") {
         try {
           sql = compileAlgebra(input, catalog).sql;
+          if (sqlPre) sqlPre.textContent = sql;
         } catch (e) {
+          if (sqlPre) sqlPre.textContent = "(erreur de compilation)";
           resultEl.replaceChildren();
           feedbackEl.replaceChildren(el("div", { class: "feedback feedback-error" }, [
             el("span", { class: "chip chip-ko", text: "✗ " + String(e && e.message || e) }),
@@ -330,6 +341,7 @@ function renderQuestion(container, question) {
   card.appendChild(el("div", { class: "q-actions" }, [runBtn, hint]));
   card.appendChild(resultEl);
   card.appendChild(feedbackEl);
+  if (sqlBox) card.appendChild(sqlBox);
   container.appendChild(card);
 
   cards.set(question.id, { status });
@@ -370,6 +382,7 @@ async function main() {
   }
   mode = questions.mode || "sql";
   catalog = (questions.database && questions.database.catalog) || null;
+  showSql = mode === "algebra" && new URLSearchParams(location.search).has("sql");
   store = makeStore(questions.tdId);
   state = store.load();
 
