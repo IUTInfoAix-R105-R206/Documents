@@ -106,6 +106,35 @@ async function renderSchemaPanel(root) {
   }
 }
 
+// Rappel de syntaxe (mode algèbre) — panneau repliable pour les étudiants.
+function renderSyntaxPanel(root) {
+  const details = el("details", { class: "schema-panel syntax-panel" });
+  details.appendChild(el("summary", { text: "Rappel : syntaxe de l'algèbre relationnelle" }));
+  const body = el("div", { class: "syntax-body" });
+  body.innerHTML = `
+    <p>Une requête est une <strong>suite d'affectations</strong> (une par ligne, avec <code>:=</code>) ;
+       la <strong>dernière relation</strong> définie est la réponse. Exemple :</p>
+    <pre>R1 := SELECTION (Avion / capacite &gt; 350)
+R2 := PROJECTION (R1 / numAv, nomAv)</pre>
+    <table class="syntax-table"><thead><tr><th>Opérateur</th><th>Forme</th></tr></thead><tbody>
+      <tr><td>SELECTION</td><td>SELECTION (R / <em>condition</em>)</td></tr>
+      <tr><td>PROJECTION</td><td>PROJECTION (R / attr1, attr2, …)</td></tr>
+      <tr><td>RENOMMAGE</td><td>RENOMMAGE (R / ancien -&gt; nouveau, …)</td></tr>
+      <tr><td>UNION · INTERSECTION · DIFFERENCE</td><td>UNION (R1, R2)</td></tr>
+      <tr><td>JOINTURE</td><td>JOINTURE (R1, R2 / attrG <em>op</em> attrD)</td></tr>
+      <tr><td>JOINTURE_NATURELLE</td><td>JOINTURE_NATURELLE (R1, R2)</td></tr>
+      <tr><td>DIVISION</td><td>DIVISION (R1, R2)</td></tr>
+    </tbody></table>
+    <p class="syntax-note">
+      Conditions : comparateurs <code>=</code> <code>&lt;&gt;</code> <code>&lt;</code> <code>&gt;</code>
+      <code>&lt;=</code> <code>&gt;=</code> ; connecteurs <code>ET</code> / <code>OU</code> / <code>NON</code> ;
+      chaînes entre apostrophes <code>'TEXTE'</code> ; heures <code>HH:MM</code> ;
+      commentaire <code>--</code> en fin de ligne. Opérateurs en <strong>MAJUSCULES sans accent</strong>.
+    </p>`;
+  details.appendChild(body);
+  root.appendChild(details);
+}
+
 // ── Rendu d'une table de résultat ───────────────────────────────────────────
 
 function renderTable(result) {
@@ -388,6 +417,7 @@ async function main() {
 
   renderHeader(root);
   await renderSchemaPanel(root);
+  if (mode === "algebra") renderSyntaxPanel(root);
 
   const main = el("main", { class: "sections" });
   for (const section of questions.sections) {
