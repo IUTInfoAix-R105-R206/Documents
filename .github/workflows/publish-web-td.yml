@@ -1,7 +1,11 @@
 # .github/workflows/publish-web-td.yml
-# Publie automatiquement les pages web des TD dans leurs dépôts étudiants dès qu'un
-# push sur main modifie ce qui les compose (corrections, données, template, scripts).
+# Publie automatiquement les pages web des TD dans leurs dépôts étudiants.
 # Inspiré du dépôt classroom-sync (sync config-driven via PAT cross-dépôt).
+#
+# CHAÎNAGE : ce workflow se déclenche APRÈS « Build PDFs » (build.yml) via
+# workflow_run. Il réutilise ainsi l'artefact « td-pdfs » produit par build.yml
+# (aucune recompilation LaTeX ici) : chaque PDF sujet est copié dans la page et
+# lié (« Ouvrir le sujet »), utile quand le dépôt Documents deviendra privé.
 #
 # PRÉ-REQUIS (une fois) : créer un secret « PUBLISH_TOKEN » dans ce dépôt
 # (Settings > Secrets and variables > Actions), contenant un jeton d'accès (PAT)
@@ -16,6 +20,7 @@
 name: Publish web TD pages
 
 on:
+  # Déclenchement manuel (avec option dry-run) : récupère le dernier artefact PDF.
   workflow_dispatch:
     inputs:
       dry_run:
@@ -23,21 +28,15 @@ on:
         type: boolean
         default: false
 
-  push:
+  # Déclenchement automatique : après chaque build PDF réussi sur main.
+  workflow_run:
+    workflows: ["Build PDFs"]
+    types: [completed]
     branches: [main]
-    paths:
-      - 'docs/r1.05/td6/td6-correction.sql'
-      - 'docs/r1.05/td7/td7-correction.sql'
-      - 'docs/r1.05/td1/**'
-      - 'docs/r1.05/td2/**'
-      - 'docs/shared/data/**'
-      - 'scripts/**'
-      - 'templates/web-td/**'
-      - 'Makefile'
-      - '.github/workflows/publish-web-td.yml'
 
 permissions:
   contents: read
+  actions: read   # nécessaire pour télécharger l'artefact « td-pdfs » du run build.yml
 
 # Une seule publication à la fois (évite les pushs concurrents vers un même dépôt).
 concurrency:
@@ -46,6 +45,13 @@ concurrency:
 
 jobs:
   publish:
+    # Sur workflow_run : uniquement si le build a réussi et vient d'un push / dispatch
+    # sur main. Sur workflow_dispatch : toujours.
+    if: >-
+      ${{ github.event_name == 'workflow_dispatch' ||
+          (github.event.workflow_run.conclusion == 'success' &&
+           (github.event.workflow_run.event == 'push' ||
+            github.event.workflow_run.event == 'workflow_dispatch')) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -71,6 +77,28 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Récupérer les PDF sujets (artefact du build)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          # Run à consulter : celui qui a déclenché (workflow_run), sinon le dernier build réussi.
+          RUN_ID="${{ github.event.workflow_run.id }}"
+          if [ -z "$RUN_ID" ]; then
+            RUN_ID=$(gh run list --workflow "Build PDFs" --branch main --status success \
+                       --limit 1 --json databaseId --jq '.[0].databaseId' || true)
+          fi
+          echo "Artefact td-pdfs depuis le run ${RUN_ID:-<aucun>}"
+          if [ -n "$RUN_ID" ] && gh run download "$RUN_ID" -n td-pdfs -D pdf-artifact 2>/dev/null; then
+            mkdir -p output/r1.05/td1 output/r1.05/td2 output/r1.05/td6 output/r1.05/td7
+            for td in td1 td2 td6 td7; do
+              f=$(find pdf-artifact -name "$td.pdf" 2>/dev/null | head -1 || true)
+              if [ -n "$f" ]; then cp "$f" "output/r1.05/$td/$td.pdf"; echo "  PDF $td <- $f"; fi
+            done
+          else
+            echo "::warning::Artefact td-pdfs indisponible - publication SANS mise a jour du PDF (le PDF deja present dans chaque depot est preserve)."
+          fi
 
       - name: Publier toutes les pages TD
         env:

@@ -25,17 +25,25 @@ fi
 
 VERSION="$(git describe --exact-match --tags HEAD 2>/dev/null || git rev-parse --short HEAD 2>/dev/null || echo inconnu)"
 
+# Si le site généré ne contient pas de PDF sujet (ex. artefact indisponible en CI, ou
+# build local sans LaTeX), on préserve celui déjà publié dans le dépôt plutôt que de le
+# supprimer via --delete.
+PDF_KEEP=()
+if [ ! -f "$SITE_DIR/sujet.pdf" ]; then
+  PDF_KEEP=(--exclude 'sujet.pdf')
+fi
+
 if [ -n "$SUBDIR" ]; then
   # Site dans un sous-dossier ; workflow + .nojekyll restent à la racine.
   mkdir -p "$REPO_DIR/$SUBDIR"
-  rsync -a --delete --exclude '.git/' --exclude '.github/' "$SITE_DIR"/ "$REPO_DIR/$SUBDIR"/
+  rsync -a --delete --exclude '.git/' --exclude '.github/' "${PDF_KEEP[@]}" "$SITE_DIR"/ "$REPO_DIR/$SUBDIR"/
   if [ -f "$SITE_DIR/.github/workflows/deploy-pages.yml" ]; then
     mkdir -p "$REPO_DIR/.github/workflows"
     cp "$SITE_DIR/.github/workflows/deploy-pages.yml" "$REPO_DIR/.github/workflows/deploy-pages.yml"
   fi
   touch "$REPO_DIR/.nojekyll"
 else
-  rsync -a --delete --exclude '.git/' "$SITE_DIR"/ "$REPO_DIR"/
+  rsync -a --delete --exclude '.git/' "${PDF_KEEP[@]}" "$SITE_DIR"/ "$REPO_DIR"/
 fi
 
 cd "$REPO_DIR"
