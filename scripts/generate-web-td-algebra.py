@@ -91,7 +91,7 @@ def relational_schema_html(path, section_marker=None, extra=None):
 
 ALLOWED_TOP_KEYS = {
     "formatVersion", "tdId", "tdLabel", "title", "intro",
-    "mode", "database", "canon", "sections",
+    "mode", "database", "canon", "sections", "subjectPdf",
 }
 ALLOWED_QUESTION_KEYS = {
     "type", "id", "num", "statement", "expectedCols", "expectedRows",
@@ -225,7 +225,7 @@ def run_algebra(node_bin, script, web_root, schema_sql, insert_sql, jobs):
     return json.loads(proc.stdout.decode("utf-8"))
 
 
-def emit_site(template_dir, site_dir, schema_sql, insert_sql, questions_json):
+def emit_site(template_dir, site_dir, schema_sql, insert_sql, questions_json, pdf_src=None):
     if os.path.exists(site_dir):
         shutil.rmtree(site_dir)
     shutil.copytree(template_dir, site_dir)
@@ -235,6 +235,10 @@ def emit_site(template_dir, site_dir, schema_sql, insert_sql, questions_json):
         f.write(schema_sql)
     with open(os.path.join(data_dir, "insert.sql"), "w", encoding="utf-8") as f:
         f.write(insert_sql)
+    # PDF du sujet (facultatif) : copié dans le site pour rester accessible même
+    # quand le dépôt Documents sera privé. Seul le SUJET est publié (pas la correction).
+    if pdf_src:
+        shutil.copyfile(pdf_src, os.path.join(site_dir, questions_json["subjectPdf"]))
     with open(os.path.join(site_dir, "questions.json"), "w", encoding="utf-8") as f:
         json.dump(questions_json, f, ensure_ascii=False, indent=2)
     open(os.path.join(site_dir, ".nojekyll"), "w").close()
@@ -255,6 +259,8 @@ def audit_no_leak(site_dir, solutions, questions_json):
     texts = {}
     for root, _, files in os.walk(site_dir):
         for fn in files:
+            if fn.lower().endswith(".pdf"):
+                continue  # sujet PDF (binaire, ne contient pas la correction)
             p = os.path.join(root, fn)
             try:
                 texts[p] = norm(open(p, encoding="utf-8", errors="ignore").read())
@@ -291,6 +297,11 @@ def main():
                     default=os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                                          "templates", "web-td"))
     ap.add_argument("--node", default="node")
+    ap.add_argument("--pdf", default=None,
+                    help="Chemin du PDF du sujet à copier dans le site (facultatif). "
+                         "Ignoré avec un avertissement si le fichier est absent.")
+    ap.add_argument("--pdf-name", default="sujet.pdf",
+                    help="Nom du PDF dans le site (défaut : sujet.pdf).")
     args = ap.parse_args()
 
     repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -399,8 +410,17 @@ def main():
         "sections": [{"name": s, "items": sections_map[s]} for s in order if sections_map[s]],
     }
 
+    pdf_src = None
+    if args.pdf:
+        if os.path.isfile(args.pdf):
+            questions_json["subjectPdf"] = args.pdf_name
+            pdf_src = args.pdf
+            log(f"→ Sujet PDF : {args.pdf} → {args.pdf_name}")
+        else:
+            log(f"⚠ PDF introuvable ({args.pdf}) — page générée sans lien vers le sujet")
+
     log(f"→ Émission du site dans {args.output}")
-    emit_site(args.template_dir, args.output, schema_sql, insert_sql, questions_json)
+    emit_site(args.template_dir, args.output, schema_sql, insert_sql, questions_json, pdf_src)
 
     os.makedirs(args.verify_out, exist_ok=True)
     with open(os.path.join(args.verify_out, "solutions.json"), "w", encoding="utf-8") as f:

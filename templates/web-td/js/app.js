@@ -72,6 +72,14 @@ function renderHeader(root) {
 
   const header = el("header", { class: "app-header" }, [titleRow]);
   if (questions.intro) header.appendChild(el("p", { class: "intro", text: questions.intro }));
+  if (questions.subjectPdf) {
+    header.appendChild(el("p", { class: "subject-pdf" }, [
+      el("a", {
+        text: "📄 Ouvrir le sujet (PDF)",
+        attrs: { href: questions.subjectPdf, target: "_blank", rel: "noopener" },
+      }),
+    ]));
+  }
   header.appendChild(actions);
   header.appendChild(el("p", {
     class: "hint",

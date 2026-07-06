@@ -45,7 +45,7 @@ RE_ORDER_BY = re.compile(r'\border\s+by\b', re.IGNORECASE)
 # Clés autorisées dans questions.json (audit anti-fuite).
 ALLOWED_TOP_KEYS = {
     "formatVersion", "tdId", "tdLabel", "title", "intro",
-    "database", "canon", "sections",
+    "database", "canon", "sections", "subjectPdf",
 }
 ALLOWED_QUESTION_KEYS = {
     "type", "id", "num", "statement",
@@ -311,6 +311,8 @@ def audit_no_leak(site_dir, solutions, questions):
     site_texts = {}
     for root, _, files in os.walk(site_dir):
         for fn in files:
+            if fn.lower().endswith(".pdf"):
+                continue  # sujet PDF (binaire, ne contient pas la correction)
             path = os.path.join(root, fn)
             try:
                 site_texts[path] = norm(open(path, encoding="utf-8", errors="ignore").read())
@@ -327,7 +329,7 @@ def audit_no_leak(site_dir, solutions, questions):
                         f"Audit ANTI-FUITE : la requête de {sol['id']} apparaît dans {path}")
 
 
-def emit_site(template_dir, site_dir, schema_sql, insert_sql, questions):
+def emit_site(template_dir, site_dir, schema_sql, insert_sql, questions, pdf_src=None):
     if os.path.exists(site_dir):
         shutil.rmtree(site_dir)
     shutil.copytree(template_dir, site_dir)
@@ -338,6 +340,10 @@ def emit_site(template_dir, site_dir, schema_sql, insert_sql, questions):
         f.write(schema_sql)
     with open(os.path.join(data_dir, "insert.sql"), "w", encoding="utf-8") as f:
         f.write(insert_sql)
+    # PDF du sujet (facultatif) : copié dans le site pour rester accessible même
+    # quand le dépôt Documents sera privé. Seul le SUJET est publié (pas la correction).
+    if pdf_src:
+        shutil.copyfile(pdf_src, os.path.join(site_dir, questions["subjectPdf"]))
     with open(os.path.join(site_dir, "questions.json"), "w", encoding="utf-8") as f:
         json.dump(questions, f, ensure_ascii=False, indent=2)
     # GitHub Pages : désactiver Jekyll (préserve les fichiers commençant par _).
@@ -385,6 +391,11 @@ def main():
     ap.add_argument("--verify-out", default=None)
     ap.add_argument("--db-name", default=None)
     ap.add_argument("--allow-multiple-hashes", action="store_true")
+    ap.add_argument("--pdf", default=None,
+                    help="Chemin du PDF du sujet à copier dans le site (facultatif). "
+                         "Ignoré avec un avertissement si le fichier est absent.")
+    ap.add_argument("--pdf-name", default="sujet.pdf",
+                    help="Nom du PDF dans le site (défaut : sujet.pdf).")
     args = ap.parse_args()
 
     repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -412,8 +423,17 @@ def main():
     questions, solutions, nq = build_questions_json(parsed, conn, meta, args.allow_multiple_hashes)
     conn.close()
 
+    pdf_src = None
+    if args.pdf:
+        if os.path.isfile(args.pdf):
+            questions["subjectPdf"] = args.pdf_name
+            pdf_src = args.pdf
+            log(f"→ Sujet PDF : {args.pdf} → {args.pdf_name}")
+        else:
+            log(f"⚠ PDF introuvable ({args.pdf}) — page générée sans lien vers le sujet")
+
     log(f"→ Émission du site dans {args.output}")
-    emit_site(args.template_dir, args.output, schema_sql, insert_sql, questions)
+    emit_site(args.template_dir, args.output, schema_sql, insert_sql, questions, pdf_src)
 
     log(f"→ Émission du sidecar de vérification dans {verify_dir}")
     emit_verify(verify_dir, solutions)

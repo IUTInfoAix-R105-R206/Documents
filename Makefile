@@ -920,11 +920,21 @@ clean-corrections: $(CLEAN_CORRECTIONS) ## Génère les corrections SQL nettoyé
 NODE ?= node
 WEB_TD_TEMPLATE = $(TEMPLATE_DIR)/web-td
 
+# PDF sujets consommés par les pages web (copiés dans le site + lien « Ouvrir le sujet »).
+# Absents en local (non compilés) → --pdf omis via $(wildcard), la page est générée sans
+# lien (dégradation propre). En CI, l'artefact « td-pdfs » de build.yml les fournit.
+WEB_TD6_PDF          = $(OUTPUT_DIR)/r1.05/td6/td6.pdf
+WEB_TD7_PDF          = $(OUTPUT_DIR)/r1.05/td7/td7.pdf
+WEB_TD1_ALGEBRE_PDF  = $(OUTPUT_DIR)/r1.05/td1/td1.pdf
+WEB_TD2_PDF          = $(OUTPUT_DIR)/r1.05/td2/td2.pdf
+pdf-arg = $(if $(wildcard $(1)),--pdf $(1),)
+
 web-td7: ## Génère le site web du TD7 R1.05 (output/web/td7)
 	$(PYTHON) scripts/generate-web-td.py docs/r1.05/td7/td7-correction.sql \
 		--data-dir docs/shared/data/voyages \
 		--output $(OUTPUT_DIR)/web/td7 --verify-out $(OUTPUT_DIR)/web-verify/td7 \
-		--td-id r1.05-td7 --td-label "R1.05 - TD7" --template-dir $(WEB_TD_TEMPLATE)
+		--td-id r1.05-td7 --td-label "R1.05 - TD7" --template-dir $(WEB_TD_TEMPLATE) \
+		$(call pdf-arg,$(WEB_TD7_PDF))
 
 verify-web-td7: web-td7 ## Vérifie hash Python == hash WASM pour toutes les questions du TD7
 	$(NODE) scripts/verify-web-td.mjs $(OUTPUT_DIR)/web/td7 $(OUTPUT_DIR)/web-verify/td7
@@ -942,7 +952,8 @@ web-td6: ## Génère le site web du TD6 R1.05 (output/web/td6)
 	$(PYTHON) scripts/generate-web-td.py docs/r1.05/td6/td6-correction.sql \
 		--data-dir docs/shared/data/airbase \
 		--output $(OUTPUT_DIR)/web/td6 --verify-out $(OUTPUT_DIR)/web-verify/td6 \
-		--td-id r1.05-td6 --td-label "R1.05 - TD6" --template-dir $(WEB_TD_TEMPLATE)
+		--td-id r1.05-td6 --td-label "R1.05 - TD6" --template-dir $(WEB_TD_TEMPLATE) \
+		$(call pdf-arg,$(WEB_TD6_PDF))
 
 verify-web-td6: web-td6 ## Vérifie hash Python == hash WASM pour toutes les questions du TD6
 	$(NODE) scripts/verify-web-td.mjs $(OUTPUT_DIR)/web/td6 $(OUTPUT_DIR)/web-verify/td6
@@ -962,7 +973,8 @@ web-td1-algebre: ## Génère le site web d'algèbre du TD1 R1.05 (output/web/td1
 		--output $(OUTPUT_DIR)/web/td1-algebre --verify-out $(OUTPUT_DIR)/web-verify/td1-algebre \
 		--td-id r1.05-td1-algebre --td-label "R1.05 - TD1 (algèbre)" \
 		--title "Requêtes avec le langage algébrique" \
-		--manifest docs/r1.05/td1/web-td.json --template-dir $(WEB_TD_TEMPLATE)
+		--manifest docs/r1.05/td1/web-td.json --template-dir $(WEB_TD_TEMPLATE) \
+		$(call pdf-arg,$(WEB_TD1_ALGEBRE_PDF))
 
 verify-web-td1-algebre: web-td1-algebre ## Vérifie hash Python == hash WASM pour le TD1 algèbre
 	$(NODE) scripts/verify-web-td-algebra.mjs $(OUTPUT_DIR)/web/td1-algebre $(OUTPUT_DIR)/web-verify/td1-algebre
@@ -983,7 +995,8 @@ web-td2-immobilier: ## Génère le site d'algèbre du TD2 R1.05 exercice 2 (agen
 		--td-id r1.05-td2-immobilier --td-label "R1.05 - TD2 (agence immobilière)" \
 		--title "Agence immobilière - langage algébrique" \
 		--section-marker "Exercice n° 2" --schema-md docs/r1.05/td2/td2.md \
-		--manifest docs/r1.05/td2/web-td-ex2.json --template-dir $(WEB_TD_TEMPLATE)
+		--manifest docs/r1.05/td2/web-td-ex2.json --template-dir $(WEB_TD_TEMPLATE) \
+		$(call pdf-arg,$(WEB_TD2_PDF))
 
 verify-web-td2-immobilier: web-td2-immobilier ## Vérifie hash Python == hash WASM pour le TD2 immobilier
 	$(NODE) scripts/verify-web-td-algebra.mjs $(OUTPUT_DIR)/web/td2-immobilier $(OUTPUT_DIR)/web-verify/td2-immobilier
@@ -1007,7 +1020,8 @@ web-td2-airbase: ## Génère le site d'algèbre du TD2 R1.05 exercice 1 (Airbase
 		--title "Airbase - langage algébrique" \
 		--section-marker "Exercice n° 1" --schema-md docs/r1.05/td2/td2.md \
 		--schema-extra '$(WEB_TD2_AIRBASE_SCHEMA_EXTRA)' \
-		--manifest docs/r1.05/td2/web-td-ex1.json --template-dir $(WEB_TD_TEMPLATE)
+		--manifest docs/r1.05/td2/web-td-ex1.json --template-dir $(WEB_TD_TEMPLATE) \
+		$(call pdf-arg,$(WEB_TD2_PDF))
 
 verify-web-td2-airbase: web-td2-airbase ## Vérifie hash Python == hash WASM pour le TD2 Airbase
 	$(NODE) scripts/verify-web-td-algebra.mjs $(OUTPUT_DIR)/web/td2-airbase $(OUTPUT_DIR)/web-verify/td2-airbase
