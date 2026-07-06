@@ -19,8 +19,8 @@ import re
 from pathlib import Path
 
 RESOURCE_LABELS = {
-    "r1.05": "R1.05 — Introduction aux bases de données et SQL",
-    "r2.06": "R2.06 — Exploitation d'une base de données",
+    "r1.05": "R1.05 - Introduction aux bases de données et SQL",
+    "r2.06": "R2.06 - Exploitation d'une base de données",
 }
 
 GUIDE_TITLES = {
@@ -251,16 +251,16 @@ def generate_index(titles, pdfs, summary, guides, output_file):
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Bases de données — TD</title>
+  <title>Bases de données - TD</title>
   <style>{CSS}</style>
 </head>
 <body>
-  <h1>Bases de données — Sujets de TD</h1>
+  <h1>Bases de données - Sujets de TD</h1>
   {"".join(sections_html)}
   {guides_section}
   {reports_section}
   {stats_section}
-  <p class="footer">IUT d'Aix-Marseille — Département Informatique</p>
+  <p class="footer">IUT d'Aix-Marseille - Département Informatique</p>
 </body>
 </html>"""
 

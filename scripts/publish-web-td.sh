@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# publish-web-td.sh — publie un site de TD généré dans le dépôt étudiant.
+# publish-web-td.sh - publie un site de TD généré dans le dépôt étudiant.
 #
 # Usage : publish-web-td.sh <site_dir> <repo_dir> [<sous-dossier>]
 #

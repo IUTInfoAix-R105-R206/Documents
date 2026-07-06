@@ -37,7 +37,7 @@ import sys
 # Label question : chiffres + lettre optionnelle (Q3, Q3a, Q12b, etc.)
 QNUM = r'(\d+[a-z]?)'
 
-# Regex pour les lignes QN — essayés dans l'ordre de spécificité décroissante
+# Regex pour les lignes QN - essayés dans l'ordre de spécificité décroissante
 RE_QUESTION_FULL = re.compile(
     r'^--\s+Q' + QNUM + r'\s*-\s*c:(\d+),\s*t:(\d+)'
     r'(?:\s+\(([^)]*)\))?'      # valeur attendue optionnelle entre ()
@@ -365,7 +365,7 @@ def parse_sql(path):
         if m_c and state == 'variant':
             text = m_c.group(1)
             if text.startswith('Version') or text.startswith('V'):
-                # Label de version — le PROMPT qui suit le gère
+                # Label de version - le PROMPT qui suit le gère
                 i += 1
                 continue
             else:

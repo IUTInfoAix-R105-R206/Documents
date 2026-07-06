@@ -1,4 +1,4 @@
-// verify-web-td.mjs — preuve que hash Python (générateur) == hash WASM (navigateur).
+// verify-web-td.mjs - preuve que hash Python (générateur) == hash WASM (navigateur).
 //
 // Rejoue chaque variante de correction (output/web-verify/<td>/solutions.json) à
 // travers les OCTETS LIVRÉS du moteur (output/web/<td>/vendor/sqljs/sql-wasm.wasm)
@@ -132,9 +132,9 @@ for (const sol of solutions) {
     const tag = sol.variants.length > 1 ? `${sol.id} v${v + 1}` : sol.id;
     if (problems.length) {
       fails++;
-      console.log(`${RED}✗${NC} ${tag} — ${problems.join(", ")}`);
+      console.log(`${RED}✗${NC} ${tag} - ${problems.join(", ")}`);
     } else {
-      console.log(`${GREEN}✓${NC} ${tag} — ${ncols}c × ${nrows}r, hash ${sortedHash.slice(0, 10)}${q.orderSensitive ? " (ordonné vérifié)" : ""}`);
+      console.log(`${GREEN}✓${NC} ${tag} - ${ncols}c × ${nrows}r, hash ${sortedHash.slice(0, 10)}${q.orderSensitive ? " (ordonné vérifié)" : ""}`);
     }
   }
 }
@@ -142,9 +142,9 @@ for (const sol of solutions) {
 const nq = solutions.length;
 console.log("");
 if (fails === 0) {
-  console.log(`${GREEN}${nq}/${nq} OK${NC} — ${checks} vérifications, hash Python == hash WASM pour toutes les variantes et fixtures.`);
+  console.log(`${GREEN}${nq}/${nq} OK${NC} - ${checks} vérifications, hash Python == hash WASM pour toutes les variantes et fixtures.`);
   process.exit(0);
 } else {
-  console.log(`${RED}ÉCHEC${NC} — ${fails} divergence(s) sur ${checks} vérifications.`);
+  console.log(`${RED}ÉCHEC${NC} - ${fails} divergence(s) sur ${checks} vérifications.`);
   process.exit(1);
 }

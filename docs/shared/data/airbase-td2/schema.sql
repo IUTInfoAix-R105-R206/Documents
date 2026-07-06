@@ -1,4 +1,4 @@
--- Airbase étendu — Schéma adapté pour PostgreSQL/SQLite (R1.05 TD2, exercice 1)
+-- Airbase étendu - Schéma adapté pour PostgreSQL/SQLite (R1.05 TD2, exercice 1)
 -- Airbase (PILOTE, AVION, VOL) + relations FORMATION et STAGE.
 -- Nommage en MAJUSCULES (NUMPIL, VILLE_DEP, TYPE_F...) conforme au corrigé du TD2.
 

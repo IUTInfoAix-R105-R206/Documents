@@ -1,4 +1,4 @@
-# Bases de données — Sources des TD
+# Bases de données - Sources des TD
 
 [![Build PDFs](https://github.com/IUTInfoAix-R105-R206/Documents/actions/workflows/build.yml/badge.svg)](https://github.com/IUTInfoAix-R105-R206/Documents/actions/workflows/build.yml)
 [![Test SQL Corrections](https://github.com/IUTInfoAix-R105-R206/Documents/actions/workflows/test-sql.yml/badge.svg)](https://github.com/IUTInfoAix-R105-R206/Documents/actions/workflows/test-sql.yml)
@@ -6,8 +6,8 @@
 Ce dépôt contient les sources des sujets de travaux dirigés des cours de
 bases de données de l'IUT d'Aix-Marseille :
 
-- **R1.05** — Introduction aux bases de données et SQL
-- **R2.06** — Exploitation d'une base de données
+- **R1.05** - Introduction aux bases de données et SQL
+- **R2.06** - Exploitation d'une base de données
 
 Les sujets sont écrits en **Markdown** et compilés en **PDF** via
 [Pandoc](https://pandoc.org/) + LaTeX, permettant un workflow collaboratif
@@ -59,7 +59,7 @@ Il suffit de Docker et de VS Code pour démarrer.
 
 ### Tester les corrections SQL
 
-Les variables d'environnement sont pré-configurées — les trois SGBD
+Les variables d'environnement sont pré-configurées - les trois SGBD
 fonctionnent directement :
 
 ```bash
@@ -109,7 +109,7 @@ correspondant, et pousse les deux sur `origin`.
 
 ```
 ├── docs/
-│   ├── r1.05/                        # R1.05 — Introduction aux BD et SQL
+│   ├── r1.05/                        # R1.05 - Introduction aux BD et SQL
 │   │   ├── td1/                      #   Algèbre relationnelle
 │   │   ├── td2/                      #   Concepts relationnels
 │   │   ├── td3/                      #   DF et normalisation
@@ -117,7 +117,7 @@ correspondant, et pousse les deux sur `origin`.
 │   │   ├── td5/                      #   Conception E/A
 │   │   ├── td6/                      #   Interrogation SQL (BD Airbase)
 │   │   └── td7/                      #   SQL interprété (BD Voyages)
-│   ├── r2.06/                        # R2.06 — Exploitation d'une BD
+│   ├── r2.06/                        # R2.06 - Exploitation d'une BD
 │   │   ├── td1/                      #   Opérateurs ensemblistes (BD Voyages)
 │   │   ├── td2/                      #   Jointures externes (BD Voyages)
 │   │   ├── td3/                      #   Interrogations SQL (BD Gestion péda.)
@@ -273,4 +273,4 @@ processus. En résumé :
 
 Les contenus pédagogiques sont sous licence
 [CC BY-NC-SA](https://creativecommons.org/licenses/by-nc-sa/4.0/)
-— Mickaël Martin Nevot.
+- Mickaël Martin Nevot.

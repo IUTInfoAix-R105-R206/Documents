@@ -220,11 +220,11 @@ vous modifiez des fichiers dans `docs/`, `templates/` ou le `Makefile`.
 Déclenché quand vous modifiez des fichiers `.sql` ou les données de test.
 Les vérifications sont exécutées dans cet ordre :
 
-1. **Lint SQL** — Vérifie le style des fichiers SQL avec SQLFluff
-2. **Test PostgreSQL** — Exécute les corrections sur PostgreSQL
-3. **Test SQLite** — Exécute les corrections sur SQLite
-4. **Test Oracle** — Exécute les corrections sur Oracle (SGBD de référence)
-5. **Gate Oracle** — **Si Oracle échoue, la PR est bloquée**
+1. **Lint SQL** - Vérifie le style des fichiers SQL avec SQLFluff
+2. **Test PostgreSQL** - Exécute les corrections sur PostgreSQL
+3. **Test SQLite** - Exécute les corrections sur SQLite
+4. **Test Oracle** - Exécute les corrections sur Oracle (SGBD de référence)
+5. **Gate Oracle** - **Si Oracle échoue, la PR est bloquée**
 
 > **Important :** Oracle est le SGBD cible du cours. Les corrections sont
 > écrites en syntaxe Oracle. Des différences avec PostgreSQL ou SQLite sont

@@ -1,4 +1,4 @@
--- Airbase — Schéma adapté pour PostgreSQL/SQLite
+-- Airbase - Schéma adapté pour PostgreSQL/SQLite
 -- Base de données de gestion simplifiée d'une compagnie aérienne
 
 DROP TABLE IF EXISTS Vol;

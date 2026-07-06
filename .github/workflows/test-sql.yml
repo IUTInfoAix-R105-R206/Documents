@@ -195,7 +195,7 @@ jobs:
           if [ -n "$FAILURES" ]; then
             echo "::error::Des requêtes Oracle ont échoué :"
             echo "$FAILURES" | while IFS=';' read -r td label dbms st ecols erows acols arows; do
-              echo "::error::  $td $label — attendu ${ecols}c × ${erows}r, reçu ${acols}c × ${arows}r"
+              echo "::error::  $td $label - attendu ${ecols}c × ${erows}r, reçu ${acols}c × ${arows}r"
             done
             exit 1
           fi

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""test-sql.py — Valide les corrections SQL contre le jeu de données de test.
+"""test-sql.py - Valide les corrections SQL contre le jeu de données de test.
 
 Usage: python3 scripts/test-sql.py [DBMS] [--report FILE] [--td TD_NUM]
 
@@ -566,7 +566,7 @@ def test_block(engine: DBEngine, block: TestBlock) -> TestResult:
         return TestResult(
             block.td_id, block.label, "fail",
             exp_cols, exp_rows, actual_cols, actual_rows,
-            f"attendu: {expected_str}, reçu: {actual_str} — {detail_str}",
+            f"attendu: {expected_str}, reçu: {actual_str} - {detail_str}",
         )
 
 
@@ -576,13 +576,13 @@ def test_block(engine: DBEngine, block: TestBlock) -> TestResult:
 def log_result(r: TestResult):
     """Affiche un résultat de test sur la console."""
     if r.status == "pass":
-        print(f"  {GREEN}✓{NC} {r.label} — {r.message}")
+        print(f"  {GREEN}✓{NC} {r.label} - {r.message}")
     elif r.status == "fail":
-        print(f"  {RED}✗{NC} {r.label} — {r.message}")
+        print(f"  {RED}✗{NC} {r.label} - {r.message}")
     elif r.status == "error":
-        print(f"  {RED}•{NC} {r.label} — {r.message}")
+        print(f"  {RED}•{NC} {r.label} - {r.message}")
     elif r.status == "skip":
-        print(f"  {YELLOW}⊘{NC} {r.label} — {r.message}")
+        print(f"  {YELLOW}⊘{NC} {r.label} - {r.message}")
 
 
 # ── Rapport CSV ──────────────────────────────────────────────────────────────
@@ -655,7 +655,7 @@ def main():
 
     # --- Bannière ---
     print("╔══════════════════════════════════════════════════════╗")
-    print(f"║  Test des corrections SQL — SGBD: {dbms_name}             ")
+    print(f"║  Test des corrections SQL - SGBD: {dbms_name}             ")
     print("╚══════════════════════════════════════════════════════╝")
 
     # --- Rapport CSV ---
@@ -693,7 +693,7 @@ def main():
         if not engine.has_data_files(current_data_dir):
             print()
             print(f"=== {YELLOW}Skipping: {td_id}"
-                  f" — pas de données pour {dbms_name}{NC} ===")
+                  f" - pas de données pour {dbms_name}{NC} ===")
             continue
 
         # Recharger les données si on change de répertoire
@@ -720,7 +720,7 @@ def main():
                 pass_count += 1
             elif result.status in ("fail", "error"):
                 fail_count += 1
-                failed_labels.append(result.label + " — " + result.message)
+                failed_labels.append(result.label + " - " + result.message)
             elif result.status == "skip":
                 skip_count += 1
 

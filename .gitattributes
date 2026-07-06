@@ -13,7 +13,7 @@
 *.yaml      text eol=lf
 Makefile    text eol=lf
 
-# Binaires — pas de conversion
+# Binaires - pas de conversion
 *.pdf       binary
 *.png       binary
 *.docx      binary

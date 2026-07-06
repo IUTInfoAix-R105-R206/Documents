@@ -1,4 +1,4 @@
-// app.js — interface du TP SQL en ligne.
+// app.js - interface du TP SQL en ligne.
 
 import { initEngine, runQuery } from "./engine.js";
 import { hashResult } from "./canon.js";
@@ -66,7 +66,7 @@ function renderHeader(root) {
 
   const actions = el("div", { class: "header-actions" }, [nameInput, exportBtn, resetBtn]);
   const titleRow = el("div", { class: "title-row" }, [
-    el("h1", { text: `${questions.tdLabel} — ${questions.title}` }),
+    el("h1", { text: `${questions.tdLabel} - ${questions.title}` }),
     progress,
   ]);
 
@@ -115,7 +115,7 @@ async function renderSchemaPanel(root) {
   }
 }
 
-// Rappel de syntaxe (mode algèbre) — panneau repliable pour les étudiants.
+// Rappel de syntaxe (mode algèbre) - panneau repliable pour les étudiants.
 function renderSyntaxPanel(root) {
   const details = el("details", { class: "schema-panel syntax-panel" });
   details.appendChild(el("summary", { text: "Rappel : syntaxe de l'algèbre relationnelle" }));
@@ -158,7 +158,7 @@ function renderHowItWorks(root) {
        ${isAlg ? "Elle est traduite en SQL et exécutée" : "Elle est exécutée"} sur la base,
        et le résultat s'affiche dans une table.</p>
     <p>Un retour automatique compare votre résultat au résultat attendu (nombre de colonnes,
-       de lignes et contenu) et affiche <strong>✓ Résultat exact</strong> si tout correspond —
+       de lignes et contenu) et affiche <strong>✓ Résultat exact</strong> si tout correspond -
        <em>sans jamais afficher la correction</em>.</p>
     <p>La base est <strong>réinitialisée à chaque exécution</strong> : vous pouvez tout tester
        sans risque. Vos réponses restent dans ce navigateur ; le bouton
@@ -466,7 +466,7 @@ function renderTheory(container, question) {
   const card = el("section", { class: "question-card question-theory", attrs: { id: question.id } });
   card.appendChild(el("div", { class: "q-head" }, [el("span", { class: "q-num", text: "Q" + question.num })]));
   card.appendChild(el("p", { class: "q-statement", text: question.statement }));
-  card.appendChild(el("p", { class: "q-theory-note", text: "Question de cours — pas d'auto-évaluation." }));
+  card.appendChild(el("p", { class: "q-theory-note", text: "Question de cours - pas d'auto-évaluation." }));
   container.appendChild(card);
 }
 

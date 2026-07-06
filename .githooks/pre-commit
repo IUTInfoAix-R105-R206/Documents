@@ -4,7 +4,7 @@
 
 # Vérifier que sqlfluff est installé
 if ! command -v sqlfluff >/dev/null 2>&1; then
-    echo "[pre-commit] sqlfluff non trouvé — hook ignoré (pip install sqlfluff)"
+    echo "[pre-commit] sqlfluff non trouvé - hook ignoré (pip install sqlfluff)"
     exit 0
 fi
 

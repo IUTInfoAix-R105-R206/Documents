@@ -1,5 +1,5 @@
 {
-  "name": "Bases de données — Environnement de développement",
+  "name": "Bases de données - Environnement de développement",
   "dockerComposeFile": "docker-compose.yml",
   "service": "dev",
   "workspaceFolder": "/workspace",
@@ -62,7 +62,7 @@
         "sqltools.connections": [
           {
             "previewLimit": 50,
-            "name": "PostgreSQL — gestion_pedagogique",
+            "name": "PostgreSQL - gestion_pedagogique",
             "driver": "PostgreSQL",
             "server": "postgres",
             "port": 5432,
@@ -72,13 +72,13 @@
           },
           {
             "previewLimit": 50,
-            "name": "SQLite — gestion_pedagogique",
+            "name": "SQLite - gestion_pedagogique",
             "driver": "SQLite",
             "database": "/workspace/docs/shared/data/gestion-pedagogique/gestion_pedagogique.db"
           },
           {
             "previewLimit": 50,
-            "name": "Oracle — FREEPDB1",
+            "name": "Oracle - FREEPDB1",
             "driver": "Oracle",
             "server": "oracle",
             "port": 1521,

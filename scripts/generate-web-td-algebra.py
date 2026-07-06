@@ -3,7 +3,7 @@
 
 L'étudiant écrit une expression en algèbre relationnelle (notation du cours) ;
 le navigateur la compile en SQL (algebra.js) et l'exécute (sql.js), puis compare
-un hash SHA-256 du résultat au hash attendu — précalculé ici sans jamais embarquer
+un hash SHA-256 du résultat au hash attendu - précalculé ici sans jamais embarquer
 la correction.
 
 Étapes :
@@ -417,7 +417,7 @@ def main():
             pdf_src = args.pdf
             log(f"→ Sujet PDF : {args.pdf} → {args.pdf_name}")
         else:
-            log(f"⚠ PDF introuvable ({args.pdf}) — page générée sans lien vers le sujet")
+            log(f"⚠ PDF introuvable ({args.pdf}) - page générée sans lien vers le sujet")
 
     log(f"→ Émission du site dans {args.output}")
     emit_site(args.template_dir, args.output, schema_sql, insert_sql, questions_json, pdf_src)
@@ -429,7 +429,7 @@ def main():
     log("→ Audit anti-fuite")
     audit_no_leak(args.output, solutions, questions_json)
 
-    log(f"✓ OK — {nq} questions générées, {len(theory)} question(s) de cours, "
+    log(f"✓ OK - {nq} questions générées, {len(theory)} question(s) de cours, "
         f"{len(drops)} drop(s). Site : {args.output}")
 
 

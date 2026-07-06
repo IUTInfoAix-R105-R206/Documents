@@ -5,8 +5,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Projet
 
 Sources Markdown des sujets de TD des cours de bases de données de l'IUT d'Aix-Marseille :
-- **R1.05** — Introduction aux bases de données et SQL (7 TD)
-- **R2.06** — Exploitation d'une base de données (6 TD)
+- **R1.05** - Introduction aux bases de données et SQL (7 TD)
+- **R2.06** - Exploitation d'une base de données (6 TD)
 
 Les sujets sont compilés en PDF via Pandoc + LaTeX. Le but est de remplacer les sources Word par du Markdown versionné sous Git, avec CI pour la compilation PDF et la validation des corrections SQL.
 
@@ -108,7 +108,7 @@ Q1
 
 Les figures flottent naturellement (comportement LaTeX par défaut). Ne pas forcer leur placement.
 
-**Référencer une figure dans le texte** — utiliser du LaTeX brut inline avec la syntaxe `{=latex}` pour que `~` et `\ref` soient interprétés correctement :
+**Référencer une figure dans le texte** - utiliser du LaTeX brut inline avec la syntaxe `{=latex}` pour que `~` et `\ref` soient interprétés correctement :
 
 ```markdown
 La figure est présentée en `figure~\ref{fig:mcd}`{=latex}.
@@ -120,7 +120,7 @@ La figure est présentée en `figure~\ref{fig:mcd}`{=latex}.
 ![Légende](figures/fichier.pdf){#fig:id width=90%}
 ```
 
-**Figure large en paysage** — utiliser un bloc LaTeX brut directement dans le Markdown :
+**Figure large en paysage** - utiliser un bloc LaTeX brut directement dans le Markdown :
 
 ```markdown
 \begin{sidewaysfigure}
@@ -213,20 +213,20 @@ Passée à Pandoc via `--variable=version:$(GIT_VERSION)`, elle écrase la valeu
 Le template LaTeX reproduit l'apparence d'un document professionnel :
 - **Marges** : `body={160mm,250mm}, left=25mm, top=20mm`
 - **Questions (listes de définitions)** : `style=sameline` pour que le numéro apparaisse sur la même ligne
-- **Figures** : comportement flottant LaTeX naturel (`tbp`) — ne pas forcer avec `H` (crée des espaces blancs)
+- **Figures** : comportement flottant LaTeX naturel (`tbp`) - ne pas forcer avec `H` (crée des espaces blancs)
 - **Figures larges** : `sidewaysfigure` (package `rotating`) pour les diagrammes en paysage (MCD, hiérarchie)
 - **Espacements** : `\parskip=6pt`, `\parindent=0pt` (style sans indentation)
 - **Tableaux** : police `\small`, `\arraystretch=1.3` pour meilleure lisibilité
 - **Captions** : police small, label en gras, espacement réduit
 
 ### Figures TikZ et packages personnalisés
-- `tikz-er2.sty` et `pgf-umlcd.sty` sont dans `templates/` — chargés via `TEXINPUTS`
+- `tikz-er2.sty` et `pgf-umlcd.sty` sont dans `templates/` - chargés via `TEXINPUTS`
 - La règle Makefile pour les figures standalone définit `TEXINPUTS="$(CURDIR)/$(TEMPLATE_DIR):"` avant `pdflatex`
 - Le MCD utilise `tikz-er2` avec associations en **ellipses** (défaut tikz-er2, convention préférée)
 
-### MCD — conventions de nommage et placement des cardinalités
+### MCD - conventions de nommage et placement des cardinalités
 - **Attributs** : noms camelCase du schéma relationnel (`numEt`, `heureCMPrev`, `coefCC`…), pas les anciens noms `H_Cours_Prev`
-- **Cardinalités** : placées via des **ancres de bord** des entités (ex: `mat.south`, `etud.north`, `mat.315`) plutôt que le centre, pour que `pos=0.1` tombe dans l'espace entre entité et association — les valeurs `pos` sont ajustées manuellement par lien
+- **Cardinalités** : placées via des **ancres de bord** des entités (ex: `mat.south`, `etud.north`, `mat.315`) plutôt que le centre, pour que `pos=0.1` tombe dans l'espace entre entité et association - les valeurs `pos` sont ajustées manuellement par lien
 
 ### Makefile
 Les règles de compilation spécifient explicitement tous les paramètres Pandoc au lieu de réutiliser `PANDOC_OPTS`, pour permettre l'ajustement correct des chemins relatifs lors du `cd docs/r2.06/td3`.
@@ -269,14 +269,14 @@ Toutes les corrections du TD3 R2.06 (Q1-Q26) ont été validées avec les résul
 | Ressource | TD1 | TD2 | TD3 | TD4 | TD5 | TD6 | TD7 |
 |-----------|-----|-----|-----|-----|-----|-----|-----|
 | R1.05     | ✅  | ✅  | ✅  | ✅  | ✅  | ✅  | ✅  |
-| R2.06     | ✅  | ✅  | ✅  | ✅  | ✅  | ✅  | —   |
+| R2.06     | ✅  | ✅  | ✅  | ✅  | ✅  | ✅  | -   |
 
 ### Corrections
 
 | Ressource | TD1 | TD2 | TD3 | TD4 | TD5 | TD6 | TD7 |
 |-----------|-----|-----|-----|-----|-----|-----|-----|
-| R1.05     | ✅ algèbre | ✅ algèbre | — (DF/normalisation) | — (modèle E/A) | — (modèle E/A) | ✅ SQL (c:t complets) | ✅ SQL |
-| R2.06     | ✅ SQL | ✅ SQL | ✅ SQL (validé Q1-Q26) | ✅ SQL | ✅ SQL | ✅ SQL | — |
+| R1.05     | ✅ algèbre | ✅ algèbre | - (DF/normalisation) | - (modèle E/A) | - (modèle E/A) | ✅ SQL (c:t complets) | ✅ SQL |
+| R2.06     | ✅ SQL | ✅ SQL | ✅ SQL (validé Q1-Q26) | ✅ SQL | ✅ SQL | ✅ SQL | - |
 
 Notes :
 - R1.05 TD1-TD2 : corrections en algèbre relationnelle (fichiers Markdown, pas de SQL)

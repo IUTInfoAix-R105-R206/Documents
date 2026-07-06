@@ -1,4 +1,4 @@
--- schema.sql — Schéma de la base de données "Gestion pédagogique"
+-- schema.sql - Schéma de la base de données "Gestion pédagogique"
 -- Version PostgreSQL (adaptée depuis le script Oracle original)
 -- Source Oracle : gestion-pedagogique-oracle.sql
 

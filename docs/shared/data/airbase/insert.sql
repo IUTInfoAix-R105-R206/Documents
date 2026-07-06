@@ -1,4 +1,4 @@
--- Airbase — Données de test pour PostgreSQL/SQLite
+-- Airbase - Données de test pour PostgreSQL/SQLite
 -- Heures stockées au format 'HH:MM' (compatible TIME PostgreSQL et TEXT SQLite)
 
 -- Table Pilote

@@ -8,7 +8,7 @@ même résultat de requête, afin que le générateur (Python + sqlite3) puisse
 précalculer les hashes attendus et que le navigateur (sql.js WASM) puisse les
 vérifier sans jamais recevoir la correction.
 
-Contrat (voir aussi canon.js — toute modification doit être répercutée) :
+Contrat (voir aussi canon.js - toute modification doit être répercutée) :
 
 Séparateurs (échappés dans les valeurs texte, ne peuvent donc pas apparaître) :
     US = "\\x1f"  séparateur de cellules

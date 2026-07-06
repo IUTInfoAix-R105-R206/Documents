@@ -1,4 +1,4 @@
--- Airbase étendu — données de test (R1.05 TD2, exercice 1)
+-- Airbase étendu - données de test (R1.05 TD2, exercice 1)
 -- Valeurs en MAJUSCULES sans diacritiques (convention du cours). Types d'appareil : A320, B747, ATR.
 -- Jeu conçu pour que les divisions aient des réponses non triviales :
 --   - l'avion 1 (A320) est piloté par TOUS les pilotes (Q4) ;

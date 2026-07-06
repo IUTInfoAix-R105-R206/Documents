@@ -1,4 +1,4 @@
-// verify-web-td-algebra.mjs — preuve que le compilateur+hash LIVRÉ reproduit les
+// verify-web-td-algebra.mjs - preuve que le compilateur+hash LIVRÉ reproduit les
 // hashes de questions.json (chemin navigateur).
 //
 // Rejoue chaque bloc de référence (solutions.json) à travers le algebra.js +
@@ -65,10 +65,10 @@ for (const sol of solutions) {
       if (nrows !== q.expectedRows) problems.push(`lignes ${nrows}≠${q.expectedRows}`);
       if (!q.hashesSorted.includes(h)) problems.push(`hash ${h.slice(0, 10)} absent`);
       const tag = sol.blocks.length > 1 ? `${sol.id} v${v + 1}` : sol.id;
-      if (problems.length) { fails++; console.log(`${RED}✗${NC} ${tag} — ${problems.join(", ")}`); }
-      else console.log(`${GREEN}✓${NC} ${tag} — ${ncols}c × ${nrows}r, hash ${h.slice(0, 10)}`);
+      if (problems.length) { fails++; console.log(`${RED}✗${NC} ${tag} - ${problems.join(", ")}`); }
+      else console.log(`${GREEN}✓${NC} ${tag} - ${ncols}c × ${nrows}r, hash ${h.slice(0, 10)}`);
     } catch (e) {
-      fails++; console.log(`${RED}✗${NC} ${sol.id} v${v + 1} — compile/exec: ${e.message || e}`);
+      fails++; console.log(`${RED}✗${NC} ${sol.id} v${v + 1} - compile/exec: ${e.message || e}`);
     }
   }
 }
@@ -76,9 +76,9 @@ for (const sol of solutions) {
 const nq = solutions.length;
 console.log("");
 if (fails === 0) {
-  console.log(`${GREEN}${nq}/${nq} OK${NC} — ${checks} vérifications, compilateur+hash LIVRÉ == questions.json.`);
+  console.log(`${GREEN}${nq}/${nq} OK${NC} - ${checks} vérifications, compilateur+hash LIVRÉ == questions.json.`);
   process.exit(0);
 } else {
-  console.log(`${RED}ÉCHEC${NC} — ${fails} divergence(s) sur ${checks} vérifications.`);
+  console.log(`${RED}ÉCHEC${NC} - ${fails} divergence(s) sur ${checks} vérifications.`);
   process.exit(1);
 }

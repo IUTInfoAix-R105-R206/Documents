@@ -1,4 +1,4 @@
--- Agence immobilière — données de test (R1.05 TD2, exercice 2)
+-- Agence immobilière - données de test (R1.05 TD2, exercice 2)
 -- Valeurs en MAJUSCULES sans diacritiques (convention du cours).
 -- Jeu conçu pour que les requêtes aient des réponses non triviales :
 --   - MARTIN JEAN (proprio 1) possède les 3 types d'appartements (division Q18) ;

@@ -48,8 +48,8 @@ STATUS_ICONS = {
 }
 
 RESOURCE_LABELS = {
-    "r1.05": "R1.05 — Introduction aux bases de données et SQL",
-    "r2.06": "R2.06 — Exploitation d'une base de données",
+    "r1.05": "R1.05 - Introduction aux bases de données et SQL",
+    "r2.06": "R2.06 - Exploitation d'une base de données",
 }
 
 CSS = """\
@@ -232,7 +232,7 @@ def generate_table_html(all_labels, reports_data):
 
     rows_html = []
     for label in all_labels:
-        expected = "—"
+        expected = "-"
         for _dbms, data in reports_data:
             if label in data:
                 e = data[label]
@@ -245,7 +245,7 @@ def generate_table_html(all_labels, reports_data):
             if label in data:
                 cells += cell_html(data[label])
             else:
-                cells += '<td class="missing">—</td>'
+                cells += '<td class="missing">-</td>'
         rows_html.append(f"<tr>{cells}</tr>")
 
     return (
@@ -296,7 +296,7 @@ def generate_global_report(reports, output_file=None):
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rapport SQL — Corrections</title>
+  <title>Rapport SQL - Corrections</title>
   <style>{CSS}</style>
 </head>
 <body>
@@ -332,7 +332,7 @@ def generate_td_report_html(td_id, title, reports_data, now):
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rapport SQL — {title}</title>
+  <title>Rapport SQL - {title}</title>
   <style>{CSS}</style>
 </head>
 <body>
@@ -432,7 +432,7 @@ def generate_report_index_html(td_order, summary, dbms_names, now, titles=None):
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rapports SQL — Index</title>
+  <title>Rapports SQL - Index</title>
   <style>{CSS}</style>
 </head>
 <body>

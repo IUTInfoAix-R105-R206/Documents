@@ -4,7 +4,7 @@
 Le site permet aux étudiants de répondre aux questions du TD directement dans le
 navigateur : sql.js exécute leurs requêtes côté client, le résultat s'affiche
 dans une table, et un retour automatique compare un hash SHA-256 du résultat au
-hash attendu — **précalculé ici sans jamais embarquer la correction**.
+hash attendu - **précalculé ici sans jamais embarquer la correction**.
 
 Étapes :
     1. Parse le fichier de correction annoté (module `td_correction`).
@@ -19,7 +19,7 @@ hash attendu — **précalculé ici sans jamais embarquer la correction**.
 
 Usage :
     generate-web-td.py CORRECTION.sql --data-dir DIR --output DIR
-        --td-id r1.05-td7 --td-label "R1.05 — TD7"
+        --td-id r1.05-td7 --td-label "R1.05 - TD7"
         [--template-dir templates/web-td] [--verify-out DIR]
         [--db-name NAME] [--allow-multiple-hashes]
 """
@@ -221,7 +221,7 @@ def process_question(conn, q, allow_multiple):
                     hashes_sorted.append(h)
             else:
                 raise GenError(
-                    f"Q{num} : variantes divergentes (hash trié différent) — "
+                    f"Q{num} : variantes divergentes (hash trié différent) - "
                     f"utilisez --allow-multiple-hashes si intentionnel")
 
     entry = {
@@ -263,7 +263,7 @@ def build_questions_json(parsed, conn, meta, allow_multiple):
             if t in ("instruction", "text"):
                 items_out.append({"type": t, "text": item["text"]})
             elif t in ("remark", "remark_teacher"):
-                continue  # jamais dans le sujet — non exposé aux étudiants
+                continue  # jamais dans le sujet - non exposé aux étudiants
             elif t == "question":
                 entry, solution = process_question(conn, item, allow_multiple)
                 items_out.append(entry)
@@ -333,7 +333,7 @@ def emit_site(template_dir, site_dir, schema_sql, insert_sql, questions, pdf_src
     if os.path.exists(site_dir):
         shutil.rmtree(site_dir)
     shutil.copytree(template_dir, site_dir)
-    # Les données SQLite-propres (filtrées) — le navigateur n'a pas de logique de compat.
+    # Les données SQLite-propres (filtrées) - le navigateur n'a pas de logique de compat.
     data_dir = os.path.join(site_dir, "data")
     os.makedirs(data_dir, exist_ok=True)
     with open(os.path.join(data_dir, "schema.sql"), "w", encoding="utf-8") as f:
@@ -430,7 +430,7 @@ def main():
             pdf_src = args.pdf
             log(f"→ Sujet PDF : {args.pdf} → {args.pdf_name}")
         else:
-            log(f"⚠ PDF introuvable ({args.pdf}) — page générée sans lien vers le sujet")
+            log(f"⚠ PDF introuvable ({args.pdf}) - page générée sans lien vers le sujet")
 
     log(f"→ Émission du site dans {args.output}")
     emit_site(args.template_dir, args.output, schema_sql, insert_sql, questions, pdf_src)
@@ -441,7 +441,7 @@ def main():
     log("→ Audit anti-fuite")
     audit_no_leak(args.output, solutions, questions)
 
-    log(f"✓ OK — {nq} questions générées, site prêt dans {args.output}")
+    log(f"✓ OK - {nq} questions générées, site prêt dans {args.output}")
 
 
 if __name__ == "__main__":

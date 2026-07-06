@@ -1,4 +1,4 @@
--- insert.sql — Jeu de données "Gestion pédagogique"
+-- insert.sql - Jeu de données "Gestion pédagogique"
 -- Extrait automatiquement du script Oracle original
 -- Source : gestion-pedagogique-oracle.sql
 

@@ -1,4 +1,4 @@
--- Agence immobilière — Schéma adapté pour PostgreSQL/SQLite (R1.05 TD2, exercice 2)
+-- Agence immobilière - Schéma adapté pour PostgreSQL/SQLite (R1.05 TD2, exercice 2)
 -- Gestion de propriétaires, locataires et appartements.
 
 DROP TABLE IF EXISTS LOCATAIRE;

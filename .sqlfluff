@@ -2,24 +2,24 @@
 processes = -1
 # Dialecte principal du projet (syntaxe Oracle pour les corrections SQL)
 dialect = oracle
-# Largeur max des lignes — les commentaires descriptifs des questions sont souvent longs
+# Largeur max des lignes - les commentaires descriptifs des questions sont souvent longs
 max_line_length = 250
 # Limite pour les fichiers volumineux (fichiers d'insertion de données)
 large_file_skip_byte_limit = 50000
 
 # Règles désactivées (non pertinentes pour des corrections SQL pédagogiques) :
 #
-#   CP02 (capitalisation.identifiers) — le schéma utilise le camelCase (numEt, moyTest, coefCC…)
-#   AL04 (aliasing.unique.table)      — alias de table dupliqué entre CTE et requête principale (faux positifs fréquents)
-#   AL05 (aliasing.unused)            — alias de table non utilisé dans le SELECT (toléré pour clarté des jointures)
-#   LT09 (layout.select_targets)      — SELECT col1, col2 sur une ligne autorisé pour les SELECT simples
-#   ST05 (structure.subquery)          — sous-requêtes IN sans qualification (pattern standard enseigné)
-#   RF02 (references.qualification)   — qualification non ambiguë tolérée ; promue dans le guide sans être imposée
-#   AM04 (ambiguous.column_count)     — SELECT * autorisé dans EXISTS et quand l'exercice le demande
-#   CV12 (convention.join_condition)  — jointures dans le WHERE enseignées comme « version prédicative »
-#   AM08 (ambiguous.join_condition)   — jointures implicites (produit cartésien + WHERE) font partie du programme
-#   ST06 (structure.column_order)     — l'ordre wildcards/simples/agrégats n'est pas pédagogiquement pertinent
-#   CV08 (convention.left_join)      — RIGHT JOIN enseigné comme alternative pédagogique au LEFT JOIN
+#   CP02 (capitalisation.identifiers) - le schéma utilise le camelCase (numEt, moyTest, coefCC…)
+#   AL04 (aliasing.unique.table)      - alias de table dupliqué entre CTE et requête principale (faux positifs fréquents)
+#   AL05 (aliasing.unused)            - alias de table non utilisé dans le SELECT (toléré pour clarté des jointures)
+#   LT09 (layout.select_targets)      - SELECT col1, col2 sur une ligne autorisé pour les SELECT simples
+#   ST05 (structure.subquery)          - sous-requêtes IN sans qualification (pattern standard enseigné)
+#   RF02 (references.qualification)   - qualification non ambiguë tolérée ; promue dans le guide sans être imposée
+#   AM04 (ambiguous.column_count)     - SELECT * autorisé dans EXISTS et quand l'exercice le demande
+#   CV12 (convention.join_condition)  - jointures dans le WHERE enseignées comme « version prédicative »
+#   AM08 (ambiguous.join_condition)   - jointures implicites (produit cartésien + WHERE) font partie du programme
+#   ST06 (structure.column_order)     - l'ordre wildcards/simples/agrégats n'est pas pédagogiquement pertinent
+#   CV08 (convention.left_join)      - RIGHT JOIN enseigné comme alternative pédagogique au LEFT JOIN
 exclude_rules = capitalisation.identifiers, aliasing.unique.table, aliasing.unused, layout.select_targets, structure.subquery, references.qualification, ambiguous.column_count, convention.join_condition, ambiguous.join_condition, structure.column_order, convention.left_join
 
 # ── Indentation ────────────────────────────────────────────────────────────────

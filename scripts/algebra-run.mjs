@@ -1,11 +1,11 @@
-// algebra-run.mjs — helper Node du générateur d'algèbre.
+// algebra-run.mjs - helper Node du générateur d'algèbre.
 //
 // Lit un job JSON sur stdin, construit une base SQLite (sql.js) depuis le schéma
 // et les données fournis, puis pour chaque bloc d'algèbre : compile via algebra.js,
 // exécute, et calcule le hash canonique via canon.js. Renvoie un JSON sur stdout.
 //
 // algebra.js + canon.js + sql.js sont chargés depuis --web-root (défaut :
-// templates/web-td) — mêmes fichiers qu'au navigateur.
+// templates/web-td) - mêmes fichiers qu'au navigateur.
 //
 // Job (stdin) : { schema, insert, questions: [ { id, blocks: [algebraText,...] } ] }
 // Sortie (stdout) : { catalog, results: [ { id, blocks: [ {ncols,nrows,hashSorted,error?} ] } ] }
