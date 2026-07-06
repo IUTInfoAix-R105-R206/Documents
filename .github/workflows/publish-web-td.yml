@@ -1,0 +1,99 @@
+# .github/workflows/publish-web-td.yml
+# Publie automatiquement les pages web des TD dans leurs dépôts étudiants dès qu'un
+# push sur main modifie ce qui les compose (corrections, données, template, scripts).
+# Inspiré du dépôt classroom-sync (sync config-driven via PAT cross-dépôt).
+#
+# PRÉ-REQUIS (une fois) : créer un secret « PUBLISH_TOKEN » dans ce dépôt
+# (Settings > Secrets and variables > Actions), contenant un jeton d'accès (PAT)
+# autorisé en écriture (Contents: write) sur les dépôts
+# IUTInfoAix-R105/TD1, /TD2, /TD6, /TD7 :
+#   - PAT classique avec le scope « repo », OU
+#   - PAT fine-grained limité à ces dépôts avec « Contents: Read and write ».
+# Sans ce secret, le job échoue avec un message explicite.
+#
+# Chaque page publiée déclenche le workflow de déploiement Pages de son dépôt.
+
+name: Publish web TD pages
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry-run (ne rien pousser, juste rapporter les changements)"
+        type: boolean
+        default: false
+
+  push:
+    branches: [main]
+    paths:
+      - 'docs/r1.05/td6/td6-correction.sql'
+      - 'docs/r1.05/td7/td7-correction.sql'
+      - 'docs/r1.05/td1/**'
+      - 'docs/r1.05/td2/**'
+      - 'docs/shared/data/**'
+      - 'scripts/**'
+      - 'templates/web-td/**'
+      - 'Makefile'
+      - '.github/workflows/publish-web-td.yml'
+
+permissions:
+  contents: read
+
+# Une seule publication à la fois (évite les pushs concurrents vers un même dépôt).
+concurrency:
+  group: publish-web-td
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Vérifier la présence du secret PUBLISH_TOKEN
+        env:
+          PUBLISH_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
+        run: |
+          if [ -z "$PUBLISH_TOKEN" ]; then
+            echo "::error::Secret PUBLISH_TOKEN manquant. Créez un PAT (Contents: write sur TD1/TD2/TD6/TD7) et ajoutez-le en secret Actions nommé PUBLISH_TOKEN."
+            exit 1
+          fi
+
+      - name: Configurer git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Publier toutes les pages TD
+        env:
+          PUBLISH_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
+          DRY_RUN: ${{ (inputs.dry_run && '1') || '0' }}
+        run: |
+          set -euo pipefail
+          ORG=IUTInfoAix-R105
+          if [ "$DRY_RUN" = "1" ]; then MODE="dry-run (aucun push)"; else MODE="live"; fi
+
+          clone() { rm -rf "/tmp/$1"; git clone "https://x-access-token:${PUBLISH_TOKEN}@github.com/${ORG}/$1.git" "/tmp/$1"; }
+          publish() {  # <label> <make-target> <VAR=path>
+            echo "### $1" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            make "$2" "$3" 2>&1 | tail -4 | tee -a "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          }
+
+          printf '## Publication des pages web TD\n\n- Mode : %s\n\n' "$MODE" >> "$GITHUB_STEP_SUMMARY"
+
+          clone TD6; publish "TD6 (SQL)"        publish-web-td6         WEB_TD6_REPO=/tmp/TD6
+          clone TD7; publish "TD7 (SQL)"        publish-web-td7         WEB_TD7_REPO=/tmp/TD7
+          clone TD1; publish "TD1 (algèbre)"    publish-web-td1-algebre WEB_TD1_ALGEBRE_REPO=/tmp/TD1
+          clone TD2
+          publish "TD2 airbase"     publish-web-td2-airbase   WEB_TD2_REPO=/tmp/TD2
+          publish "TD2 immobilier"  publish-web-td2-immobilier WEB_TD2_REPO=/tmp/TD2

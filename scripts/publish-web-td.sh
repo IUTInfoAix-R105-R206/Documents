@@ -44,6 +44,14 @@ if git diff --cached --quiet; then
   echo "Aucun changement à publier."
   exit 0
 fi
+
+# DRY_RUN=1 : montrer ce qui changerait sans committer ni pousser.
+if [ "${DRY_RUN:-0}" = "1" ]; then
+  echo "── DRY-RUN : changements qui SERAIENT publiés dans $REPO_DIR${SUBDIR:+/$SUBDIR} ──"
+  git diff --cached --stat
+  exit 0
+fi
+
 git commit -m "Mise à jour du TP (Documents @ $VERSION)"
 git push -u origin HEAD
 echo "✓ Publié dans $REPO_DIR${SUBDIR:+/$SUBDIR} (push effectué)."
