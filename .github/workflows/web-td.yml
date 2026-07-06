@@ -24,6 +24,12 @@ on:
       - 'scripts/verify-web-td-algebra.mjs'
       - 'docs/r1.05/td1/td1-correction.md'
       - 'docs/r1.05/td1/web-td.json'
+      - 'docs/r1.05/td2/td2-correction.md'
+      - 'docs/r1.05/td2/web-td-ex1.json'
+      - 'docs/r1.05/td2/web-td-ex2.json'
+      - 'docs/r1.05/td2/td2.md'
+      - 'docs/shared/data/airbase-td2/**'
+      - 'docs/shared/data/immobilier/**'
       - 'templates/web-td/**'
       - '.github/workflows/web-td.yml'
   pull_request:
@@ -43,6 +49,12 @@ on:
       - 'scripts/verify-web-td-algebra.mjs'
       - 'docs/r1.05/td1/td1-correction.md'
       - 'docs/r1.05/td1/web-td.json'
+      - 'docs/r1.05/td2/td2-correction.md'
+      - 'docs/r1.05/td2/web-td-ex1.json'
+      - 'docs/r1.05/td2/web-td-ex2.json'
+      - 'docs/r1.05/td2/td2.md'
+      - 'docs/shared/data/airbase-td2/**'
+      - 'docs/shared/data/immobilier/**'
       - 'templates/web-td/**'
       - '.github/workflows/web-td.yml'
 
@@ -51,7 +63,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        td: [td6, td7, td1-algebre]
+        td: [td6, td7, td1-algebre, td2-airbase, td2-immobilier]
 
     steps:
       - uses: actions/checkout@v4
