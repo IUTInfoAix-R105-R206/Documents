@@ -1,4 +1,0 @@
-{
-  "_comment": "Manifeste de la page web interactive du TD2 R2.06. oracleOnlyQuestions : questions dont aucune variante ne s'exécute sous SQLite (syntaxe Oracle/PostgreSQL only, ex. « > ALL (sous-requête) ») ; rendues non évaluables en ligne (énoncé seul + note). Vérifié via le dashboard test-sql.",
-  "oracleOnlyQuestions": ["20", "21"]
-}
