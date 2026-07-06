@@ -1124,8 +1124,7 @@ web-r206-td2: ## Génère le site web du TD2 R2.06 (output/web/r206-td2)
 		--data-dir docs/shared/data/voyages \
 		--output $(OUTPUT_DIR)/web/r206-td2 --verify-out $(OUTPUT_DIR)/web-verify/r206-td2 \
 		--td-id r2.06-td2 --td-label "R2.06 - TD2" --template-dir $(WEB_TD_TEMPLATE) \
-		--allow-multiple-hashes --manifest docs/r2.06/td2/web-td.json \
-		$(call pdf-arg,$(OUTPUT_DIR)/r2.06/td2/td2.pdf)
+		--allow-multiple-hashes $(call pdf-arg,$(OUTPUT_DIR)/r2.06/td2/td2.pdf)
 
 verify-web-r206-td2: web-r206-td2 ## Vérifie hash Python == hash WASM pour le TD2 R2.06
 	$(NODE) scripts/verify-web-td.mjs $(OUTPUT_DIR)/web/r206-td2 $(OUTPUT_DIR)/web-verify/r206-td2

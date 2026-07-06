@@ -16,6 +16,8 @@ on:
       - 'docs/shared/data/airbase/**'
       - 'scripts/generate-web-td.py'
       - 'scripts/verify-web-td.mjs'
+      - 'scripts/sql_quantifiers.py'
+      - 'scripts/test-sql-quantifiers.mjs'
       - 'scripts/td_correction.py'
       - 'scripts/sqlite_compat.py'
       - 'scripts/webtd_canon.py'
@@ -44,6 +46,8 @@ on:
       - 'docs/shared/data/airbase/**'
       - 'scripts/generate-web-td.py'
       - 'scripts/verify-web-td.mjs'
+      - 'scripts/sql_quantifiers.py'
+      - 'scripts/test-sql-quantifiers.mjs'
       - 'scripts/td_correction.py'
       - 'scripts/sqlite_compat.py'
       - 'scripts/webtd_canon.py'
@@ -84,6 +88,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+
+      - name: Parité du réécriveur ALL/ANY (Python == JS)
+        if: matrix.td == 'r206-td2'
+        run: node scripts/test-sql-quantifiers.mjs
 
       - name: Génère et vérifie le site (hash Python == hash WASM)
         run: make verify-web-${{ matrix.td }}

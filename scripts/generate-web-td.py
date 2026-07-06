@@ -39,6 +39,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import td_correction
 import webtd_canon as canon
 from sqlite_compat import filter_schema, filter_insert
+from sql_quantifiers import rewrite_quantifiers
 
 RE_ORDER_BY = re.compile(r'\border\s+by\b', re.IGNORECASE)
 
@@ -144,9 +145,12 @@ def exec_query(conn, sql):
 
 
 def clean_variant_sql(sql):
-    """Retire les annotations noqa et le point-virgule final pour l'exécution."""
+    """Retire les annotations noqa et le point-virgule final, puis réécrit les
+    comparaisons quantifiées ALL/ANY en équivalents SQLite (même transformation que
+    le navigateur via sql-quantifiers.js) pour exécuter la requête."""
     sql = td_correction._strip_noqa(sql).strip()
-    return sql.rstrip(";").strip()
+    sql = sql.rstrip(";").strip()
+    return rewrite_quantifiers(sql)
 
 
 RE_QUERY_START = re.compile(r'^\s*(?:--[^\n]*\n\s*)*\(*\s*(select|with)\b', re.IGNORECASE)
