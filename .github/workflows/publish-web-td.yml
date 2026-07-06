@@ -64,12 +64,17 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Vérifier la présence du secret PUBLISH_TOKEN
+      - name: Vérifier la présence des secrets de publication
         env:
           PUBLISH_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
+          PUBLISH_TOKEN_R206: ${{ secrets.PUBLISH_TOKEN_R206 }}
         run: |
           if [ -z "$PUBLISH_TOKEN" ]; then
-            echo "::error::Secret PUBLISH_TOKEN manquant. Créez un PAT (Contents: write sur TD1/TD2/TD6/TD7) et ajoutez-le en secret Actions nommé PUBLISH_TOKEN."
+            echo "::error::Secret PUBLISH_TOKEN manquant (PAT Contents: write sur IUTInfoAix-R105/TD1..7)."
+            exit 1
+          fi
+          if [ -z "$PUBLISH_TOKEN_R206" ]; then
+            echo "::error::Secret PUBLISH_TOKEN_R206 manquant (PAT Contents: write sur IUTInfoAix-R206/TD1..6)."
             exit 1
           fi
 
@@ -91,10 +96,13 @@ jobs:
           fi
           echo "Artefact td-pdfs depuis le run ${RUN_ID:-<aucun>}"
           if [ -n "$RUN_ID" ] && gh run download "$RUN_ID" -n td-pdfs -D pdf-artifact 2>/dev/null; then
-            for td in td1 td2 td3 td4 td5 td6 td7; do
-              mkdir -p "output/r1.05/$td"
-              f=$(find pdf-artifact -name "$td.pdf" 2>/dev/null | head -1 || true)
-              if [ -n "$f" ]; then cp "$f" "output/r1.05/$td/$td.pdf"; echo "  PDF $td <- $f"; fi
+            # L'artefact contient les arbres r1.05/ et r2.06/ (td3.pdf existe dans les
+            # deux → on copie par ressource, pas par nom de fichier). Robuste que le
+            # préfixe output/ soit conservé ou non dans l'artefact.
+            mkdir -p output
+            for res in r1.05 r2.06; do
+              src=$(find pdf-artifact -type d -name "$res" 2>/dev/null | head -1 || true)
+              if [ -n "$src" ]; then cp -r "$src" output/; echo "  PDF $res <- $src"; fi
             done
           else
             echo "::warning::Artefact td-pdfs indisponible - publication SANS mise a jour du PDF (le PDF deja present dans chaque depot est preserve)."
@@ -103,13 +111,14 @@ jobs:
       - name: Publier toutes les pages TD
         env:
           PUBLISH_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
+          PUBLISH_TOKEN_R206: ${{ secrets.PUBLISH_TOKEN_R206 }}
           DRY_RUN: ${{ (inputs.dry_run && '1') || '0' }}
         run: |
           set -euo pipefail
-          ORG=IUTInfoAix-R105
           if [ "$DRY_RUN" = "1" ]; then MODE="dry-run (aucun push)"; else MODE="live"; fi
 
-          clone() { rm -rf "/tmp/$1"; git clone "https://x-access-token:${PUBLISH_TOKEN}@github.com/${ORG}/$1.git" "/tmp/$1"; }
+          # clone <repo> <dest> : utilise $ORG et $TOKEN de l'organisation courante.
+          clone() { rm -rf "$2"; git clone "https://x-access-token:${TOKEN}@github.com/${ORG}/$1.git" "$2"; }
           publish() {  # <label> <make-target> <VAR=path>
             echo "### $1" >> "$GITHUB_STEP_SUMMARY"
             echo '```' >> "$GITHUB_STEP_SUMMARY"
@@ -119,13 +128,25 @@ jobs:
 
           printf '## Publication des pages web TD\n\n- Mode : %s\n\n' "$MODE" >> "$GITHUB_STEP_SUMMARY"
 
-          clone TD6; publish "TD6 (SQL)"        publish-web-td6         WEB_TD6_REPO=/tmp/TD6
-          clone TD7; publish "TD7 (SQL)"        publish-web-td7         WEB_TD7_REPO=/tmp/TD7
-          clone TD1; publish "TD1 (algèbre)"    publish-web-td1-algebre WEB_TD1_ALGEBRE_REPO=/tmp/TD1
-          clone TD2
-          publish "TD2 airbase"     publish-web-td2-airbase   WEB_TD2_REPO=/tmp/TD2
+          # ── R1.05 (org IUTInfoAix-R105) ──
+          ORG=IUTInfoAix-R105; TOKEN="$PUBLISH_TOKEN"
+          printf '\n### R1.05\n' >> "$GITHUB_STEP_SUMMARY"
+          clone TD6 /tmp/TD6; publish "TD6 (SQL)"     publish-web-td6         WEB_TD6_REPO=/tmp/TD6
+          clone TD7 /tmp/TD7; publish "TD7 (SQL)"     publish-web-td7         WEB_TD7_REPO=/tmp/TD7
+          clone TD1 /tmp/TD1; publish "TD1 (algèbre)" publish-web-td1-algebre WEB_TD1_ALGEBRE_REPO=/tmp/TD1
+          clone TD2 /tmp/TD2
+          publish "TD2 airbase"     publish-web-td2-airbase    WEB_TD2_REPO=/tmp/TD2
           publish "TD2 immobilier"  publish-web-td2-immobilier WEB_TD2_REPO=/tmp/TD2
-          # Pages minimales (lien PDF seul) : TD3/TD4/TD5.
-          clone TD3; publish "TD3 (PDF)"        publish-web-td3         WEB_TD3_REPO=/tmp/TD3
-          clone TD4; publish "TD4 (PDF)"        publish-web-td4         WEB_TD4_REPO=/tmp/TD4
-          clone TD5; publish "TD5 (PDF)"        publish-web-td5         WEB_TD5_REPO=/tmp/TD5
+          clone TD3 /tmp/TD3; publish "TD3 (PDF)"     publish-web-td3         WEB_TD3_REPO=/tmp/TD3
+          clone TD4 /tmp/TD4; publish "TD4 (PDF)"     publish-web-td4         WEB_TD4_REPO=/tmp/TD4
+          clone TD5 /tmp/TD5; publish "TD5 (PDF)"     publish-web-td5         WEB_TD5_REPO=/tmp/TD5
+
+          # ── R2.06 (org IUTInfoAix-R206) : interactif TD1-5, PDF seul TD6 ──
+          ORG=IUTInfoAix-R206; TOKEN="$PUBLISH_TOKEN_R206"
+          printf '\n### R2.06\n' >> "$GITHUB_STEP_SUMMARY"
+          clone TD1 /tmp/R206-TD1; publish "TD1 (SQL)"  publish-web-r206-td1 WEB_R206_TD1_REPO=/tmp/R206-TD1
+          clone TD2 /tmp/R206-TD2; publish "TD2 (SQL)"  publish-web-r206-td2 WEB_R206_TD2_REPO=/tmp/R206-TD2
+          clone TD3 /tmp/R206-TD3; publish "TD3 (SQL)"  publish-web-r206-td3 WEB_R206_TD3_REPO=/tmp/R206-TD3
+          clone TD4 /tmp/R206-TD4; publish "TD4 (SQL)"  publish-web-r206-td4 WEB_R206_TD4_REPO=/tmp/R206-TD4
+          clone TD5 /tmp/R206-TD5; publish "TD5 (SQL)"  publish-web-r206-td5 WEB_R206_TD5_REPO=/tmp/R206-TD5
+          clone TD6 /tmp/R206-TD6; publish "TD6 (PDF)"  publish-web-r206-td6 WEB_R206_TD6_REPO=/tmp/R206-TD6

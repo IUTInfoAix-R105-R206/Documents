@@ -30,6 +30,9 @@ on:
       - 'docs/r1.05/td2/td2.md'
       - 'docs/shared/data/airbase-td2/**'
       - 'docs/shared/data/immobilier/**'
+      - 'docs/r2.06/**'
+      - 'docs/shared/data/gestion-pedagogique/**'
+      - 'docs/shared/data/questionnaire/**'
       - 'templates/web-td/**'
       - '.github/workflows/web-td.yml'
   pull_request:
@@ -55,6 +58,9 @@ on:
       - 'docs/r1.05/td2/td2.md'
       - 'docs/shared/data/airbase-td2/**'
       - 'docs/shared/data/immobilier/**'
+      - 'docs/r2.06/**'
+      - 'docs/shared/data/gestion-pedagogique/**'
+      - 'docs/shared/data/questionnaire/**'
       - 'templates/web-td/**'
       - '.github/workflows/web-td.yml'
 
@@ -63,7 +69,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        td: [td6, td7, td1-algebre, td2-airbase, td2-immobilier]
+        td: [td6, td7, td1-algebre, td2-airbase, td2-immobilier,
+             r206-td1, r206-td2, r206-td3, r206-td4, r206-td5]
 
     steps:
       - uses: actions/checkout@v4
