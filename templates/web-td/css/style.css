@@ -196,3 +196,10 @@ body {
 .syntax-table th { background: color-mix(in srgb, var(--accent) 10%, var(--card)); }
 .syntax-table td:first-child { font-weight: 600; }
 .syntax-note { color: var(--muted); }
+
+/* Section « Comment fonctionne cette page ? » + terrain d'essai */
+.howto-body { padding: .5rem 1rem 1rem; border-top: 1px solid var(--border); }
+.howto-text p { margin: .5rem 0; font-size: .9rem; }
+.howto-text code { font-family: var(--mono); font-size: .85em; background: var(--bg); padding: .05rem .3rem; border-radius: 4px; }
+.howto-pg-title { font-weight: 700; margin: 1.1rem 0 .2rem; }
+.howto-pg-sub { color: var(--muted); font-size: .85rem; margin: 0 0 .5rem; }

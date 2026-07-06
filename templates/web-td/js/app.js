@@ -135,6 +135,82 @@ R2 := PROJECTION (R1 / numAv, nomAv)</pre>
   root.appendChild(details);
 }
 
+// Section « Comment fonctionne cette page ? » + terrain d'essai (sans évaluation).
+function renderHowItWorks(root) {
+  const isAlg = mode === "algebra";
+  const what = isAlg ? "votre expression en algèbre relationnelle" : "votre requête SQL";
+  const details = el("details", { class: "schema-panel howto-panel" });
+  details.appendChild(el("summary", { text: "Comment fonctionne cette page ?" }));
+  const body = el("div", { class: "howto-body" });
+  const intro = el("div", { class: "howto-text" });
+  intro.innerHTML = `
+    <p>Pour chaque question, écrivez ${what} puis cliquez <strong>Exécuter</strong>
+       (ou <code>Ctrl</code>/<code>Cmd</code> + <code>Entrée</code>).
+       ${isAlg ? "Elle est traduite en SQL et exécutée" : "Elle est exécutée"} sur la base,
+       et le résultat s'affiche dans une table.</p>
+    <p>Un retour automatique compare votre résultat au résultat attendu (nombre de colonnes,
+       de lignes et contenu) et affiche <strong>✓ Résultat exact</strong> si tout correspond —
+       <em>sans jamais afficher la correction</em>.</p>
+    <p>La base est <strong>réinitialisée à chaque exécution</strong> : vous pouvez tout tester
+       sans risque. Vos réponses restent dans ce navigateur ; le bouton <strong>Exporter .sql</strong>
+       les télécharge pour les rendre.</p>
+    ${isAlg ? "<p>La notation de référence est imposée (voir le rappel de syntaxe) ; toute erreur est signalée précisément avec le numéro de ligne.</p>" : ""}`;
+  body.appendChild(intro);
+
+  // ── Terrain d'essai ────────────────────────────────────────────────────────
+  body.appendChild(el("p", { class: "howto-pg-title", text: "Terrain d'essai (sans évaluation)" }));
+  body.appendChild(el("p", { class: "howto-pg-sub", text: isAlg
+    ? "Testez n'importe quelle expression : le résultat s'affiche, sans jugement de correction."
+    : "Testez n'importe quelle requête : le résultat s'affiche, sans jugement de correction." }));
+
+  const pgKey = `webtd:${questions.tdId}:playground`;
+  const textarea = el("textarea", { class: "q-input", attrs: { spellcheck: "false", rows: "5",
+    placeholder: isAlg ? "Écrivez une expression algébrique à tester…" : "Écrivez une requête SQL à tester…" } });
+  try { textarea.value = localStorage.getItem(pgKey) || ""; } catch { /* ignore */ }
+  const code = el("code");
+  const pre = el("pre", { class: "q-highlight", attrs: { "aria-hidden": "true" } }, [code]);
+  const editor = el("div", { class: "q-editor" }, [pre, textarea]);
+  const highlight = isAlg ? highlightAlgebra : highlightSQL;
+  const sync = () => { code.innerHTML = highlight(textarea.value + "\n"); pre.scrollTop = textarea.scrollTop; pre.scrollLeft = textarea.scrollLeft; };
+  const savePg = debounce(() => { try { localStorage.setItem(pgKey, textarea.value); } catch { /* ignore */ } }, 400);
+  const resultEl = el("div", { class: "q-result" });
+
+  function runPg() {
+    const input = textarea.value.trim();
+    if (!input) { resultEl.replaceChildren(); return; }
+    let sql = input;
+    if (isAlg) {
+      try { sql = compileAlgebra(input, catalog).sql; }
+      catch (e) { resultEl.replaceChildren(el("div", { class: "sql-error", text: String(e && e.message || e) })); return; }
+    }
+    try { resultEl.replaceChildren(renderTable(runQuery(sql))); }
+    catch (e) { resultEl.replaceChildren(el("div", { class: "sql-error", text: String(e && e.message || e) })); }
+  }
+
+  textarea.addEventListener("input", () => { sync(); savePg(); });
+  textarea.addEventListener("scroll", () => { pre.scrollTop = textarea.scrollTop; pre.scrollLeft = textarea.scrollLeft; });
+  textarea.addEventListener("keydown", (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); runPg(); }
+    else if (e.key === "Tab") {
+      e.preventDefault();
+      const s = textarea.selectionStart, en = textarea.selectionEnd;
+      textarea.value = textarea.value.slice(0, s) + "    " + textarea.value.slice(en);
+      textarea.selectionStart = textarea.selectionEnd = s + 4;
+      sync(); savePg();
+    }
+  });
+  sync();
+
+  const runBtn = el("button", { class: "btn btn-run", text: "Exécuter ▶" });
+  runBtn.addEventListener("click", runPg);
+  body.appendChild(editor);
+  body.appendChild(el("div", { class: "q-actions" }, [runBtn, el("span", { class: "run-hint", text: "Ctrl/Cmd + Entrée" })]));
+  body.appendChild(resultEl);
+
+  details.appendChild(body);
+  root.appendChild(details);
+}
+
 // ── Rendu d'une table de résultat ───────────────────────────────────────────
 
 function renderTable(result) {
@@ -416,6 +492,7 @@ async function main() {
   state = store.load();
 
   renderHeader(root);
+  renderHowItWorks(root);
   await renderSchemaPanel(root);
   if (mode === "algebra") renderSyntaxPanel(root);
 
