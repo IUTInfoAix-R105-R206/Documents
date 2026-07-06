@@ -1,0 +1,4 @@
+{
+  "_comment": "Manifeste de la page web interactive du TD5 R2.06. oracleOnlyQuestions : questions dont aucune variante ne s'exécute sous SQLite (recherche hiérarchique START WITH/CONNECT BY, LPAD, etc.) ; rendues non évaluables en ligne (énoncé seul + note). Vérifié via le dashboard test-sql.",
+  "oracleOnlyQuestions": ["10", "11", "12", "13", "18", "19"]
+}

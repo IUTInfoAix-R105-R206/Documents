@@ -51,7 +51,7 @@ ALLOWED_QUESTION_KEYS = {
     "type", "id", "num", "statement",
     "expectedCols", "expectedRows", "expectedLabel",
     "orderSensitive", "hashesSorted", "hashOrdered",
-    "difficulty", "tags", "sameAs",
+    "difficulty", "tags", "sameAs", "theoryNote",
 }
 
 # Fixtures de parité (cellules + résultats) rehashées par le vérificateur en JS.
@@ -149,6 +149,16 @@ def clean_variant_sql(sql):
     return sql.rstrip(";").strip()
 
 
+RE_QUERY_START = re.compile(r'^\s*(?:--[^\n]*\n\s*)*\(*\s*(select|with)\b', re.IGNORECASE)
+
+
+def is_query(sql):
+    """Vrai si la requête renvoie des lignes (SELECT / WITH ... SELECT). Les autres
+    (CREATE, ALTER, INSERT, UPDATE, DELETE, COMMIT... = LDD/LMD/LCT) n'ont pas de
+    résultat à comparer : la question est alors non évaluable (comme dans test-sql)."""
+    return bool(RE_QUERY_START.match(clean_variant_sql(sql)))
+
+
 def expected_label(q):
     """Libellé lisible du résultat attendu (« 1 attribut, 5 tuples »), sans balise."""
     raw = td_correction.format_expected(q).strip()
@@ -161,7 +171,7 @@ def process_question(conn, q, allow_multiple):
     num = q["num"]
     qid = "q" + num
     variants = q.get("variants", [])
-    sqls = [clean_variant_sql(v["sql"]) for v in variants if v.get("sql", "").strip()]
+    sqls = [clean_variant_sql(v["sql"]) for v in variants if is_query(v.get("sql", ""))]
     if not sqls:
         raise GenError(f"Q{num} : aucune requête SQL")
 
@@ -252,7 +262,22 @@ def process_question(conn, q, allow_multiple):
     return entry, solution
 
 
-def build_questions_json(parsed, conn, meta, allow_multiple):
+def theory_entry(q, note):
+    """Item non évaluable (énoncé seul) : en-tête sans SQL, question de cours, ou
+    requête Oracle non transposable en SQLite. expectedCols=None → app.js le rend
+    via renderTheory (pas d'éditeur, pas d'auto-évaluation)."""
+    return {
+        "type": "question", "id": "q" + q["num"], "num": q["num"],
+        "statement": q.get("description", ""),
+        "expectedCols": None, "expectedRows": None, "expectedLabel": None,
+        "orderSensitive": False, "hashesSorted": [], "hashOrdered": None,
+        "difficulty": None, "tags": [], "sameAs": None, "theoryNote": note,
+    }
+
+
+def build_questions_json(parsed, conn, meta, allow_multiple, oracle_only=None, theory=None):
+    oracle_only = oracle_only or set()
+    theory = theory or set()
     sections_out = []
     solutions = []
     nquestions = 0
@@ -265,7 +290,24 @@ def build_questions_json(parsed, conn, meta, allow_multiple):
             elif t in ("remark", "remark_teacher"):
                 continue  # jamais dans le sujet - non exposé aux étudiants
             elif t == "question":
-                entry, solution = process_question(conn, item, allow_multiple)
+                num = item["num"]
+                has_query = any(is_query(v.get("sql", "")) for v in item.get("variants", []))
+                # En-tête sans SQL, question LDD/LMD/LCT (non-SELECT), ou marquée
+                # « de cours » → non évaluable (énoncé seul).
+                if not has_query or num in theory:
+                    items_out.append(theory_entry(
+                        item, "Question de cours - pas d'auto-évaluation."))
+                    continue
+                # Requête Oracle non transposable : tolérée si déclarée, sinon erreur.
+                try:
+                    entry, solution = process_question(conn, item, allow_multiple)
+                except GenError as e:
+                    if num in oracle_only:
+                        items_out.append(theory_entry(
+                            item, "Requête Oracle - non auto-évaluable en ligne (à exécuter sous Oracle)."))
+                        log(f"  Q{num} : non évaluable en SQLite ({e}) → rendue non évaluable")
+                        continue
+                    raise
                 items_out.append(entry)
                 solutions.append(solution)
                 nquestions += 1
@@ -391,6 +433,10 @@ def main():
     ap.add_argument("--verify-out", default=None)
     ap.add_argument("--db-name", default=None)
     ap.add_argument("--allow-multiple-hashes", action="store_true")
+    ap.add_argument("--manifest", default=None,
+                    help="JSON facultatif : {\"oracleOnlyQuestions\":[...], \"theoryQuestions\":[...]}. "
+                         "oracleOnly = tolère une question dont aucune variante ne tourne sous SQLite "
+                         "(rendue non évaluable) ; theory = force l'énoncé seul.")
     ap.add_argument("--pdf", default=None,
                     help="Chemin du PDF du sujet à copier dans le site (facultatif). "
                          "Ignoré avec un avertissement si le fichier est absent.")
@@ -419,8 +465,13 @@ def main():
                         .replace(microsecond=0).isoformat().replace("+00:00", "Z"),
     }
 
+    manifest = json.load(open(args.manifest, encoding="utf-8")) if args.manifest and os.path.exists(args.manifest) else {}
+    oracle_only = set(str(x) for x in manifest.get("oracleOnlyQuestions", []))
+    theory = set(str(x) for x in manifest.get("theoryQuestions", []))
+
     log("→ Exécution des corrections et calcul des hashes")
-    questions, solutions, nq = build_questions_json(parsed, conn, meta, args.allow_multiple_hashes)
+    questions, solutions, nq = build_questions_json(
+        parsed, conn, meta, args.allow_multiple_hashes, oracle_only, theory)
     conn.close()
 
     pdf_src = None

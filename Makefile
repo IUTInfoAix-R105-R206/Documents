@@ -5,6 +5,8 @@
 PANDOC = pandoc
 PDFLATEX = pdflatex
 PYTHON = python3
+MOCODO = mocodo
+INKSCAPE = inkscape
 TEMPLATE_DIR = templates
 FILTER_DIR = $(TEMPLATE_DIR)/filters
 OUTPUT_DIR = output
@@ -600,8 +602,20 @@ R105_TD4_FIGURES = docs/r1.05/td4/figures/gestion-artistique-1.pdf \
 	docs/r1.05/td4/figures/gestion-sportive-1.pdf \
 	docs/r1.05/td4/figures/gestion-sportive-2.pdf
 
-docs/r1.05/td4/figures/%.pdf: docs/r1.05/td4/figures/%.tex
-	cd docs/r1.05/td4/figures && TEXINPUTS="$(CURDIR)/$(TEMPLATE_DIR):" $(PDFLATEX) -interaction=nonstopmode $*.tex
+# Figures MCD générées par Mocodo : .mcd -> .svg (mocodo) -> .pdf (inkscape).
+# La disposition est figée par le fichier <figure>_geo.json (versionné, lu via
+# --reuse_geo). Après modification d'un .mcd : relancer mocodo SANS --reuse_geo
+# pour recalculer la géométrie, l'ajuster à la main si besoin, puis la committer.
+docs/r1.05/td4/figures/%.svg: docs/r1.05/td4/figures/%.mcd docs/r1.05/td4/figures/%_geo.json $(TEMPLATE_DIR)/mocodo-colors.json $(TEMPLATE_DIR)/mocodo-shapes.json scripts/mocodo-static-notes.py
+	cd docs/r1.05/td4/figures && $(MOCODO) --input $*.mcd --reuse_geo \
+		--colors $(CURDIR)/$(TEMPLATE_DIR)/mocodo-colors.json \
+		--shapes $(CURDIR)/$(TEMPLATE_DIR)/mocodo-shapes.json \
+		--card_format "({min_card},{max_card})"
+	$(PYTHON) scripts/mocodo-static-notes.py $@
+	rm -f docs/r1.05/td4/figures/$*_static.svg
+
+docs/r1.05/td4/figures/%.pdf: docs/r1.05/td4/figures/%.svg
+	$(INKSCAPE) $< --export-type=pdf --export-filename=$@
 
 $(OUTPUT_DIR)/r1.05/td4/td4.pdf: docs/r1.05/td4/td4.md $(TEMPLATE_DIR)/template.tex $(FILTER_DIR)/custom-styles.lua $(R105_TD4_FIGURES)
 	@mkdir -p $(OUTPUT_DIR)/r1.05/td4
@@ -1077,6 +1091,118 @@ publish-web-td5: web-td5 ## Publie la page du TD5 dans le dépôt étudiant (WEB
 	scripts/publish-web-td.sh $(OUTPUT_DIR)/web/td5 $(WEB_TD5_REPO)
 
 # ==============================================================================
+# Pages web R2.06 (interactif SQL où SQLite le permet, PDF seul sinon)
+# ==============================================================================
+# Corrections ciblées Oracle : --allow-multiple-hashes tolère l'ordre des colonnes
+# entre variantes ; les questions LDD/LCT (non-SELECT) sont auto-rendues « énoncé
+# seul » ; --manifest liste les requêtes Oracle-only (ALL/ANY, CONNECT BY, LPAD…)
+# rendues non évaluables. TD6 (15 % SQLite : vues/tables système) = page PDF seule.
+
+# ── R2.06 TD1 (voyages) : opérateurs ensemblistes, LDD et LCT ──
+web-r206-td1: ## Génère le site web du TD1 R2.06 (output/web/r206-td1)
+	$(PYTHON) scripts/generate-web-td.py docs/r2.06/td1/td1-correction.sql \
+		--data-dir docs/shared/data/voyages \
+		--output $(OUTPUT_DIR)/web/r206-td1 --verify-out $(OUTPUT_DIR)/web-verify/r206-td1 \
+		--td-id r2.06-td1 --td-label "R2.06 - TD1" --template-dir $(WEB_TD_TEMPLATE) \
+		--allow-multiple-hashes $(call pdf-arg,$(OUTPUT_DIR)/r2.06/td1/td1.pdf)
+
+verify-web-r206-td1: web-r206-td1 ## Vérifie hash Python == hash WASM pour le TD1 R2.06
+	$(NODE) scripts/verify-web-td.mjs $(OUTPUT_DIR)/web/r206-td1 $(OUTPUT_DIR)/web-verify/r206-td1
+
+serve-web-r206-td1: web-r206-td1 ## Sert le TD1 R2.06 en local (http://localhost:8000)
+	@cd $(OUTPUT_DIR)/web/r206-td1 && $(PYTHON) -m http.server 8000
+
+publish-web-r206-td1: verify-web-r206-td1 ## Publie le TD1 R2.06 (WEB_R206_TD1_REPO=chemin)
+	@if [ -z "$(WEB_R206_TD1_REPO)" ]; then echo "Erreur : définissez WEB_R206_TD1_REPO=chemin"; exit 1; fi
+	scripts/publish-web-td.sh $(OUTPUT_DIR)/web/r206-td1 $(WEB_R206_TD1_REPO)
+
+# ── R2.06 TD2 (voyages) : jointures externes, partitionnement, synthèse ──
+web-r206-td2: ## Génère le site web du TD2 R2.06 (output/web/r206-td2)
+	$(PYTHON) scripts/generate-web-td.py docs/r2.06/td2/td2-correction.sql \
+		--data-dir docs/shared/data/voyages \
+		--output $(OUTPUT_DIR)/web/r206-td2 --verify-out $(OUTPUT_DIR)/web-verify/r206-td2 \
+		--td-id r2.06-td2 --td-label "R2.06 - TD2" --template-dir $(WEB_TD_TEMPLATE) \
+		--allow-multiple-hashes --manifest docs/r2.06/td2/web-td.json \
+		$(call pdf-arg,$(OUTPUT_DIR)/r2.06/td2/td2.pdf)
+
+verify-web-r206-td2: web-r206-td2 ## Vérifie hash Python == hash WASM pour le TD2 R2.06
+	$(NODE) scripts/verify-web-td.mjs $(OUTPUT_DIR)/web/r206-td2 $(OUTPUT_DIR)/web-verify/r206-td2
+
+serve-web-r206-td2: web-r206-td2 ## Sert le TD2 R2.06 en local (http://localhost:8000)
+	@cd $(OUTPUT_DIR)/web/r206-td2 && $(PYTHON) -m http.server 8000
+
+publish-web-r206-td2: verify-web-r206-td2 ## Publie le TD2 R2.06 (WEB_R206_TD2_REPO=chemin)
+	@if [ -z "$(WEB_R206_TD2_REPO)" ]; then echo "Erreur : définissez WEB_R206_TD2_REPO=chemin"; exit 1; fi
+	scripts/publish-web-td.sh $(OUTPUT_DIR)/web/r206-td2 $(WEB_R206_TD2_REPO)
+
+# ── R2.06 TD3 (gestion-pédagogique) : interrogations en SQL ──
+web-r206-td3: ## Génère le site web du TD3 R2.06 (output/web/r206-td3)
+	$(PYTHON) scripts/generate-web-td.py docs/r2.06/td3/td3-correction.sql \
+		--data-dir docs/shared/data/gestion-pedagogique \
+		--output $(OUTPUT_DIR)/web/r206-td3 --verify-out $(OUTPUT_DIR)/web-verify/r206-td3 \
+		--td-id r2.06-td3 --td-label "R2.06 - TD3" --template-dir $(WEB_TD_TEMPLATE) \
+		--allow-multiple-hashes $(call pdf-arg,$(OUTPUT_DIR)/r2.06/td3/td3.pdf)
+
+verify-web-r206-td3: web-r206-td3 ## Vérifie hash Python == hash WASM pour le TD3 R2.06
+	$(NODE) scripts/verify-web-td.mjs $(OUTPUT_DIR)/web/r206-td3 $(OUTPUT_DIR)/web-verify/r206-td3
+
+serve-web-r206-td3: web-r206-td3 ## Sert le TD3 R2.06 en local (http://localhost:8000)
+	@cd $(OUTPUT_DIR)/web/r206-td3 && $(PYTHON) -m http.server 8000
+
+publish-web-r206-td3: verify-web-r206-td3 ## Publie le TD3 R2.06 (WEB_R206_TD3_REPO=chemin)
+	@if [ -z "$(WEB_R206_TD3_REPO)" ]; then echo "Erreur : définissez WEB_R206_TD3_REPO=chemin"; exit 1; fi
+	scripts/publish-web-td.sh $(OUTPUT_DIR)/web/r206-td3 $(WEB_R206_TD3_REPO)
+
+# ── R2.06 TD4 (questionnaire) : recherche récursive, division, requêtes complexes ──
+web-r206-td4: ## Génère le site web du TD4 R2.06 (output/web/r206-td4)
+	$(PYTHON) scripts/generate-web-td.py docs/r2.06/td4/td4-correction.sql \
+		--data-dir docs/shared/data/questionnaire \
+		--output $(OUTPUT_DIR)/web/r206-td4 --verify-out $(OUTPUT_DIR)/web-verify/r206-td4 \
+		--td-id r2.06-td4 --td-label "R2.06 - TD4" --template-dir $(WEB_TD_TEMPLATE) \
+		--allow-multiple-hashes $(call pdf-arg,$(OUTPUT_DIR)/r2.06/td4/td4.pdf)
+
+verify-web-r206-td4: web-r206-td4 ## Vérifie hash Python == hash WASM pour le TD4 R2.06
+	$(NODE) scripts/verify-web-td.mjs $(OUTPUT_DIR)/web/r206-td4 $(OUTPUT_DIR)/web-verify/r206-td4
+
+serve-web-r206-td4: web-r206-td4 ## Sert le TD4 R2.06 en local (http://localhost:8000)
+	@cd $(OUTPUT_DIR)/web/r206-td4 && $(PYTHON) -m http.server 8000
+
+publish-web-r206-td4: verify-web-r206-td4 ## Publie le TD4 R2.06 (WEB_R206_TD4_REPO=chemin)
+	@if [ -z "$(WEB_R206_TD4_REPO)" ]; then echo "Erreur : définissez WEB_R206_TD4_REPO=chemin"; exit 1; fi
+	scripts/publish-web-td.sh $(OUTPUT_DIR)/web/r206-td4 $(WEB_R206_TD4_REPO)
+
+# ── R2.06 TD5 (gestion-pédagogique) : interrogations avancées en SQL ──
+web-r206-td5: ## Génère le site web du TD5 R2.06 (output/web/r206-td5)
+	$(PYTHON) scripts/generate-web-td.py docs/r2.06/td5/td5-correction.sql \
+		--data-dir docs/shared/data/gestion-pedagogique \
+		--output $(OUTPUT_DIR)/web/r206-td5 --verify-out $(OUTPUT_DIR)/web-verify/r206-td5 \
+		--td-id r2.06-td5 --td-label "R2.06 - TD5" --template-dir $(WEB_TD_TEMPLATE) \
+		--allow-multiple-hashes --manifest docs/r2.06/td5/web-td.json \
+		$(call pdf-arg,$(OUTPUT_DIR)/r2.06/td5/td5.pdf)
+
+verify-web-r206-td5: web-r206-td5 ## Vérifie hash Python == hash WASM pour le TD5 R2.06
+	$(NODE) scripts/verify-web-td.mjs $(OUTPUT_DIR)/web/r206-td5 $(OUTPUT_DIR)/web-verify/r206-td5
+
+serve-web-r206-td5: web-r206-td5 ## Sert le TD5 R2.06 en local (http://localhost:8000)
+	@cd $(OUTPUT_DIR)/web/r206-td5 && $(PYTHON) -m http.server 8000
+
+publish-web-r206-td5: verify-web-r206-td5 ## Publie le TD5 R2.06 (WEB_R206_TD5_REPO=chemin)
+	@if [ -z "$(WEB_R206_TD5_REPO)" ]; then echo "Erreur : définissez WEB_R206_TD5_REPO=chemin"; exit 1; fi
+	scripts/publish-web-td.sh $(OUTPUT_DIR)/web/r206-td5 $(WEB_R206_TD5_REPO)
+
+# ── R2.06 TD6 (gestion-pédagogique) : vues, tables système - PAGE PDF SEULE ──
+.PHONY: web-r206-td6 publish-web-r206-td6
+
+web-r206-td6: ## Génère la page minimale (lien PDF) du TD6 R2.06
+	$(PYTHON) scripts/generate-web-td-landing.py --output $(OUTPUT_DIR)/web/r206-td6 \
+		--td-label "R2.06 - TD6" --title "Vues, tables système et rappels SQL" \
+		--pdf $(OUTPUT_DIR)/r2.06/td6/td6.pdf --deploy-workflow $(WEB_LANDING_DEPLOY)
+
+publish-web-r206-td6: web-r206-td6 ## Publie la page du TD6 R2.06 (WEB_R206_TD6_REPO=chemin)
+	@if [ -z "$(WEB_R206_TD6_REPO)" ]; then echo "Erreur : définissez WEB_R206_TD6_REPO=chemin"; exit 1; fi
+	scripts/publish-web-td.sh $(OUTPUT_DIR)/web/r206-td6 $(WEB_R206_TD6_REPO)
+
+# ==============================================================================
 # Versionnage
 # ==============================================================================
 
@@ -1117,4 +1243,5 @@ clean: ## Supprime les fichiers générés
 	find docs -name "*.gen.md" | xargs rm -f
 	find docs -name "*.aux" -o -name "*.log" -o -name "*.synctex*" | xargs rm -f
 	find docs -path "*/figures/*.aux" -o -path "*/figures/*.log" -o -path "*/figures/*.pdf" | xargs rm -f
+	find docs -path "*/figures/*.svg" | xargs rm -f
 	find docs -type d -name "svg-inkscape" | xargs rm -rf
