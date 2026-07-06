@@ -45,7 +45,7 @@ RE_ORDER_BY = re.compile(r'\border\s+by\b', re.IGNORECASE)
 # Clés autorisées dans questions.json (audit anti-fuite).
 ALLOWED_TOP_KEYS = {
     "formatVersion", "tdId", "tdLabel", "title", "intro",
-    "database", "canon", "generated", "sections",
+    "database", "canon", "sections",
 }
 ALLOWED_QUESTION_KEYS = {
     "type", "id", "num", "statement",
@@ -285,7 +285,6 @@ def build_questions_json(parsed, conn, meta, allow_multiple):
             "insertFile": "data/insert.sql",
         },
         "canon": {"algo": "sha256", "specVersion": 1},
-        "generated": {"at": meta["generated_at"], "documentsVersion": meta["version"]},
         "sections": sections_out,
     }
     return questions, solutions, nquestions

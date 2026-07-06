@@ -91,7 +91,7 @@ def relational_schema_html(path, section_marker=None, extra=None):
 
 ALLOWED_TOP_KEYS = {
     "formatVersion", "tdId", "tdLabel", "title", "intro",
-    "mode", "database", "canon", "generated", "sections",
+    "mode", "database", "canon", "sections",
 }
 ALLOWED_QUESTION_KEYS = {
     "type", "id", "num", "statement", "expectedCols", "expectedRows",
@@ -383,10 +383,9 @@ def main():
         raise GenError(f"{len(unexpected)} correction(s) inattendue(s) en échec : "
                        + ", ".join(f"Q{n}" for n, _ in unexpected))
 
-    generated = {
-        "at": datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
-        "documentsVersion": git_version(repo_root),
-    }
+    # Pas d'horodatage ni de version dans questions.json : la sortie doit être
+    # stable pour un contenu inchangé (l'auto-publication ne republie alors que
+    # les pages réellement modifiées).
     questions_json = {
         "formatVersion": 1, "tdId": args.td_id, "tdLabel": args.td_label,
         "title": args.title, "intro": intro, "mode": "algebra",
@@ -397,7 +396,6 @@ def main():
                          args.section_marker if args.schema_md else None,
                          (args.schema_extra.split("|") if args.schema_extra else None))},
         "canon": {"algo": "sha256", "specVersion": 1},
-        "generated": generated,
         "sections": [{"name": s, "items": sections_map[s]} for s in order if sections_map[s]],
     }
 
