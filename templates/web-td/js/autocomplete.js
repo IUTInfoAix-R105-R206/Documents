@@ -19,9 +19,12 @@ const SQL_KEYWORDS = [
 ];
 const SQL_FUNCTIONS = ["COUNT", "SUM", "AVG", "MIN", "MAX", "ROUND", "COALESCE",
   "UPPER", "LOWER", "LENGTH", "SUBSTR"];
+// Opérateurs relationnels seulement (proposés en début d'expression). Les connecteurs
+// ET/OU/NON ne sont PAS complétés : ils ne peuvent pas ouvrir une condition (on commence
+// par un attribut) et sont assez courts pour être tapés à la main.
 const ALGEBRA_OPERATORS = [
   "SELECTION", "PROJECTION", "RENOMMAGE", "UNION", "INTERSECTION", "DIFFERENCE",
-  "JOINTURE", "JOINTURE_NATURELLE", "DIVISION", "ET", "OU", "NON",
+  "JOINTURE", "JOINTURE_NATURELLE", "DIVISION",
 ];
 
 const IDENT = "[A-Za-z_\\u00C0-\\u024F][A-Za-z0-9_\\u00C0-\\u024F]*";
@@ -97,15 +100,7 @@ function algebraCandidates(textBefore, start, schema) {
   const prev = j >= 0 ? textBefore[j] : "";
   // Après un comparateur ou la flèche « -> » de RENOMMAGE : valeur / nouveau nom (saisie libre).
   if (prev === ">" || prev === "<" || prev === "=") return [];
-  if (prev === "/") {
-    // Après « / » : des attributs. Les connecteurs ET/OU/NON ne s'appliquent qu'à la
-    // CONDITION d'une SELECTION (ET seul dans une JOINTURE) ; pas à la liste d'attributs
-    // d'une PROJECTION ni aux renommages d'un RENOMMAGE.
-    const op = (enclosingOperator(textBefore.slice(0, start)) || {}).op;
-    if (op === "SELECTION") return [...cols, { label: "ET", kind: "kw" }, { label: "OU", kind: "kw" }, { label: "NON", kind: "kw" }];
-    if (op === "JOINTURE") return [...cols, { label: "ET", kind: "kw" }];
-    return cols;
-  }
+  if (prev === "/") return cols; // début de condition / liste d'attributs / renommage -> attributs
   if (prev === "(" || prev === ",") return [...tables, ...cols];
   return [...ops, ...tables, ...cols];
 }

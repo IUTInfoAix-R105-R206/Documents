@@ -92,14 +92,13 @@ check("attribut complet sans séparateur (SELECTION) -> rien", a.type === "none"
 a = completionAction("sql", "WHERE ville = 'MAR", SCHEMA, true);
 check("dans une chaîne -> rien (action none)", a.type === "none");
 
-// ── Connecteurs ET/OU/NON : uniquement dans une condition (SELECTION, ET en JOINTURE) ──
-check("RENOMMAGE / -> pas de connecteur", !suggest("algebra", "RENOMMAGE (R1 / ", SCHEMA, true).items.some((i) => i.kind === "kw"));
-check("PROJECTION / -> pas de connecteur", !suggest("algebra", "PROJECTION (R1 / ", SCHEMA, true).items.some((i) => i.kind === "kw"));
-check("SELECTION / -> propose ET", suggest("algebra", "SELECTION (VOYAGE / ", SCHEMA, true).items.some((i) => i.label === "ET"));
-check("JOINTURE / -> propose ET mais pas OU", (() => {
-  const it = suggest("algebra", "JOINTURE (A, B / ", SCHEMA, true).items;
-  return it.some((i) => i.label === "ET") && !it.some((i) => i.label === "OU");
-})());
+// ── Après « / » : uniquement des attributs, jamais de connecteur (quel que soit l'opérateur) ──
+for (const ctx of ["SELECTION (VOYAGE / ", "RENOMMAGE (R1 / ", "PROJECTION (R1 / ", "JOINTURE (A, B / "]) {
+  check(`${ctx.trim()} -> attributs seuls`, !suggest("algebra", ctx, SCHEMA, true).items.some((i) => i.kind === "kw"));
+}
+// ── ET/OU/NON ne sont jamais proposés (ni en début d'expression) ──
+check("début d'expression -> opérateurs relationnels sans ET/OU/NON",
+  !suggest("algebra", "R1 := ", SCHEMA, true).items.some((i) => ["ET", "OU", "NON"].includes(i.label)));
 
 console.log(`${pass}/${pass + fail} OK - logique d'autocomplétion contextuelle`);
 process.exit(fail === 0 ? 0 : 1);
