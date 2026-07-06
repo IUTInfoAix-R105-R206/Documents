@@ -144,6 +144,40 @@ export function algebraAcceptSuffix(before, kind) {
   return "";
 }
 
+// Sur appel explicite (Ctrl+Espace) : si le mot sous le curseur est une relation/attribut
+// DÉJÀ complet, à une position où un séparateur suit, renvoie ce séparateur (sinon "").
+export function pendingSeparator(textBefore, schema) {
+  const wm = TRAILING_WORD.exec(textBefore);
+  if (!wm) return "";
+  const word = wm[0];
+  const start = textBefore.length - word.length;
+  let j = start - 1;
+  while (j >= 0 && /\s/.test(textBefore[j])) j--;
+  const prev = j >= 0 ? textBefore[j] : "";
+  let kind = null;
+  if (prev === "(" || prev === ",") kind = "table";
+  else if (prev === "/") kind = "col";
+  else return "";
+  const wl = word.toLowerCase();
+  const list = kind === "table" ? (schema.tables || []) : (schema.allColumns || []);
+  if (!list.some((x) => x.toLowerCase() === wl)) return "";
+  return algebraAcceptSuffix(textBefore.slice(0, start), kind);
+}
+
+// Décision d'un déclenchement de complétion, testable sans DOM :
+//   { type:"separator", text } : insère directement le séparateur (nom déjà complet) ;
+//   { type:"list", start, word, items } : affiche la popup ; { type:"none" }.
+export function completionAction(mode, textBefore, schema, force = false) {
+  if (inString(textBefore)) return { type: "none" };
+  if (force && mode === "algebra") {
+    const sep = pendingSeparator(textBefore, schema);
+    if (sep) return { type: "separator", text: sep };
+  }
+  const res = suggest(mode, textBefore, schema, force);
+  if (!res.items.length) return { type: "none" };
+  return { type: "list", start: res.start, word: res.word, items: res.items };
+}
+
 // Vrai si le curseur est dans une chaîne « non fermée » (échappement SQL '' géré).
 function inString(text) {
   let inStr = false;
@@ -176,10 +210,7 @@ export function suggest(mode, textBefore, schema, force = false) {
   for (const it of raw) {
     const low = it.label.toLowerCase();
     if (!low.startsWith(w)) continue;
-    // Mot déjà tapé entièrement : rien à ajouter, SAUF (sur appel explicite en algèbre)
-    // une relation/attribut exact, dont l'acceptation insère un séparateur (/, ->, virgule).
-    if (low === w && !qualifier
-        && !(force && mode === "algebra" && (it.kind === "table" || it.kind === "col"))) continue;
+    if (low === w && !qualifier) continue; // mot déjà tapé en entier : rien à proposer
     if (seen.has(low)) continue;
     seen.add(low);
     items.push(it);
@@ -255,9 +286,17 @@ export function attachAutocomplete(textarea, opts) {
   function update(force = false) {
     if (textarea.selectionStart !== textarea.selectionEnd) return close();
     const pos = textarea.selectionStart;
-    const res = suggest(opts.getMode(), textarea.value.slice(0, pos), opts.getSchema(), force);
-    if (!res.items.length) return close();
-    items = res.items; anchorStart = res.start; active = 0;
+    const act = completionAction(opts.getMode(), textarea.value.slice(0, pos), opts.getSchema(), force);
+    if (act.type === "none") return close();
+    if (act.type === "separator") {
+      // Nom déjà complet : on insère directement le séparateur, sans proposer le mot lui-même.
+      textarea.value = textarea.value.slice(0, pos) + act.text + textarea.value.slice(pos);
+      textarea.selectionStart = textarea.selectionEnd = pos + act.text.length;
+      close();
+      if (opts.onInsert) opts.onInsert();
+      return;
+    }
+    items = act.items; anchorStart = act.start; active = 0;
     render();
     popup.style.display = "block";
     position();

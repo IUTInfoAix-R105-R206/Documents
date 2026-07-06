@@ -1,6 +1,6 @@
 // test-autocomplete.mjs - teste la logique de suggestion contextuelle (pure, sans DOM).
 //   node scripts/test-autocomplete.mjs
-import { suggest, buildAliasMap, algebraAcceptSuffix } from "../templates/web-td/js/autocomplete.js";
+import { suggest, buildAliasMap, algebraAcceptSuffix, completionAction } from "../templates/web-td/js/autocomplete.js";
 
 const SCHEMA = {
   tables: ["Client", "Voyage", "Reservation"],
@@ -76,9 +76,21 @@ check("1re relation UNION -> ', '", algebraAcceptSuffix("UNION(", "table") === "
 check("2e relation JOINTURE -> ' / '", algebraAcceptSuffix("JOINTURE(A, ", "table") === " / ");
 check("2e relation JOINTURE_NATURELLE -> rien", algebraAcceptSuffix("JOINTURE_NATURELLE(A, ", "table") === "");
 
-// ── Algèbre : relation/attribut exact gardé sur appel explicite (Ctrl+Espace) ──
-check("exact relation gardé avec force", suggest("algebra", "SELECTION (VOYAGE", SCHEMA, true).items.some((i) => i.label === "VOYAGE"));
-check("exact relation ignoré sans force", !suggest("algebra", "SELECTION (VOYAGE", SCHEMA, false).items.some((i) => i.label === "VOYAGE"));
+// ── Bug reproduit : sur un nom DÉJÀ complet, ne pas « proposer NUMAV mais insérer -> ».
+//    L'appel explicite doit renvoyer un SÉPARATEUR (insertion directe), jamais une liste
+//    proposant le mot déjà tapé.
+let a = completionAction("algebra", "RENOMMAGE(R1/VILLEARR", SCHEMA, true);
+check("RENOMMAGE + attribut complet -> séparateur ' -> ' (pas de liste)", a.type === "separator" && a.text === " -> ");
+a = completionAction("algebra", "SELECTION(VOYAGE", SCHEMA, true);
+check("SELECTION + relation complète -> séparateur '/'", a.type === "separator" && a.text === "/");
+a = completionAction("algebra", "SELECTION(VOYAGE", SCHEMA, true);
+check("jamais de proposition égale au mot déjà tapé", a.type !== "list" || !a.items.some((i) => i.label === "VOYAGE"));
+a = completionAction("algebra", "SELECTION(VO", SCHEMA, true);
+check("nom partiel -> liste normale (propose VOYAGE)", a.type === "list" && a.items.some((i) => i.label === "VOYAGE"));
+a = completionAction("algebra", "SELECTION(VOYAGE/VILLEARR", SCHEMA, true);
+check("attribut complet sans séparateur (SELECTION) -> rien", a.type === "none");
+a = completionAction("sql", "WHERE ville = 'MAR", SCHEMA, true);
+check("dans une chaîne -> rien (action none)", a.type === "none");
 
 console.log(`${pass}/${pass + fail} OK - logique d'autocomplétion contextuelle`);
 process.exit(fail === 0 ? 0 : 1);
