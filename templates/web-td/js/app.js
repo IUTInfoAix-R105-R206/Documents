@@ -492,9 +492,9 @@ async function main() {
   state = store.load();
 
   renderHeader(root);
-  renderHowItWorks(root);
   await renderSchemaPanel(root);
   if (mode === "algebra") renderSyntaxPanel(root);
+  renderHowItWorks(root);
 
   const main = el("main", { class: "sections" });
   for (const section of questions.sections) {
