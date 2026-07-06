@@ -1,0 +1,23 @@
+-- Agence immobilière — données de test (R1.05 TD2, exercice 2)
+-- Valeurs en MAJUSCULES sans diacritiques (convention du cours).
+-- Jeu conçu pour que les requêtes aient des réponses non triviales :
+--   - MARTIN JEAN (proprio 1) possède les 3 types d'appartements (division Q18) ;
+--   - MOREAU LUC (code 4) est à la fois propriétaire et locataire (Q15) ;
+--   - certains appartements sont inoccupés (Q17), certains proprios n'ont pas de
+--     bien à AIX (Q16), certains locataires ne sont pas proprios (Q19).
+
+INSERT INTO PROPRIO (CODEP, NOM, PRENOM) VALUES (1, 'MARTIN', 'JEAN');
+INSERT INTO PROPRIO (CODEP, NOM, PRENOM) VALUES (2, 'DURAND', 'MARIE');
+INSERT INTO PROPRIO (CODEP, NOM, PRENOM) VALUES (3, 'PETIT', 'PAUL');
+INSERT INTO PROPRIO (CODEP, NOM, PRENOM) VALUES (4, 'MOREAU', 'LUC');
+
+INSERT INTO APPART (NUM, TYPE, ADR, VILLE, SURFACE, LOYER, CODE) VALUES (101, 'STUDIO', '10 RUE ALPHA', 'AIX', 30, 500, 1);
+INSERT INTO APPART (NUM, TYPE, ADR, VILLE, SURFACE, LOYER, CODE) VALUES (102, 'T2', '20 RUE BETA', 'MARSEILLE', 55, 750, 1);
+INSERT INTO APPART (NUM, TYPE, ADR, VILLE, SURFACE, LOYER, CODE) VALUES (103, 'VILLA', '30 RUE GAMMA', 'AIX', 120, 1500, 1);
+INSERT INTO APPART (NUM, TYPE, ADR, VILLE, SURFACE, LOYER, CODE) VALUES (104, 'STUDIO', '40 RUE DELTA', 'MARSEILLE', 28, 480, 2);
+INSERT INTO APPART (NUM, TYPE, ADR, VILLE, SURFACE, LOYER, CODE) VALUES (105, 'T2', '50 RUE EPSILON', 'AIX', 60, 800, 3);
+INSERT INTO APPART (NUM, TYPE, ADR, VILLE, SURFACE, LOYER, CODE) VALUES (106, 'VILLA', '60 RUE ZETA', 'NICE', 100, 1300, 2);
+
+INSERT INTO LOCATAIRE (CODEL, NOM, PRENOM, NUM) VALUES (4, 'MOREAU', 'LUC', 102);
+INSERT INTO LOCATAIRE (CODEL, NOM, PRENOM, NUM) VALUES (5, 'BERNARD', 'ANNE', 101);
+INSERT INTO LOCATAIRE (CODEL, NOM, PRENOM, NUM) VALUES (6, 'THOMAS', 'ERIC', 103);

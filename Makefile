@@ -73,6 +73,8 @@ R206_TEACHER_PDFS = \
 	web-td7 verify-web-td7 serve-web-td7 publish-web-td7 \
 	web-td6 verify-web-td6 serve-web-td6 publish-web-td6 \
 	web-td1-algebre verify-web-td1-algebre serve-web-td1-algebre publish-web-td1-algebre \
+	web-td2-immobilier verify-web-td2-immobilier serve-web-td2-immobilier publish-web-td2-immobilier \
+	web-td2-airbase verify-web-td2-airbase serve-web-td2-airbase publish-web-td2-airbase \
 	clean-corrections bump help
 
 help: ## Affiche cette aide
@@ -973,6 +975,51 @@ publish-web-td1-algebre: verify-web-td1-algebre ## Publie le TD1 algèbre dans l
 	@if [ -z "$(WEB_TD1_ALGEBRE_REPO)" ]; then \
 		echo "Erreur : définissez WEB_TD1_ALGEBRE_REPO=chemin/vers/depot"; exit 1; fi
 	scripts/publish-web-td.sh $(OUTPUT_DIR)/web/td1-algebre $(WEB_TD1_ALGEBRE_REPO)
+
+web-td2-immobilier: ## Génère le site d'algèbre du TD2 R1.05 exercice 2 (agence immobilière)
+	$(PYTHON) scripts/generate-web-td-algebra.py docs/r1.05/td2/td2-correction.md \
+		--data-dir docs/shared/data/immobilier \
+		--output $(OUTPUT_DIR)/web/td2-immobilier --verify-out $(OUTPUT_DIR)/web-verify/td2-immobilier \
+		--td-id r1.05-td2-immobilier --td-label "R1.05 — TD2 (agence immobilière)" \
+		--title "Agence immobilière — langage algébrique" \
+		--section-marker "Exercice n° 2" --schema-md docs/r1.05/td2/td2.md \
+		--manifest docs/r1.05/td2/web-td-ex2.json --template-dir $(WEB_TD_TEMPLATE)
+
+verify-web-td2-immobilier: web-td2-immobilier ## Vérifie hash Python == hash WASM pour le TD2 immobilier
+	$(NODE) scripts/verify-web-td-algebra.mjs $(OUTPUT_DIR)/web/td2-immobilier $(OUTPUT_DIR)/web-verify/td2-immobilier
+
+serve-web-td2-immobilier: web-td2-immobilier ## Sert le site du TD2 immobilier en local (http://localhost:8000)
+	@echo "→ http://localhost:8000  (Ctrl-C pour arrêter)"
+	@cd $(OUTPUT_DIR)/web/td2-immobilier && $(PYTHON) -m http.server 8000
+
+publish-web-td2-immobilier: verify-web-td2-immobilier ## Publie le TD2 immobilier dans le sous-dossier immobilier/ (WEB_TD2_REPO=chemin)
+	@if [ -z "$(WEB_TD2_REPO)" ]; then \
+		echo "Erreur : définissez WEB_TD2_REPO=chemin/vers/depot"; exit 1; fi
+	scripts/publish-web-td.sh $(OUTPUT_DIR)/web/td2-immobilier $(WEB_TD2_REPO) immobilier
+
+WEB_TD2_AIRBASE_SCHEMA_EXTRA = <strong>PILOTE</strong> (<u>NUMPIL</u>, NOMPIL, ADR, SALAIRE)|<strong>AVION</strong> (<u>NUMAV</u>, NOMAV, CAPACITE, LOCALISATION)|<strong>VOL</strong> (<u>NUMVOL</u>, <em>NUMPIL\#</em>, <em>NUMAV\#</em>, VILLE_DEP, VILLE_ARR)
+
+web-td2-airbase: ## Génère le site d'algèbre du TD2 R1.05 exercice 1 (Airbase, formations)
+	$(PYTHON) scripts/generate-web-td-algebra.py docs/r1.05/td2/td2-correction.md \
+		--data-dir docs/shared/data/airbase-td2 \
+		--output $(OUTPUT_DIR)/web/td2-airbase --verify-out $(OUTPUT_DIR)/web-verify/td2-airbase \
+		--td-id r1.05-td2-airbase --td-label "R1.05 — TD2 (Airbase, formations)" \
+		--title "Airbase — langage algébrique" \
+		--section-marker "Exercice n° 1" --schema-md docs/r1.05/td2/td2.md \
+		--schema-extra '$(WEB_TD2_AIRBASE_SCHEMA_EXTRA)' \
+		--manifest docs/r1.05/td2/web-td-ex1.json --template-dir $(WEB_TD_TEMPLATE)
+
+verify-web-td2-airbase: web-td2-airbase ## Vérifie hash Python == hash WASM pour le TD2 Airbase
+	$(NODE) scripts/verify-web-td-algebra.mjs $(OUTPUT_DIR)/web/td2-airbase $(OUTPUT_DIR)/web-verify/td2-airbase
+
+serve-web-td2-airbase: web-td2-airbase ## Sert le site du TD2 Airbase en local (http://localhost:8000)
+	@echo "→ http://localhost:8000  (Ctrl-C pour arrêter)"
+	@cd $(OUTPUT_DIR)/web/td2-airbase && $(PYTHON) -m http.server 8000
+
+publish-web-td2-airbase: verify-web-td2-airbase ## Publie le TD2 Airbase dans le sous-dossier airbase/ (WEB_TD2_REPO=chemin)
+	@if [ -z "$(WEB_TD2_REPO)" ]; then \
+		echo "Erreur : définissez WEB_TD2_REPO=chemin/vers/depot"; exit 1; fi
+	scripts/publish-web-td.sh $(OUTPUT_DIR)/web/td2-airbase $(WEB_TD2_REPO) airbase
 
 # ==============================================================================
 # Versionnage
