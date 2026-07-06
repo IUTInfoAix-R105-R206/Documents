@@ -1,0 +1,11 @@
+ŒUVRE: Titre, _Auteur
+:
+ORCHESTRE: NomO, Type, Pays
+
+Donne lieu/Est tiré de, 0n ŒUVRE, 11 MORCEAU DE DISQUE
+Est enregistré par/Enregistre, 0n ORCHESTRE, 11 MORCEAU DE DISQUE
+:
+
+MORCEAU DE DISQUE: Identification, Marque, Date, N°arrangement
+Est interprété/Interprète, 1n MORCEAU DE DISQUE, 0n PERSONNE: rôle
+PERSONNE: N° Personne, Nom, Type-voix, Instrument princ.

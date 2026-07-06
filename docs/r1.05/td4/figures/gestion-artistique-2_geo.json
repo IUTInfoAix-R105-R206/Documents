@@ -1,0 +1,22 @@
+{
+  "width": 560,
+  "height": 201,
+  "cx": [
+    [ "MORCEAU_DE_MUSIQUE", 100 ],
+    [ "EST_INTERPRETE_INTERPRETE", 311 ],
+    [ "PERSONNE", 491 ],
+    [ "ENREGISTREMENT", 311 ]
+  ],
+  "cy": [
+    [ "MORCEAU_DE_MUSIQUE", 72 ],
+    [ "EST_INTERPRETE_INTERPRETE", 72 ],
+    [ "PERSONNE", 72 ],
+    [ "ENREGISTREMENT", 162 ]
+  ],
+  "shift": [
+    [ "EST_INTERPRETE_INTERPRETE,MORCEAU_DE_MUSIQUE,0", 0 ],
+    [ "EST_INTERPRETE_INTERPRETE,PERSONNE,0", 0 ],
+    [ "EST_INTERPRETE_INTERPRETE,ENREGISTREMENT,0", 0 ]
+  ],
+  "ratio": []
+}

@@ -1,0 +1,11 @@
+:
+inscription, 0n JOUEUR, 12 MATCH: date
+
+JOUEUR: N°Joueur, Nom, An_naiss, Pays, Classement
+:
+MATCH: N° match, Nom_Arbitre, N°Jour, Heure_Deb, N°Court, Score
+dans, 11 MATCH, 1n TOURNOI
+TOURNOI: Lieu, _An_Tournoi, Mois_Deb, Jour_Deb
+
+:
+gagnant, 0n JOUEUR, 01 MATCH

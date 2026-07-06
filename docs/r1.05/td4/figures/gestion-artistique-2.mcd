@@ -1,0 +1,7 @@
+MORCEAU DE MUSIQUE: Identification, Date publication, N° Arrangement
+Est interprété/Interprète, 1n MORCEAU DE MUSIQUE, 0n PERSONNE, 1n ENREGISTREMENT: rôle
+PERSONNE: N° Personne, Nom, Type Voix, Instrument princ.
+
+:
+ENREGISTREMENT: N° Enregistrement
+:

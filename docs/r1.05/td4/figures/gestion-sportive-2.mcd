@@ -1,0 +1,6 @@
+:
+MATCH, 0n [Est gagnant] JOUEUR, 0n [Est battu] JOUEUR, 1n TOURNOI: Nom-arbitre, N°Jour, Heure_Deb, N°Court, Score
+
+JOUEUR: N°Joueur, Nom, An_Naiss, Pays, Classement
+:
+TOURNOI: Lieu, _An_Tournoi, Mois_Deb, Jour_Deb

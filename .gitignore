@@ -14,8 +14,11 @@ output/
 node_modules/
 package-lock.json
 yarn.lock
-# Figures PDF générées (compilées depuis les .tex)
+# Figures PDF générées (compilées depuis les .tex ou les .mcd)
 docs/**/figures/*.pdf
+
+# Figures Mocodo : SVG intermédiaires (les .mcd et *_geo.json sont versionnés)
+docs/**/figures/*.svg
 
 # Fichiers temporaires Inkscape (générés par le package svg)
 docs/**/svg-inkscape/

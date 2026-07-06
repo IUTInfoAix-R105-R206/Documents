@@ -1,0 +1,29 @@
+{
+  "width": 472,
+  "height": 362,
+  "cx": [
+    [ "INSCRIPTION", 209 ],
+    [ "JOUEUR", 49 ],
+    [ "MATCH", 209 ],
+    [ "DANS", 315 ],
+    [ "TOURNOI", 418 ],
+    [ "GAGNANT", 209 ]
+  ],
+  "cy": [
+    [ "INSCRIPTION", 39 ],
+    [ "JOUEUR", 181 ],
+    [ "MATCH", 181 ],
+    [ "DANS", 181 ],
+    [ "TOURNOI", 181 ],
+    [ "GAGNANT", 323 ]
+  ],
+  "shift": [
+    [ "INSCRIPTION,JOUEUR,0", 0 ],
+    [ "INSCRIPTION,MATCH,0", 0 ],
+    [ "DANS,MATCH,0", 0 ],
+    [ "DANS,TOURNOI,0", 0 ],
+    [ "GAGNANT,JOUEUR,0", 0 ],
+    [ "GAGNANT,MATCH,0", 0 ]
+  ],
+  "ratio": []
+}

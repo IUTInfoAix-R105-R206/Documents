@@ -1,0 +1,47 @@
+{
+  "width": 350,
+  "height": 335,
+  "cx": [
+    [
+      "MATCH",
+      175
+    ],
+    [
+      "JOUEUR",
+      57
+    ],
+    [
+      "TOURNOI",
+      296
+    ]
+  ],
+  "cy": [
+    [
+      "MATCH",
+      71
+    ],
+    [
+      "JOUEUR",
+      255
+    ],
+    [
+      "TOURNOI",
+      255
+    ]
+  ],
+  "shift": [
+    [
+      "MATCH,JOUEUR,-1_0",
+      0
+    ],
+    [
+      "MATCH,JOUEUR,1_0",
+      40
+    ],
+    [
+      "MATCH,TOURNOI,0",
+      0
+    ]
+  ],
+  "ratio": []
+}

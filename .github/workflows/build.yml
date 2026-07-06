@@ -56,6 +56,9 @@ jobs:
             lmodern \
             inkscape
 
+      - name: Install Mocodo (figures MCD)
+        run: pipx install "$(grep '^mocodo' requirements.txt)"
+
       - name: Build all PDFs
         run: make all
 

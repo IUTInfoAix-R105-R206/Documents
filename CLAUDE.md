@@ -48,6 +48,8 @@ templates/filters/           → Filtres Lua pour Pandoc (styles personnalisés)
 templates/cc-by-nc-sa.svg    → Badge licence Creative Commons (vectoriel, source)
 templates/tikz-er2.sty       → Package TikZ pour diagrammes ER (ellipses associations)
 templates/pgf-umlcd.sty      → Package TikZ UML class diagrams
+templates/mocodo-colors.json → Palette Mocodo (bleu/jaune, même style que tikz-er2)
+templates/mocodo-shapes.json → Formes Mocodo (police Latin Modern Roman)
 scripts/                     → Scripts utilitaires (test-sql.py, generate-sql-report.py)
 .github/workflows/           → CI GitHub Actions (build PDF + test SQL)
 output/                      → PDF générés (gitignored)
@@ -62,6 +64,8 @@ Markdown → Pandoc (avec filtre Lua `custom-styles.lua`) → LaTeX (via `templa
 Le flag `--shell-escape` est requis pour que le package LaTeX `svg` puisse invoquer Inkscape afin de convertir le badge CC BY-NC-SA depuis le SVG.
 
 Les figures sont des fichiers LaTeX `standalone` compilés séparément en PDF puis inclus dans le document principal. Elles utilisent les packages `forest` (arbres) et `tikz-er2` (diagrammes MCD).
+
+Exception : les MCD du TD4 R1.05 sont générés par **Mocodo** (sources `.mcd`) au lieu de TikZ, voir la section « Figures Mocodo ».
 
 ## Conventions Markdown des sujets
 
@@ -155,8 +159,9 @@ sudo apt-get install build-essential pandoc texlive-latex-base texlive-latex-ext
   texlive-pictures texlive-science texlive-plain-generic lmodern inkscape sqlite3
 ```
 
-- `inkscape` : requis pour la compilation des SVG via le package LaTeX `svg`
+- `inkscape` : requis pour la compilation des SVG via le package LaTeX `svg` et la conversion SVG → PDF des figures Mocodo
 - `sqlite3` : requis pour `make test-sql-sqlite-local` (tests SQL sans PostgreSQL ni Docker)
+- `mocodo` : requis pour les figures MCD du TD4 R1.05 (`pipx install mocodo` ou `pip install -r requirements.txt`)
 
 Pour les tests SQL : PostgreSQL, SQLite, ou Oracle selon disponibilité.
 
@@ -228,6 +233,14 @@ Le template LaTeX reproduit l'apparence d'un document professionnel :
 - **Attributs** : noms camelCase du schéma relationnel (`numEt`, `heureCMPrev`, `coefCC`…), pas les anciens noms `H_Cours_Prev`
 - **Cardinalités** : placées via des **ancres de bord** des entités (ex: `mat.south`, `etud.north`, `mat.315`) plutôt que le centre, pour que `pos=0.1` tombe dans l'espace entre entité et association - les valeurs `pos` sont ajustées manuellement par lien
 
+### Figures Mocodo (MCD du TD4 R1.05)
+- Sources `.mcd` dans `docs/r1.05/td4/figures/`, pipeline : `.mcd` → Mocodo → `.svg` → Inkscape → `.pdf`
+- Style commun dans `templates/` : `mocodo-colors.json` (bleu/jaune comme tikz-er2) et `mocodo-shapes.json` (police Latin Modern Roman, la seule sans-empattement connue de Mocodo qui corresponde au corps du document ; les polices Liberation ne sont pas dans ses métriques et retomberaient sur Courier New)
+- Cardinalités écrites en minuscules dans les `.mcd` (`0n`, `11`, `12`) + `--card_format "({min_card},{max_card})"` → rendu `(0,n)` identique aux figures TikZ
+- **Disposition figée** : chaque figure a un `<figure>_geo.json` versionné, relu via `--reuse_geo`. Après modification d'un `.mcd` : relancer `mocodo` sans `--reuse_geo` pour recalculer la géométrie, l'ajuster à la main (cx/cy/width/height, `shift` pour glisser une cardinalité le long d'une patte), puis committer
+- **Rôles de patte** (`[Est gagnant]`) : Mocodo ne les rend qu'en infobulle interactive ; `scripts/mocodo-static-notes.py` les réécrit en libellés statiques italiques et supprime script + calques d'infobulle (Inkscape ignore `visibility="hidden"`, sinon un bandeau sombre apparaît dans le PDF)
+- Mocodo est épinglé dans `requirements.txt` (installé via pipx en CI)
+
 ### Makefile
 Les règles de compilation spécifient explicitement tous les paramètres Pandoc au lieu de réutiliser `PANDOC_OPTS`, pour permettre l'ajustement correct des chemins relatifs lors du `cd docs/r2.06/td3`.
 
@@ -236,7 +249,7 @@ Les règles de compilation spécifient explicitement tous les paramètres Pandoc
 - **Données** : les valeurs dans la base de données sont en MAJUSCULES sans diacritiques (convention du cours)
 - **SQL** : les corrections suivent la syntaxe Oracle (le cours utilise Oracle)
 - **Corrections SQL** : doivent inclure les annotations `-- QN - c:X, t:Y` pour les tests automatisés
-- **Figures TikZ** : doivent rester en format texte pour être diffables et versionnables
+- **Figures TikZ/Mocodo** : doivent rester en format texte pour être diffables et versionnables (sources `.tex` ou `.mcd` + `_geo.json`)
 - **Placement des figures** : ne pas forcer avec `H` ; référencer les figures avec `` `figure~\ref{fig:X}`{=latex} `` dans le texte ; figures larges en `sidewaysfigure`
 - **Output** : ne jamais modifier les fichiers dans `output/` (générés automatiquement par `make`)
 - **Tests** : toute nouvelle requête SQL doit être validée avec `make test-sql-postgresql-local` (ou `make test-sql-sqlite-local`) avant commit
@@ -290,6 +303,7 @@ Notes :
 - ✅ Makefile avec cibles par ressource (r105, r206, all, clean)
 - ✅ Filtre Lua pour styles personnalisés (pk, fk, pkfk, expected)
 - ✅ Figures TikZ (hiérarchie modules, MCD avec tikz-er2)
+- ✅ Figures Mocodo (MCD du TD4 R1.05, sources `.mcd` + géométrie versionnée)
 - ✅ Template LaTeX reproduisant le style professionnel
 - ✅ Badge CC BY-NC-SA vectoriel (SVG via package `svg` + Inkscape)
 - ✅ Versionnage dynamique depuis git (tag ou SHA1 court)
