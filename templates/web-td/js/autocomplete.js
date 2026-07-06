@@ -66,14 +66,19 @@ function lastClauseKeyword(text) {
   return last;
 }
 
+// Relations et attributs proposés en MAJUSCULES (SQLite et le compilateur d'algèbre
+// sont insensibles à la casse) ; les mots-clés/opérateurs sont déjà en majuscules.
+const upTables = (schema) => (schema.tables || []).map((x) => ({ label: x.toUpperCase(), kind: "table" }));
+const upCols = (list) => (list || []).map((x) => ({ label: x.toUpperCase(), kind: "col" }));
+
 function sqlCandidates(textBefore, start, qualifier, schema) {
-  const tables = (schema.tables || []).map((x) => ({ label: x, kind: "table" }));
-  const cols = (schema.allColumns || []).map((x) => ({ label: x, kind: "col" }));
+  const tables = upTables(schema);
+  const cols = upCols(schema.allColumns);
   const kw = [...SQL_KEYWORDS, ...SQL_FUNCTIONS].map((x) => ({ label: x, kind: "kw" }));
   if (qualifier) {
     const table = resolveTable(qualifier, textBefore, schema);
     const list = table && schema.columns[table] ? schema.columns[table] : (schema.allColumns || []);
-    return list.map((x) => ({ label: x, kind: "col" }));
+    return upCols(list);
   }
   const ctx = lastClauseKeyword(textBefore.slice(0, start));
   if (ctx === "FROM" || ctx === "JOIN") return [...tables, ...kw];
@@ -81,8 +86,8 @@ function sqlCandidates(textBefore, start, qualifier, schema) {
 }
 
 function algebraCandidates(textBefore, start, schema) {
-  const tables = (schema.tables || []).map((x) => ({ label: x, kind: "table" }));
-  const cols = (schema.allColumns || []).map((x) => ({ label: x, kind: "col" }));
+  const tables = upTables(schema);
+  const cols = upCols(schema.allColumns);
   const ops = ALGEBRA_OPERATORS.map((x) => ({ label: x, kind: "kw" }));
   const before = textBefore.slice(0, start);
   const trimmed = before.replace(/\s+$/, "");
@@ -95,8 +100,20 @@ function algebraCandidates(textBefore, start, schema) {
   return [...ops, ...tables, ...cols];
 }
 
+// Vrai si le curseur est dans une chaîne « non fermée » (échappement SQL '' géré).
+function inString(text) {
+  let inStr = false;
+  for (let i = 0; i < text.length; i++) {
+    if (text[i] !== "'") continue;
+    if (inStr && text[i + 1] === "'") { i++; continue; } // '' échappé
+    inStr = !inStr;
+  }
+  return inStr;
+}
+
 // Renvoie { start, word, items:[{label, kind}] } ; items filtrés par préfixe (casse ignorée).
 export function suggest(mode, textBefore, schema, force = false) {
+  if (inString(textBefore)) return { start: textBefore.length, word: "", items: [] };
   const wm = TRAILING_WORD.exec(textBefore);
   const word = wm ? wm[0] : "";
   const start = textBefore.length - word.length;
