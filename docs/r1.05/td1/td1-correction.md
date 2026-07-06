@@ -263,10 +263,10 @@ Q14
 
 ```
 R14.1 := SELECTION (Pilote / nomPil <> 'DURAND')
-R14.2 := PROJECTION (R14.1 / numPil)
+R14.2 := PROJECTION (R14.1 / numPil, nomPil)
 R14.3 := RENOMMAGE (Vol / numPil -> numPilVol)
 R14.4 := JOINTURE (R14.2, R14.3 / numPil = numPilVol)
-R14.5 := PROJECTION (R14.4 / numPil)
+R14.5 := PROJECTION (R14.4 / nomPil)
 ```
 
 Q15
