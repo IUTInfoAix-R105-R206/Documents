@@ -91,8 +91,8 @@ jobs:
           fi
           echo "Artefact td-pdfs depuis le run ${RUN_ID:-<aucun>}"
           if [ -n "$RUN_ID" ] && gh run download "$RUN_ID" -n td-pdfs -D pdf-artifact 2>/dev/null; then
-            mkdir -p output/r1.05/td1 output/r1.05/td2 output/r1.05/td6 output/r1.05/td7
-            for td in td1 td2 td6 td7; do
+            for td in td1 td2 td3 td4 td5 td6 td7; do
+              mkdir -p "output/r1.05/$td"
               f=$(find pdf-artifact -name "$td.pdf" 2>/dev/null | head -1 || true)
               if [ -n "$f" ]; then cp "$f" "output/r1.05/$td/$td.pdf"; echo "  PDF $td <- $f"; fi
             done
@@ -125,3 +125,7 @@ jobs:
           clone TD2
           publish "TD2 airbase"     publish-web-td2-airbase   WEB_TD2_REPO=/tmp/TD2
           publish "TD2 immobilier"  publish-web-td2-immobilier WEB_TD2_REPO=/tmp/TD2
+          # Pages minimales (lien PDF seul) : TD3/TD4/TD5.
+          clone TD3; publish "TD3 (PDF)"        publish-web-td3         WEB_TD3_REPO=/tmp/TD3
+          clone TD4; publish "TD4 (PDF)"        publish-web-td4         WEB_TD4_REPO=/tmp/TD4
+          clone TD5; publish "TD5 (PDF)"        publish-web-td5         WEB_TD5_REPO=/tmp/TD5

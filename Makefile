@@ -1035,6 +1035,47 @@ publish-web-td2-airbase: verify-web-td2-airbase ## Publie le TD2 Airbase dans le
 		echo "Erreur : définissez WEB_TD2_REPO=chemin/vers/depot"; exit 1; fi
 	scripts/publish-web-td.sh $(OUTPUT_DIR)/web/td2-airbase $(WEB_TD2_REPO) airbase
 
+# ── Pages minimales (lien PDF seul) : R1.05 TD3/TD4/TD5 (sans contenu interactif) ──
+# Ces TD se font sur feuille (dépendances fonctionnelles, modèle E/A) : la page ne
+# contient qu'un lien vers le PDF du sujet, copié dans le dépôt étudiant pour rester
+# accessible quand Documents sera privé. Le PDF doit exister (make r105 / artefact CI).
+WEB_TD3_PDF = $(OUTPUT_DIR)/r1.05/td3/td3.pdf
+WEB_TD4_PDF = $(OUTPUT_DIR)/r1.05/td4/td4.pdf
+WEB_TD5_PDF = $(OUTPUT_DIR)/r1.05/td5/td5.pdf
+WEB_LANDING_DEPLOY = $(WEB_TD_TEMPLATE)/.github/workflows/deploy-pages.yml
+
+.PHONY: web-td3 web-td4 web-td5 publish-web-td3 publish-web-td4 publish-web-td5
+
+web-td3: ## Génère la page minimale (lien PDF) du TD3 R1.05
+	$(PYTHON) scripts/generate-web-td-landing.py --output $(OUTPUT_DIR)/web/td3 \
+		--td-label "R1.05 - TD3" --title "Dépendances fonctionnelles et normalisation" \
+		--pdf $(WEB_TD3_PDF) --deploy-workflow $(WEB_LANDING_DEPLOY)
+
+publish-web-td3: web-td3 ## Publie la page du TD3 dans le dépôt étudiant (WEB_TD3_REPO=chemin)
+	@if [ -z "$(WEB_TD3_REPO)" ]; then \
+		echo "Erreur : définissez WEB_TD3_REPO=chemin/vers/depot"; exit 1; fi
+	scripts/publish-web-td.sh $(OUTPUT_DIR)/web/td3 $(WEB_TD3_REPO)
+
+web-td4: ## Génère la page minimale (lien PDF) du TD4 R1.05
+	$(PYTHON) scripts/generate-web-td-landing.py --output $(OUTPUT_DIR)/web/td4 \
+		--td-label "R1.05 - TD4" --title "Modèle Entité/Association et traduction relationnelle" \
+		--pdf $(WEB_TD4_PDF) --deploy-workflow $(WEB_LANDING_DEPLOY)
+
+publish-web-td4: web-td4 ## Publie la page du TD4 dans le dépôt étudiant (WEB_TD4_REPO=chemin)
+	@if [ -z "$(WEB_TD4_REPO)" ]; then \
+		echo "Erreur : définissez WEB_TD4_REPO=chemin/vers/depot"; exit 1; fi
+	scripts/publish-web-td.sh $(OUTPUT_DIR)/web/td4 $(WEB_TD4_REPO)
+
+web-td5: ## Génère la page minimale (lien PDF) du TD5 R1.05
+	$(PYTHON) scripts/generate-web-td-landing.py --output $(OUTPUT_DIR)/web/td5 \
+		--td-label "R1.05 - TD5" --title "Conception avec le modèle Entité/Association" \
+		--pdf $(WEB_TD5_PDF) --deploy-workflow $(WEB_LANDING_DEPLOY)
+
+publish-web-td5: web-td5 ## Publie la page du TD5 dans le dépôt étudiant (WEB_TD5_REPO=chemin)
+	@if [ -z "$(WEB_TD5_REPO)" ]; then \
+		echo "Erreur : définissez WEB_TD5_REPO=chemin/vers/depot"; exit 1; fi
+	scripts/publish-web-td.sh $(OUTPUT_DIR)/web/td5 $(WEB_TD5_REPO)
+
 # ==============================================================================
 # Versionnage
 # ==============================================================================
