@@ -614,8 +614,10 @@ docs/r1.05/td4/figures/%.svg: docs/r1.05/td4/figures/%.mcd docs/r1.05/td4/figure
 	$(PYTHON) scripts/mocodo-static-notes.py $@
 	rm -f docs/r1.05/td4/figures/$*_static.svg
 
+# --export-area-page : sans lui, l'export PDF d'Inkscape recadre sur la boîte
+# englobante du dessin et les bordures des entités sont rognées dans le PDF
 docs/r1.05/td4/figures/%.pdf: docs/r1.05/td4/figures/%.svg
-	$(INKSCAPE) $< --export-type=pdf --export-filename=$@
+	$(INKSCAPE) $< --export-type=pdf --export-area-page --export-filename=$@
 
 $(OUTPUT_DIR)/r1.05/td4/td4.pdf: docs/r1.05/td4/td4.md $(TEMPLATE_DIR)/template.tex $(FILTER_DIR)/custom-styles.lua $(R105_TD4_FIGURES)
 	@mkdir -p $(OUTPUT_DIR)/r1.05/td4
