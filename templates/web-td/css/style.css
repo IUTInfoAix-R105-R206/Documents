@@ -169,3 +169,14 @@ body {
 
 .engine-status { text-align: center; color: var(--muted); font-size: .9rem; padding: 1rem; }
 .fatal { color: var(--ko-ink); font-weight: 600; }
+
+/* Questions de cours (mode algèbre) */
+.question-theory { border-left: 3px solid var(--accent); }
+.q-theory-note { color: var(--muted); font-size: .85rem; font-style: italic; margin: .4rem 0 0; }
+
+/* Schéma relationnel (mode algèbre) */
+.schema-rel { padding: .5rem 1rem 1rem; border-top: 1px solid var(--border); }
+.schema-rel-line { font-family: var(--mono); font-size: .9rem; margin: .35rem 0; }
+.schema-rel-line u { text-decoration: underline; }
+.schema-rel-line em { font-style: italic; }
+.schema-rel-line strong { font-weight: 700; }

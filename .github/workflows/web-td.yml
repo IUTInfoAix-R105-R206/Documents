@@ -19,6 +19,11 @@ on:
       - 'scripts/td_correction.py'
       - 'scripts/sqlite_compat.py'
       - 'scripts/webtd_canon.py'
+      - 'scripts/generate-web-td-algebra.py'
+      - 'scripts/algebra-run.mjs'
+      - 'scripts/verify-web-td-algebra.mjs'
+      - 'docs/r1.05/td1/td1-correction.md'
+      - 'docs/r1.05/td1/web-td.json'
       - 'templates/web-td/**'
       - '.github/workflows/web-td.yml'
   pull_request:
@@ -33,6 +38,11 @@ on:
       - 'scripts/td_correction.py'
       - 'scripts/sqlite_compat.py'
       - 'scripts/webtd_canon.py'
+      - 'scripts/generate-web-td-algebra.py'
+      - 'scripts/algebra-run.mjs'
+      - 'scripts/verify-web-td-algebra.mjs'
+      - 'docs/r1.05/td1/td1-correction.md'
+      - 'docs/r1.05/td1/web-td.json'
       - 'templates/web-td/**'
       - '.github/workflows/web-td.yml'
 
@@ -41,7 +51,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        td: [td6, td7]
+        td: [td6, td7, td1-algebre]
 
     steps:
       - uses: actions/checkout@v4

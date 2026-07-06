@@ -3,12 +3,15 @@
 import { initEngine, runQuery } from "./engine.js";
 import { hashResult } from "./canon.js";
 import { makeStore, buildExport, downloadText, exportFilename } from "./store.js";
-import { highlightSQL } from "./highlight.js";
+import { highlightSQL, highlightAlgebra } from "./highlight.js";
+import { compileAlgebra, AlgebraError } from "./algebra.js";
 
 const MAX_DISPLAY_ROWS = 50;
 
 let questions = null;
 let store = null;
+let mode = "sql";       // "sql" | "algebra"
+let catalog = null;     // schéma des tables (mode algèbre)
 let state = { answers: {}, name: "" };
 const cards = new Map(); // id -> { statusEl, resultEl, feedbackEl }
 
@@ -76,6 +79,17 @@ function renderHeader(root) {
 // ── Panneau schéma ──────────────────────────────────────────────────────────
 
 async function renderSchemaPanel(root) {
+  const rel = questions.database && questions.database.relationalSchema;
+  // Mode algèbre : afficher le schéma relationnel (notation du cours), pas le SQL.
+  if (mode === "algebra" && Array.isArray(rel) && rel.length) {
+    const details = el("details", { class: "schema-panel", attrs: { open: "" } });
+    details.appendChild(el("summary", { text: "Schéma relationnel" }));
+    const box = el("div", { class: "schema-rel" });
+    for (const line of rel) box.appendChild(el("div", { class: "schema-rel-line", html: line }));
+    details.appendChild(box);
+    root.appendChild(details);
+    return;
+  }
   const details = el("details", { class: "schema-panel" });
   details.appendChild(el("summary", { text: "Schéma de la base de données" }));
   const pre = el("pre", { class: "schema-sql", text: "Chargement…" });
@@ -221,18 +235,22 @@ function renderQuestion(container, question) {
   }
 
   // Éditeur : textarea transparent au-dessus d'un calque <pre> colorié.
+  const placeholder = mode === "algebra"
+    ? "Écrivez votre expression algébrique ici…"
+    : "Écrivez votre requête SQL ici…";
   const textarea = el("textarea", {
     class: "q-input",
-    attrs: { spellcheck: "false", rows: "4", placeholder: "Écrivez votre requête SQL ici…" },
+    attrs: { spellcheck: "false", rows: "4", placeholder },
   });
   textarea.value = state.answers[question.id] || "";
   const highlightCode = el("code");
   const highlightPre = el("pre", { class: "q-highlight", attrs: { "aria-hidden": "true" } }, [highlightCode]);
   const editor = el("div", { class: "q-editor" }, [highlightPre, textarea]);
+  const highlight = mode === "algebra" ? highlightAlgebra : highlightSQL;
 
   function syncHighlight() {
     // Ajoute un espace final pour qu'une ligne vide terminale s'affiche comme dans le textarea.
-    highlightCode.innerHTML = highlightSQL(textarea.value + "\n");
+    highlightCode.innerHTML = highlight(textarea.value + "\n");
     highlightPre.scrollTop = textarea.scrollTop;
     highlightPre.scrollLeft = textarea.scrollLeft;
   }
@@ -269,8 +287,8 @@ function renderQuestion(container, question) {
   const feedbackEl = el("div", { class: "q-feedback" });
 
   async function run() {
-    const sql = textarea.value.trim();
-    if (!sql) {
+    const input = textarea.value.trim();
+    if (!input) {
       resultEl.replaceChildren();
       feedbackEl.replaceChildren();
       status.textContent = "";
@@ -279,6 +297,19 @@ function renderQuestion(container, question) {
     state.answers[question.id] = textarea.value;
     store.save(state);
     try {
+      let sql = input;
+      if (mode === "algebra") {
+        try {
+          sql = compileAlgebra(input, catalog).sql;
+        } catch (e) {
+          resultEl.replaceChildren();
+          feedbackEl.replaceChildren(el("div", { class: "feedback feedback-error" }, [
+            el("span", { class: "chip chip-ko", text: "✗ " + String(e && e.message || e) }),
+          ]));
+          status.textContent = "";
+          return;
+        }
+      }
       const result = runQuery(sql);
       resultEl.replaceChildren(renderTable(result));
       const g = await grade(question, result);
@@ -302,6 +333,15 @@ function renderQuestion(container, question) {
   container.appendChild(card);
 
   cards.set(question.id, { status });
+}
+
+// Question de cours : énoncé seul, sans éditeur ni auto-évaluation.
+function renderTheory(container, question) {
+  const card = el("section", { class: "question-card question-theory", attrs: { id: question.id } });
+  card.appendChild(el("div", { class: "q-head" }, [el("span", { class: "q-num", text: "Q" + question.num })]));
+  card.appendChild(el("p", { class: "q-statement", text: question.statement }));
+  card.appendChild(el("p", { class: "q-theory-note", text: "Question de cours — pas d'auto-évaluation." }));
+  container.appendChild(card);
 }
 
 // ── Progression ─────────────────────────────────────────────────────────────
@@ -328,6 +368,8 @@ async function main() {
     root.appendChild(el("p", { class: "fatal", text: "Impossible de charger questions.json." }));
     return;
   }
+  mode = questions.mode || "sql";
+  catalog = (questions.database && questions.database.catalog) || null;
   store = makeStore(questions.tdId);
   state = store.load();
 
@@ -340,7 +382,10 @@ async function main() {
     for (const item of section.items) {
       if (item.type === "instruction") main.appendChild(el("p", { class: "instruction", text: item.text }));
       else if (item.type === "text") main.appendChild(el("p", { class: "free-text", text: item.text }));
-      else if (item.type === "question") { totalQuestions++; renderQuestion(main, item); }
+      else if (item.type === "question") {
+        if (item.expectedCols === null) { renderTheory(main, item); }   // question de cours
+        else { totalQuestions++; renderQuestion(main, item); }
+      }
     }
   }
   root.appendChild(main);

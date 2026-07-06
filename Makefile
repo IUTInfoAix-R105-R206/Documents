@@ -72,6 +72,7 @@ R206_TEACHER_PDFS = \
 	test-sql-local test-sql-docker \
 	web-td7 verify-web-td7 serve-web-td7 publish-web-td7 \
 	web-td6 verify-web-td6 serve-web-td6 publish-web-td6 \
+	web-td1-algebre verify-web-td1-algebre serve-web-td1-algebre publish-web-td1-algebre \
 	clean-corrections bump help
 
 help: ## Affiche cette aide
@@ -952,6 +953,26 @@ publish-web-td6: verify-web-td6 ## Publie le site du TD6 dans le dépôt étudia
 	@if [ -z "$(WEB_TD6_REPO)" ]; then \
 		echo "Erreur : définissez WEB_TD6_REPO=chemin/vers/depot"; exit 1; fi
 	scripts/publish-web-td.sh $(OUTPUT_DIR)/web/td6 $(WEB_TD6_REPO)
+
+web-td1-algebre: ## Génère le site web d'algèbre du TD1 R1.05 (output/web/td1-algebre)
+	$(PYTHON) scripts/generate-web-td-algebra.py docs/r1.05/td1/td1-correction.md \
+		--data-dir docs/shared/data/airbase \
+		--output $(OUTPUT_DIR)/web/td1-algebre --verify-out $(OUTPUT_DIR)/web-verify/td1-algebre \
+		--td-id r1.05-td1-algebre --td-label "R1.05 — TD1 (algèbre)" \
+		--title "Requêtes avec le langage algébrique" \
+		--manifest docs/r1.05/td1/web-td.json --template-dir $(WEB_TD_TEMPLATE)
+
+verify-web-td1-algebre: web-td1-algebre ## Vérifie hash Python == hash WASM pour le TD1 algèbre
+	$(NODE) scripts/verify-web-td-algebra.mjs $(OUTPUT_DIR)/web/td1-algebre $(OUTPUT_DIR)/web-verify/td1-algebre
+
+serve-web-td1-algebre: web-td1-algebre ## Sert le site du TD1 algèbre en local (http://localhost:8000)
+	@echo "→ http://localhost:8000  (Ctrl-C pour arrêter)"
+	@cd $(OUTPUT_DIR)/web/td1-algebre && $(PYTHON) -m http.server 8000
+
+publish-web-td1-algebre: verify-web-td1-algebre ## Publie le TD1 algèbre dans le dépôt étudiant (WEB_TD1_ALGEBRE_REPO=chemin)
+	@if [ -z "$(WEB_TD1_ALGEBRE_REPO)" ]; then \
+		echo "Erreur : définissez WEB_TD1_ALGEBRE_REPO=chemin/vers/depot"; exit 1; fi
+	scripts/publish-web-td.sh $(OUTPUT_DIR)/web/td1-algebre $(WEB_TD1_ALGEBRE_REPO)
 
 # ==============================================================================
 # Versionnage
