@@ -1,6 +1,6 @@
 // test-autocomplete.mjs - teste la logique de suggestion contextuelle (pure, sans DOM).
 //   node scripts/test-autocomplete.mjs
-import { suggest, buildAliasMap } from "../templates/web-td/js/autocomplete.js";
+import { suggest, buildAliasMap, algebraAcceptSuffix } from "../templates/web-td/js/autocomplete.js";
 
 const SCHEMA = {
   tables: ["Client", "Voyage", "Reservation"],
@@ -65,6 +65,20 @@ check("( Vo -> VOYAGE", labels(r).includes("VOYAGE") && r.items[0].kind === "tab
 // ── Algèbre : attributs après / (en MAJUSCULES) ──
 r = suggest("algebra", "SELECTION (Voyage / vi", SCHEMA);
 check("/ vi -> VILLEARR + VILLE", labels(r).includes("VILLEARR") && labels(r).includes("VILLE"));
+
+// ── Algèbre : séparateur inséré après une relation/attribut accepté ──
+check("relation SELECTION -> /", algebraAcceptSuffix("SELECTION(", "table") === "/");
+check("relation PROJECTION -> /", algebraAcceptSuffix("PROJECTION (", "table") === "/");
+check("relation RENOMMAGE -> /", algebraAcceptSuffix("RENOMMAGE (", "table") === "/");
+check("attribut RENOMMAGE -> ' -> '", algebraAcceptSuffix("RENOMMAGE (R1 / NUMAV", "col") === " -> ");
+check("attribut SELECTION -> rien", algebraAcceptSuffix("SELECTION (AVION / ", "col") === "");
+check("1re relation UNION -> ', '", algebraAcceptSuffix("UNION(", "table") === ", ");
+check("2e relation JOINTURE -> ' / '", algebraAcceptSuffix("JOINTURE(A, ", "table") === " / ");
+check("2e relation JOINTURE_NATURELLE -> rien", algebraAcceptSuffix("JOINTURE_NATURELLE(A, ", "table") === "");
+
+// ── Algèbre : relation/attribut exact gardé sur appel explicite (Ctrl+Espace) ──
+check("exact relation gardé avec force", suggest("algebra", "SELECTION (VOYAGE", SCHEMA, true).items.some((i) => i.label === "VOYAGE"));
+check("exact relation ignoré sans force", !suggest("algebra", "SELECTION (VOYAGE", SCHEMA, false).items.some((i) => i.label === "VOYAGE"));
 
 console.log(`${pass}/${pass + fail} OK - logique d'autocomplétion contextuelle`);
 process.exit(fail === 0 ? 0 : 1);

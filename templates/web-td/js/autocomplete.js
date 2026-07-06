@@ -95,9 +95,53 @@ function algebraCandidates(textBefore, start, schema) {
   let j = start - 1;
   while (j >= 0 && /\s/.test(textBefore[j])) j--;
   const prev = j >= 0 ? textBefore[j] : "";
+  // Après un comparateur ou la flèche « -> » de RENOMMAGE : valeur / nouveau nom (saisie libre).
+  if (prev === ">" || prev === "<" || prev === "=") return [];
   if (prev === "/") return [...cols, { label: "ET", kind: "kw" }, { label: "OU", kind: "kw" }, { label: "NON", kind: "kw" }];
   if (prev === "(" || prev === ",") return [...tables, ...cols];
   return [...ops, ...tables, ...cols];
+}
+
+// Opérateur (et nombre de virgules de premier niveau) de la parenthèse englobant la
+// fin de `before` — pour savoir quel séparateur suit une relation/attribut.
+function enclosingOperator(before) {
+  let depth = 0, openIdx = -1;
+  for (let i = before.length - 1; i >= 0; i--) {
+    if (before[i] === ")") depth++;
+    else if (before[i] === "(") { if (depth === 0) { openIdx = i; break; } depth--; }
+  }
+  if (openIdx < 0) return null;
+  let j = openIdx - 1;
+  while (j >= 0 && /\s/.test(before[j])) j--;
+  const m = /[A-Za-z_]+$/.exec(before.slice(0, j + 1));
+  let commas = 0, d = 0;
+  for (let i = openIdx + 1; i < before.length; i++) {
+    if (before[i] === "(") d++;
+    else if (before[i] === ")") d--;
+    else if (before[i] === "," && d === 0) commas++;
+  }
+  return { op: m ? m[0].toUpperCase() : null, commas };
+}
+
+const AL_UNARY = ["SELECTION", "PROJECTION", "RENOMMAGE"];
+const AL_BINARY = ["UNION", "INTERSECTION", "DIFFERENCE", "JOINTURE", "JOINTURE_NATURELLE", "DIVISION"];
+
+// Séparateur inséré après une relation/attribut accepté en algèbre :
+//   relation d'un opérateur unaire -> « / » ; 1re relation d'un binaire -> « , » ;
+//   2e relation d'une JOINTURE -> « / » ; attribut (ancien nom) dans RENOMMAGE -> « -> ».
+export function algebraAcceptSuffix(before, kind) {
+  const info = enclosingOperator(before);
+  if (!info || !info.op) return "";
+  if (kind === "table") {
+    if (AL_UNARY.includes(info.op)) return "/";
+    if (AL_BINARY.includes(info.op)) {
+      if (info.commas === 0) return ", ";
+      if (info.op === "JOINTURE") return " / ";
+    }
+    return "";
+  }
+  if (kind === "col" && info.op === "RENOMMAGE") return " -> ";
+  return "";
 }
 
 // Vrai si le curseur est dans une chaîne « non fermée » (échappement SQL '' géré).
@@ -132,7 +176,10 @@ export function suggest(mode, textBefore, schema, force = false) {
   for (const it of raw) {
     const low = it.label.toLowerCase();
     if (!low.startsWith(w)) continue;
-    if (low === w && !qualifier) continue; // mot déjà tapé en entier : rien à ajouter
+    // Mot déjà tapé entièrement : rien à ajouter, SAUF (sur appel explicite en algèbre)
+    // une relation/attribut exact, dont l'acceptation insère un séparateur (/, ->, virgule).
+    if (low === w && !qualifier
+        && !(force && mode === "algebra" && (it.kind === "table" || it.kind === "col"))) continue;
     if (seen.has(low)) continue;
     seen.add(low);
     items.push(it);
@@ -219,7 +266,12 @@ export function attachAutocomplete(textarea, opts) {
   function accept(i) {
     if (i < 0 || i >= items.length) return;
     const pos = textarea.selectionStart;
-    const insert = items[i].label;
+    let insert = items[i].label;
+    // En algèbre, insérer une relation/attribut ajoute le séparateur attendu (/, ->, virgule),
+    // de sorte que l'appel de complétion suivant propose la suite (attributs, nouveau nom...).
+    if (opts.getMode() === "algebra") {
+      insert += algebraAcceptSuffix(textarea.value.slice(0, anchorStart), items[i].kind);
+    }
     textarea.value = textarea.value.slice(0, anchorStart) + insert + textarea.value.slice(pos);
     textarea.selectionStart = textarea.selectionEnd = anchorStart + insert.length;
     close();
