@@ -229,4 +229,5 @@ body {
 .ac-kind { font-size: .72rem; color: var(--muted); font-family: system-ui, sans-serif; }
 .ac-kind-table, .ac-kind-rel { color: #2f855a; }
 .ac-kind-col { color: var(--accent); }
-@media (prefers-color-scheme: dark) { .ac-kind-table, .ac-kind-rel { color: #68d391; } }
+.ac-kind-op { color: #b7791f; }
+@media (prefers-color-scheme: dark) { .ac-kind-table, .ac-kind-rel { color: #68d391; } .ac-kind-op { color: #f6ad55; } }

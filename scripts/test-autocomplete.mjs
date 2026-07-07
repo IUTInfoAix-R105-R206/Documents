@@ -156,5 +156,14 @@ r = suggest("sql", "SELECT ", SCHEMA, true, "SELECT  FROM Voyage");
 check("SELECT list scopé Voyage -> colonnes de Voyage, pas de Client ni de table",
   labels(r).includes("VILLEARR") && !labels(r).includes("NOM") && !r.items.some((i) => i.kind === "table"));
 
+// ── Après une colonne dans un WHERE : comparateurs + prédicats (pas de colonnes) ──
+r = suggest("sql", "SELECT * FROM Voyage WHERE villeArr ", SCHEMA, true);
+check("WHERE colonne -> comparateurs + IN/LIKE/IS, pas de colonne ni DISTINCT",
+  labels(r).includes("=") && labels(r).includes("IN") && labels(r).includes("IS")
+  && !labels(r).includes("IDV") && !labels(r).includes("DISTINCT"));
+r = suggest("sql", "SELECT * FROM Voyage WHERE ", SCHEMA, true);
+check("WHERE (début) -> colonnes, pas de comparateur",
+  labels(r).includes("VILLEARR") && !labels(r).includes("="));
+
 console.log(`${pass}/${pass + fail} OK - logique d'autocomplétion contextuelle`);
 process.exit(fail === 0 ? 0 : 1);

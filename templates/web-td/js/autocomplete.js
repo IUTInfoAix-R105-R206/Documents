@@ -29,6 +29,9 @@ const SQL_AFTER_TABLE = ["JOIN", "INNER", "LEFT", "RIGHT", "FULL", "OUTER", "CRO
 // opérateurs, mais PAS les démarreurs de clause (SELECT/FROM/WHERE/GROUP...).
 const SQL_EXPR_KW = ["DISTINCT", "AS", "AND", "OR", "NOT", "IN", "EXISTS", "IS", "NULL",
   "LIKE", "BETWEEN", "CASE", "WHEN", "THEN", "ELSE", "END"];
+// Après une COLONNE dans une condition (WHERE/ON/HAVING) : comparateurs + prédicats.
+const SQL_COMPARATORS = ["=", "<>", "<", ">", "<=", ">="];
+const SQL_PREDICATE_KW = ["IN", "LIKE", "BETWEEN", "IS", "NOT"];
 // Opérateurs relationnels seulement (proposés en début d'expression). Les connecteurs
 // ET/OU/NON ne sont PAS complétés : ils ne peuvent pas ouvrir une condition (on commence
 // par un attribut) et sont assez courts pour être tapés à la main.
@@ -87,6 +90,13 @@ function inScopeColumns(sql, schema) {
   return cols.length ? cols : null;
 }
 
+// Le jeton `name` est-il une colonne (en portée du FROM, sinon de la base) ?
+function isInScopeColumn(name, sql, schema) {
+  const scoped = inScopeColumns(sql, schema) || schema.allColumns || [];
+  const nl = String(name).toLowerCase();
+  return scoped.some((c) => c.toLowerCase() === nl);
+}
+
 function lastClauseKeyword(text) {
   let last = null, m;
   CLAUSE_KW.lastIndex = 0;
@@ -120,8 +130,16 @@ function sqlCandidates(textBefore, start, qualifier, schema, fullText) {
     if (SQL_TABLE_EXPECTING.includes(pt)) return upTables(schema);
     return SQL_AFTER_TABLE.map((x) => ({ label: x, kind: "kw" }));
   }
+  // Après une colonne dans une condition -> comparateurs + prédicats (IN, LIKE, IS...).
+  if ((ctx === "WHERE" || ctx === "ON" || ctx === "HAVING")
+      && isInScopeColumn(prevToken(textBefore.slice(0, start)), src, schema)) {
+    return [
+      ...SQL_COMPARATORS.map((x) => ({ label: x, kind: "op" })),
+      ...SQL_PREDICATE_KW.map((x) => ({ label: x, kind: "kw" })),
+    ];
+  }
   // Position d'expression (SELECT, WHERE, GROUP BY, ON...) : colonnes (restreintes aux
-  // tables du FROM) + fonctions. Pas de tables ni de mots-clés de clause (bruit).
+  // tables du FROM) + fonctions + mots-clés d'expression. Pas de tables ni de clause.
   const cols = upCols(inScopeColumns(src, schema) || schema.allColumns);
   const kw = [...SQL_FUNCTIONS, ...SQL_EXPR_KW].map((x) => ({ label: x, kind: "kw" }));
   return [...cols, ...kw];
@@ -379,7 +397,7 @@ export function suggest(mode, textBefore, schema, force = false, fullText = null
 
 // ── Popup (DOM) ──────────────────────────────────────────────────────────────
 
-const KIND_LABEL = { table: "table", rel: "relation", col: "colonne", kw: "mot-clé" };
+const KIND_LABEL = { table: "table", rel: "relation", col: "colonne", kw: "mot-clé", op: "opérateur" };
 
 // Coordonnées (px) du curseur dans le textarea, via un div-miroir.
 function caretCoords(textarea, position) {
