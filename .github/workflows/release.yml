@@ -6,10 +6,14 @@
 # feat -> minor, fix -> patch, « BREAKING CHANGE » -> major ; les autres types
 # (docs, ci, chore, style, refactor, build, test, update) donnent un patch
 # (.releaserc.json), de sorte que chaque PR fusionnée produit une release.
-# Il crée le tag v<version> et la release GitHub avec les notes générées.
+# Il crée le tag v<version> et la release GitHub (en BROUILLON, avec les notes
+# générées : le dépôt utilise les releases immuables, verrouillées dès
+# publication).
 #
 # Job « assets » : compile tous les PDF (version forcée au tag), les corrigés
-# nettoyés et les scripts Oracle, puis attache l'archive ZIP à la release.
+# nettoyés et les scripts Oracle, attache l'archive ZIP au brouillon puis
+# publie la release. Si ce job échoue, la release reste en brouillon : le
+# relancer suffit (un brouillon reste modifiable).
 # Le chaînage se fait par « needs » : le tag étant poussé avec le
 # GITHUB_TOKEN, un déclencheur « on: push: tags » ne se lancerait jamais.
 
@@ -121,9 +125,14 @@ jobs:
       - name: Create ZIP archive
         run: cd output && zip -r ../Documents-${{ needs.version.outputs.tag }}.zip .
 
-      - name: Upload ZIP to release
+      - name: Upload ZIP and publish release
+        # La release est créée en brouillon par semantic-release (draftRelease,
+        # cf. .releaserc.json) : le dépôt utilise les releases immuables, qui
+        # refusent tout ajout d'asset après publication (HTTP 422). On attache
+        # donc le ZIP au brouillon, puis on publie.
         run: |
           gh release upload ${{ needs.version.outputs.tag }} \
             Documents-${{ needs.version.outputs.tag }}.zip --clobber
+          gh release edit ${{ needs.version.outputs.tag }} --draft=false --latest
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
