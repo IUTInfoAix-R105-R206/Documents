@@ -1,18 +1,74 @@
 # .github/workflows/release.yml
-# Compile les PDF et crée une release GitHub avec archive ZIP à chaque tag de version
+# Release automatique à chaque PR fusionnée sur main, via semantic-release.
+#
+# Job « version » : semantic-release analyse les messages de commit
+# (Conventional Commits, convention des titres de PR squash-mergées) :
+# feat -> minor, fix -> patch, « BREAKING CHANGE » -> major ; les autres types
+# (docs, ci, chore, style, refactor, build, test, update) donnent un patch
+# (.releaserc.json), de sorte que chaque PR fusionnée produit une release.
+# Il crée le tag v<version> et la release GitHub avec les notes générées.
+#
+# Job « assets » : compile tous les PDF (version forcée au tag), les corrigés
+# nettoyés et les scripts Oracle, puis attache l'archive ZIP à la release.
+# Le chaînage se fait par « needs » : le tag étant poussé avec le
+# GITHUB_TOKEN, un déclencheur « on: push: tags » ne se lancerait jamais.
 
 name: Release
 
 on:
   push:
-    tags: ['v*']
+    branches: [main]
+
+permissions:
+  contents: write        # tags + releases
+  issues: write          # commentaire sur les issues liées à la release
+  pull-requests: write   # commentaire sur les PR incluses dans la release
+
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 jobs:
-  release:
+  version:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
+    outputs:
+      released: ${{ steps.semrel.outputs.released }}
+      tag: ${{ steps.semrel.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0            # historique complet requis par semantic-release
+          persist-credentials: false
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install semantic-release
+        run: npm install --no-save semantic-release@24 conventional-changelog-conventionalcommits@8
+
+      - name: Run semantic-release
+        id: semrel
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npx semantic-release
+          # semantic-release tagge HEAD en local avant de pousser : un tag v*
+          # pointant sur HEAD signifie qu'une release vient d'être publiée.
+          tag=$(git tag --points-at HEAD | grep '^v' | head -1 || true)
+          if [ -n "$tag" ]; then
+            echo "released=true" >> "$GITHUB_OUTPUT"
+            echo "tag=$tag" >> "$GITHUB_OUTPUT"
+            echo "Release publiée : $tag"
+          else
+            echo "released=false" >> "$GITHUB_OUTPUT"
+            echo "Aucune release (pas de commit déclencheur)."
+          fi
+
+  assets:
+    needs: version
+    if: needs.version.outputs.released == 'true'
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -40,11 +96,14 @@ jobs:
             lmodern \
             inkscape
 
+      - name: Install Mocodo (figures MCD)
+        run: pipx install "$(grep '^mocodo' requirements.txt)"
+
       - name: Build all PDFs
-        run: make all GIT_VERSION=${{ github.ref_name }}
+        run: make all GIT_VERSION=${{ needs.version.outputs.tag }}
 
       - name: Build teacher PDFs
-        run: make teacher GIT_VERSION=${{ github.ref_name }}
+        run: make teacher GIT_VERSION=${{ needs.version.outputs.tag }}
 
       - name: Generate clean SQL corrections
         run: make clean-corrections
@@ -60,13 +119,11 @@ jobs:
           done
 
       - name: Create ZIP archive
-        run: cd output && zip -r ../Documents-${{ github.ref_name }}.zip .
+        run: cd output && zip -r ../Documents-${{ needs.version.outputs.tag }}.zip .
 
-      - name: Create GitHub Release
+      - name: Upload ZIP to release
         run: |
-          gh release create ${{ github.ref_name }} \
-            Documents-${{ github.ref_name }}.zip \
-            --title "${{ github.ref_name }}" \
-            --generate-notes
+          gh release upload ${{ needs.version.outputs.tag }} \
+            Documents-${{ needs.version.outputs.tag }}.zip --clobber
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
