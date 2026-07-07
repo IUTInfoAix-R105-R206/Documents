@@ -29,9 +29,13 @@ const SQL_AFTER_TABLE = ["JOIN", "INNER", "LEFT", "RIGHT", "FULL", "OUTER", "CRO
 // opérateurs, mais PAS les démarreurs de clause (SELECT/FROM/WHERE/GROUP...).
 const SQL_EXPR_KW = ["DISTINCT", "AS", "AND", "OR", "NOT", "IN", "EXISTS", "IS", "NULL",
   "LIKE", "BETWEEN", "CASE", "WHEN", "THEN", "ELSE", "END"];
-// Après une COLONNE dans une condition (WHERE/ON/HAVING) : comparateurs + prédicats.
+// Dans une condition (WHERE/ON/HAVING) : après un opérande (colonne ou agrégat) ->
+// comparateurs + prédicats ; après une valeur -> connecteurs logiques.
 const SQL_COMPARATORS = ["=", "<>", "<", ">", "<=", ">="];
 const SQL_PREDICATE_KW = ["IN", "LIKE", "BETWEEN", "IS", "NOT"];
+const SQL_CONNECTORS = ["AND", "OR"];
+// Expression se terminant par un appel de fonction FONC(...) (agrégat ou scalaire).
+const SQL_FUNC_END = /\b(COUNT|SUM|AVG|MIN|MAX|ROUND|COALESCE|LENGTH|SUBSTR|UPPER|LOWER)\s*\([^()]*\)$/i;
 // Opérateurs relationnels seulement (proposés en début d'expression). Les connecteurs
 // ET/OU/NON ne sont PAS complétés : ils ne peuvent pas ouvrir une condition (on commence
 // par un attribut) et sont assez courts pour être tapés à la main.
@@ -130,19 +134,34 @@ function sqlCandidates(textBefore, start, qualifier, schema, fullText) {
     if (SQL_TABLE_EXPECTING.includes(pt)) return upTables(schema);
     return SQL_AFTER_TABLE.map((x) => ({ label: x, kind: "kw" }));
   }
-  // Après une colonne dans une condition -> comparateurs + prédicats (IN, LIKE, IS...).
-  if ((ctx === "WHERE" || ctx === "ON" || ctx === "HAVING")
-      && isInScopeColumn(prevToken(textBefore.slice(0, start)), src, schema)) {
-    return [
-      ...SQL_COMPARATORS.map((x) => ({ label: x, kind: "op" })),
-      ...SQL_PREDICATE_KW.map((x) => ({ label: x, kind: "kw" })),
-    ];
+  const scopedCols = () => upCols(inScopeColumns(src, schema) || schema.allColumns);
+  const beforeCur = textBefore.slice(0, start);
+  const pt = prevToken(beforeCur);
+
+  // Conditions (WHERE / ON / HAVING).
+  if (ctx === "WHERE" || ctx === "ON" || ctx === "HAVING") {
+    // Après un opérande (colonne ou fin d'agrégat/fonction) -> comparateur / prédicat.
+    if (isInScopeColumn(pt, src, schema) || SQL_FUNC_END.test(beforeCur.replace(/\s+$/, ""))) {
+      return [...SQL_COMPARATORS.map((x) => ({ label: x, kind: "op" })),
+              ...SQL_PREDICATE_KW.map((x) => ({ label: x, kind: "kw" }))];
+    }
+    // Après une valeur (chaîne, nombre, NULL) -> connecteurs logiques.
+    if (pt === "'" || pt === "NULL" || /^[0-9]/.test(pt)) {
+      return SQL_CONNECTORS.map((x) => ({ label: x, kind: "kw" }));
+    }
+    // Sinon (début, après opérateur/AND/OR...) -> opérande : colonnes + fonctions.
+    return [...scopedCols(), ...SQL_FUNCTIONS.map((x) => ({ label: x, kind: "kw" }))];
   }
-  // Position d'expression (SELECT, WHERE, GROUP BY, ON...) : colonnes (restreintes aux
-  // tables du FROM) + fonctions + mots-clés d'expression. Pas de tables ni de clause.
-  const cols = upCols(inScopeColumns(src, schema) || schema.allColumns);
+
+  // GROUP BY / ORDER BY : colonnes + fonctions + ASC/DESC (pas DISTINCT/AS/connecteurs).
+  if (ctx === "BY") {
+    const kw = [...SQL_FUNCTIONS, "ASC", "DESC"].map((x) => ({ label: x, kind: "kw" }));
+    return [...scopedCols(), ...kw];
+  }
+
+  // SELECT et autres positions d'expression : colonnes + fonctions + mots-clés d'expression.
   const kw = [...SQL_FUNCTIONS, ...SQL_EXPR_KW].map((x) => ({ label: x, kind: "kw" }));
-  return [...cols, ...kw];
+  return [...scopedCols(), ...kw];
 }
 
 function algebraCandidates(textBefore, start, schema) {

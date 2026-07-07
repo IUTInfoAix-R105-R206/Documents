@@ -164,6 +164,21 @@ check("WHERE colonne -> comparateurs + IN/LIKE/IS, pas de colonne ni DISTINCT",
 r = suggest("sql", "SELECT * FROM Voyage WHERE ", SCHEMA, true);
 check("WHERE (début) -> colonnes, pas de comparateur",
   labels(r).includes("VILLEARR") && !labels(r).includes("="));
+// ON et HAVING : même logique que WHERE.
+r = suggest("sql", "SELECT * FROM Voyage v JOIN Reservation r ON r.idV ", SCHEMA, true);
+check("ON colonne -> comparateurs", labels(r).includes("=") && labels(r).includes("IN"));
+// HAVING après un agrégat COUNT(*) -> comparateurs (jeton précédent ')').
+r = suggest("sql", "SELECT idV FROM Voyage GROUP BY idV HAVING COUNT(*) ", SCHEMA, true);
+check("HAVING COUNT(*) -> comparateurs", labels(r).includes("=") && labels(r).includes(">"));
+// Après une valeur -> connecteurs AND/OR (pas de colonnes ni comparateurs).
+r = suggest("sql", "SELECT * FROM Voyage WHERE villeArr = 'NICE' ", SCHEMA, true);
+check("après valeur -> AND/OR seulement", labels(r).includes("AND") && labels(r).includes("OR")
+  && !labels(r).includes("=") && !labels(r).includes("IDV"));
+// GROUP BY / ORDER BY : colonnes + fonctions (+ ASC/DESC), pas DISTINCT/AS.
+r = suggest("sql", "SELECT * FROM Voyage GROUP BY ", SCHEMA, true);
+check("GROUP BY -> colonnes, pas de DISTINCT", labels(r).includes("VILLEARR") && !labels(r).includes("DISTINCT"));
+r = suggest("sql", "SELECT * FROM Voyage ORDER BY ", SCHEMA, true);
+check("ORDER BY -> colonnes + ASC/DESC", labels(r).includes("VILLEARR") && labels(r).includes("ASC") && labels(r).includes("DESC"));
 
 console.log(`${pass}/${pass + fail} OK - logique d'autocomplétion contextuelle`);
 process.exit(fail === 0 ? 0 : 1);
