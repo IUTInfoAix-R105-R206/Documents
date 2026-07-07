@@ -138,5 +138,14 @@ check("FROM Client, Voyage -> colonnes des deux, pas de Reservation",
 r = suggest("sql", "SELECT ", SCHEMA, true);
 check("SELECT sans FROM -> repli toutes colonnes", labels(r).includes("NOM") && labels(r).includes("DATEDEP"));
 
+// ── Clause FROM : après FROM/virgule -> tables seules ; après une table -> jointures ──
+r = suggest("sql", "SELECT * FROM Voyage, ", SCHEMA, true);
+check("FROM Voyage, -> tables seules (aucun mot-clé)", r.items.length > 0 && r.items.every((i) => i.kind === "table"));
+r = suggest("sql", "SELECT * FROM ", SCHEMA, true);
+check("FROM (vide) -> tables seules", r.items.length > 0 && r.items.every((i) => i.kind === "table"));
+r = suggest("sql", "SELECT * FROM Voyage ", SCHEMA, true);
+check("FROM Voyage (après table) -> JOIN/WHERE, pas SELECT",
+  labels(r).includes("JOIN") && labels(r).includes("WHERE") && !labels(r).includes("SELECT"));
+
 console.log(`${pass}/${pass + fail} OK - logique d'autocomplétion contextuelle`);
 process.exit(fail === 0 ? 0 : 1);

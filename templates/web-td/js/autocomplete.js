@@ -19,6 +19,12 @@ const SQL_KEYWORDS = [
 ];
 const SQL_FUNCTIONS = ["COUNT", "SUM", "AVG", "MIN", "MAX", "ROUND", "COALESCE",
   "UPPER", "LOWER", "LENGTH", "SUBSTR"];
+// Dans la clause FROM : après FROM/JOIN/virgule on attend une TABLE ; après un nom de
+// table on propose les mots-clés de jointure / la clause suivante (pas SELECT, WHERE placé
+// ici pour enchaîner). Évite de noyer la liste des tables sous tous les mots-clés.
+const SQL_TABLE_EXPECTING = ["FROM", "JOIN", ","];
+const SQL_AFTER_TABLE = ["JOIN", "INNER", "LEFT", "RIGHT", "FULL", "OUTER", "CROSS",
+  "NATURAL", "ON", "WHERE", "GROUP", "ORDER", "HAVING"];
 // Opérateurs relationnels seulement (proposés en début d'expression). Les connecteurs
 // ET/OU/NON ne sont PAS complétés : ils ne peuvent pas ouvrir une condition (on commence
 // par un attribut) et sont assez courts pour être tapés à la main.
@@ -84,6 +90,13 @@ function lastClauseKeyword(text) {
   return last;
 }
 
+// Dernier jeton avant le mot en cours : identifiant (MAJ) ou ponctuation (« , » « ( »…).
+function prevToken(textBeforeWord) {
+  const t = textBeforeWord.replace(/\s+$/, "");
+  const wm = /[A-Za-z_][A-Za-z0-9_]*$/.exec(t);
+  return wm ? wm[0].toUpperCase() : t.slice(-1);
+}
+
 // Relations et attributs proposés en MAJUSCULES (SQLite et le compilateur d'algèbre
 // sont insensibles à la casse) ; les mots-clés/opérateurs sont déjà en majuscules.
 const upTables = (schema) => (schema.tables || []).map((x) => ({ label: x.toUpperCase(), kind: "table" }));
@@ -99,7 +112,12 @@ function sqlCandidates(textBefore, start, qualifier, schema, fullText) {
     return upCols(list);
   }
   const ctx = lastClauseKeyword(textBefore.slice(0, start));
-  if (ctx === "FROM" || ctx === "JOIN") return [...tables, ...kw];
+  if (ctx === "FROM" || ctx === "JOIN") {
+    const pt = prevToken(textBefore.slice(0, start));
+    // Après FROM/JOIN/virgule -> une table ; après un nom de table -> mots-clés de jointure.
+    if (SQL_TABLE_EXPECTING.includes(pt)) return tables;
+    return SQL_AFTER_TABLE.map((x) => ({ label: x, kind: "kw" }));
+  }
   // Colonnes non qualifiées : restreintes aux tables du FROM/JOIN si connu, sinon toutes.
   const cols = upCols(inScopeColumns(src, schema) || schema.allColumns);
   return [...cols, ...tables, ...kw];
