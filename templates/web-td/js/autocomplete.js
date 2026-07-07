@@ -34,8 +34,7 @@ const SQL_EXPR_KW = ["DISTINCT", "AS", "AND", "OR", "NOT", "IN", "EXISTS", "IS",
 const SQL_COMPARATORS = ["=", "<>", "<", ">", "<=", ">="];
 const SQL_PREDICATE_KW = ["IN", "LIKE", "BETWEEN", "IS", "NOT"];
 const SQL_CONNECTORS = ["AND", "OR"];
-// Expression se terminant par un appel de fonction FONC(...) (agrégat ou scalaire).
-const SQL_FUNC_END = /\b(COUNT|SUM|AVG|MIN|MAX|ROUND|COALESCE|LENGTH|SUBSTR|UPPER|LOWER)\s*\([^()]*\)$/i;
+const SQL_FUNCS_SET = new Set(SQL_FUNCTIONS);
 // Opérateurs relationnels seulement (proposés en début d'expression). Les connecteurs
 // ET/OU/NON ne sont PAS complétés : ils ne peuvent pas ouvrir une condition (on commence
 // par un attribut) et sont assez courts pour être tapés à la main.
@@ -46,11 +45,11 @@ const ALGEBRA_OPERATORS = [
 
 const IDENT = "[A-Za-z_\\u00C0-\\u024F][A-Za-z0-9_\\u00C0-\\u024F]*";
 const TRAILING_WORD = new RegExp(IDENT + "$");
-// FROM/JOIN font passer en « contexte tables » ; toute autre clause plus récente
-// repasse en « contexte colonnes » (la virgule n'est pas un mot-clé, donc « FROM a, » reste tables).
+// Démarreurs de CLAUSE uniquement (pas les opérateurs AND/OR/IN/LIKE...) : lastClauseKeyword
+// doit donner la clause qui gouverne le curseur (WHERE...), pas le dernier opérateur tapé.
 const CLAUSE_KW = new RegExp(
-  "\\b(SELECT|FROM|WHERE|JOIN|ON|GROUP|ORDER|HAVING|BY|AND|OR|NOT|IN|LIKE|BETWEEN|" +
-  "SET|VALUES|UNION|EXCEPT|INTERSECT|AS|WITH|USING|CASE|WHEN|THEN|ELSE)\\b", "gi");
+  "\\b(SELECT|FROM|WHERE|JOIN|ON|GROUP|ORDER|HAVING|BY|SET|VALUES|UNION|EXCEPT|INTERSECT|WITH)\\b",
+  "gi");
 
 // ── Logique de suggestion (pure) ─────────────────────────────────────────────
 
@@ -101,6 +100,52 @@ function isInScopeColumn(name, sql, schema) {
   return scoped.some((c) => c.toLowerCase() === nl);
 }
 
+// Le texte se termine-t-il par un appel de fonction FONC(...) (agrégat/scalaire) ?
+// Distingue « COUNT(*) » (opérande) de « IN (...) » / « (a OR b) » (prédicat/groupe fermé).
+function closesFunctionCall(text) {
+  const t = text.replace(/\s+$/, "");
+  if (!t.endsWith(")")) return false;
+  let depth = 0;
+  for (let i = t.length - 1; i >= 0; i--) {
+    if (t[i] === ")") depth++;
+    else if (t[i] === "(") {
+      depth--;
+      if (depth === 0) {
+        const fm = /[A-Za-z_][A-Za-z0-9_]*$/.exec(t.slice(0, i).replace(/\s+$/, ""));
+        return fm ? SQL_FUNCS_SET.has(fm[0].toUpperCase()) : false;
+      }
+    }
+  }
+  return false;
+}
+
+// Texte des niveaux de requête ENGLOBANT le curseur : retire les (...) « sœurs »
+// (équilibrées, ne contenant pas le curseur) pour ne pas mélanger les portées d'un
+// sous-requête sœur avec la requête courante. Conserve les niveaux englobants.
+function scopeText(text, cursor) {
+  let out = "", i = 0;
+  while (i < text.length) {
+    if (text[i] === "(") {
+      let depth = 0, j = i;
+      for (; j < text.length; j++) {
+        if (text[j] === "(") depth++;
+        else if (text[j] === ")") { depth--; if (depth === 0) break; }
+      }
+      const close = j < text.length ? j : text.length; // ')' ou fin si non équilibré
+      if (cursor > i && cursor <= close) {
+        out += " " + scopeText(text.slice(i + 1, close), cursor - (i + 1)); // curseur dedans
+      } else {
+        out += " "; // groupe sœur -> retiré
+      }
+      i = close + 1;
+    } else {
+      out += text[i];
+      i++;
+    }
+  }
+  return out;
+}
+
 function lastClauseKeyword(text) {
   let last = null, m;
   CLAUSE_KW.lastIndex = 0;
@@ -122,31 +167,35 @@ const upCols = (list) => (list || []).map((x) => ({ label: x.toUpperCase(), kind
 
 function sqlCandidates(textBefore, start, qualifier, schema, fullText) {
   const src = fullText || textBefore; // le FROM peut être APRÈS le curseur (liste du SELECT)
+  // Portée : uniquement les niveaux de requête englobant le curseur (pas les sous-requêtes sœurs).
+  const scope = scopeText(src, textBefore.length);
   if (qualifier) {
-    const table = resolveTable(qualifier, src, schema);
+    const table = resolveTable(qualifier, scope, schema);
     const list = table && schema.columns[table] ? schema.columns[table] : (schema.allColumns || []);
     return upCols(list);
   }
-  const ctx = lastClauseKeyword(textBefore.slice(0, start));
+  const beforeCur = textBefore.slice(0, start);
+  // Contexte de clause déterminé au niveau ENGLOBANT (sous-requêtes sœurs retirées), sinon
+  // un FROM de sous-requête fausserait le contexte de la requête courante.
+  const ctx = lastClauseKeyword(scopeText(beforeCur, beforeCur.length));
+  const pt = prevToken(beforeCur); // brut : voit le ')' d'une sous-requête / d'une fonction
   if (ctx === "FROM" || ctx === "JOIN") {
-    const pt = prevToken(textBefore.slice(0, start));
     // Après FROM/JOIN/virgule -> une table ; après un nom de table -> mots-clés de jointure.
     if (SQL_TABLE_EXPECTING.includes(pt)) return upTables(schema);
     return SQL_AFTER_TABLE.map((x) => ({ label: x, kind: "kw" }));
   }
-  const scopedCols = () => upCols(inScopeColumns(src, schema) || schema.allColumns);
-  const beforeCur = textBefore.slice(0, start);
-  const pt = prevToken(beforeCur);
+  const scopedCols = () => upCols(inScopeColumns(scope, schema) || schema.allColumns);
 
   // Conditions (WHERE / ON / HAVING).
   if (ctx === "WHERE" || ctx === "ON" || ctx === "HAVING") {
-    // Après un opérande (colonne ou fin d'agrégat/fonction) -> comparateur / prédicat.
-    if (isInScopeColumn(pt, src, schema) || SQL_FUNC_END.test(beforeCur.replace(/\s+$/, ""))) {
+    // Après un opérande (colonne ou fin d'appel de fonction) -> comparateur / prédicat.
+    if (isInScopeColumn(pt, scope, schema) || closesFunctionCall(beforeCur)) {
       return [...SQL_COMPARATORS.map((x) => ({ label: x, kind: "op" })),
               ...SQL_PREDICATE_KW.map((x) => ({ label: x, kind: "kw" }))];
     }
-    // Après une valeur (chaîne, nombre, NULL) -> connecteurs logiques.
-    if (pt === "'" || pt === "NULL" || /^[0-9]/.test(pt)) {
+    // Après une valeur, ou une parenthèse fermante non-fonction (fin de IN(...) / sous-requête
+    // / sous-condition) -> connecteurs logiques AND/OR.
+    if (pt === "'" || pt === "NULL" || /^[0-9]/.test(pt) || pt === ")") {
       return SQL_CONNECTORS.map((x) => ({ label: x, kind: "kw" }));
     }
     // Sinon (début, après opérateur/AND/OR...) -> opérande : colonnes + fonctions.

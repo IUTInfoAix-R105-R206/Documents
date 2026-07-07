@@ -180,5 +180,21 @@ check("GROUP BY -> colonnes, pas de DISTINCT", labels(r).includes("VILLEARR") &&
 r = suggest("sql", "SELECT * FROM Voyage ORDER BY ", SCHEMA, true);
 check("ORDER BY -> colonnes + ASC/DESC", labels(r).includes("VILLEARR") && labels(r).includes("ASC") && labels(r).includes("DESC"));
 
+// ── Limite 1 : le ')' d'un IN(...) / sous-requête -> AND/OR (pas comparateur) ──
+r = suggest("sql", "SELECT * FROM Voyage WHERE idV IN (SELECT numCl FROM Client) ", SCHEMA, true);
+check("après IN(sous-requête) -> AND/OR, pas de comparateur",
+  labels(r).includes("AND") && labels(r).includes("OR") && !labels(r).includes("="));
+// mais le ')' d'un agrégat reste un opérande -> comparateur
+r = suggest("sql", "SELECT idV FROM Voyage GROUP BY idV HAVING SUM(idV) ", SCHEMA, true);
+check("après agrégat SUM(...) -> comparateur", labels(r).includes("=") && !labels(r).includes("AND"));
+
+// ── Limite 2 : la portée d'une sous-requête sœur ne fuit pas dans la requête englobante ──
+r = suggest("sql", "SELECT * FROM Voyage WHERE idV IN (SELECT numCl FROM Client) AND ", SCHEMA, true);
+check("après une sous-requête sœur -> colonnes de Voyage seulement (pas Client)",
+  labels(r).includes("VILLEARR") && !labels(r).includes("NOM"));
+// dans une sous-requête, sa table est en portée (+ englobante pour corrélation)
+r = suggest("sql", "SELECT * FROM Voyage WHERE idV IN (SELECT numCl FROM Client WHERE n", SCHEMA, true);
+check("dans la sous-requête -> colonnes de Client visibles", labels(r).includes("NOM"));
+
 console.log(`${pass}/${pass + fail} OK - logique d'autocomplétion contextuelle`);
 process.exit(fail === 0 ? 0 : 1);
