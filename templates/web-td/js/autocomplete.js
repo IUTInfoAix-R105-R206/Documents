@@ -25,6 +25,10 @@ const SQL_FUNCTIONS = ["COUNT", "SUM", "AVG", "MIN", "MAX", "ROUND", "COALESCE",
 const SQL_TABLE_EXPECTING = ["FROM", "JOIN", ","];
 const SQL_AFTER_TABLE = ["JOIN", "INNER", "LEFT", "RIGHT", "FULL", "OUTER", "CROSS",
   "NATURAL", "ON", "WHERE", "GROUP", "ORDER", "HAVING"];
+// Mots-clés utiles en POSITION D'EXPRESSION (SELECT, WHERE...) : modificateurs et
+// opérateurs, mais PAS les démarreurs de clause (SELECT/FROM/WHERE/GROUP...).
+const SQL_EXPR_KW = ["DISTINCT", "AS", "AND", "OR", "NOT", "IN", "EXISTS", "IS", "NULL",
+  "LIKE", "BETWEEN", "CASE", "WHEN", "THEN", "ELSE", "END"];
 // Opérateurs relationnels seulement (proposés en début d'expression). Les connecteurs
 // ET/OU/NON ne sont PAS complétés : ils ne peuvent pas ouvrir une condition (on commence
 // par un attribut) et sont assez courts pour être tapés à la main.
@@ -119,8 +123,8 @@ function sqlCandidates(textBefore, start, qualifier, schema, fullText) {
   // Position d'expression (SELECT, WHERE, GROUP BY, ON...) : colonnes (restreintes aux
   // tables du FROM) + fonctions. Pas de tables ni de mots-clés de clause (bruit).
   const cols = upCols(inScopeColumns(src, schema) || schema.allColumns);
-  const fns = SQL_FUNCTIONS.map((x) => ({ label: x, kind: "kw" }));
-  return [...cols, ...fns];
+  const kw = [...SQL_FUNCTIONS, ...SQL_EXPR_KW].map((x) => ({ label: x, kind: "kw" }));
+  return [...cols, ...kw];
 }
 
 function algebraCandidates(textBefore, start, schema) {
