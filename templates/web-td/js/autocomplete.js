@@ -104,8 +104,6 @@ const upCols = (list) => (list || []).map((x) => ({ label: x.toUpperCase(), kind
 
 function sqlCandidates(textBefore, start, qualifier, schema, fullText) {
   const src = fullText || textBefore; // le FROM peut être APRÈS le curseur (liste du SELECT)
-  const tables = upTables(schema);
-  const kw = [...SQL_KEYWORDS, ...SQL_FUNCTIONS].map((x) => ({ label: x, kind: "kw" }));
   if (qualifier) {
     const table = resolveTable(qualifier, src, schema);
     const list = table && schema.columns[table] ? schema.columns[table] : (schema.allColumns || []);
@@ -115,12 +113,14 @@ function sqlCandidates(textBefore, start, qualifier, schema, fullText) {
   if (ctx === "FROM" || ctx === "JOIN") {
     const pt = prevToken(textBefore.slice(0, start));
     // Après FROM/JOIN/virgule -> une table ; après un nom de table -> mots-clés de jointure.
-    if (SQL_TABLE_EXPECTING.includes(pt)) return tables;
+    if (SQL_TABLE_EXPECTING.includes(pt)) return upTables(schema);
     return SQL_AFTER_TABLE.map((x) => ({ label: x, kind: "kw" }));
   }
-  // Colonnes non qualifiées : restreintes aux tables du FROM/JOIN si connu, sinon toutes.
+  // Position d'expression (SELECT, WHERE, GROUP BY, ON...) : colonnes (restreintes aux
+  // tables du FROM) + fonctions. Pas de tables ni de mots-clés de clause (bruit).
   const cols = upCols(inScopeColumns(src, schema) || schema.allColumns);
-  return [...cols, ...tables, ...kw];
+  const fns = SQL_FUNCTIONS.map((x) => ({ label: x, kind: "kw" }));
+  return [...cols, ...fns];
 }
 
 function algebraCandidates(textBefore, start, schema) {

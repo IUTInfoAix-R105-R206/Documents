@@ -147,5 +147,13 @@ r = suggest("sql", "SELECT * FROM Voyage ", SCHEMA, true);
 check("FROM Voyage (après table) -> JOIN/WHERE, pas SELECT",
   labels(r).includes("JOIN") && labels(r).includes("WHERE") && !labels(r).includes("SELECT"));
 
+// ── Position d'expression (SELECT, WHERE...) : colonnes + fonctions, pas de table ni clause ──
+r = suggest("sql", "SELECT DISTINCT ", SCHEMA, true);
+check("SELECT list -> pas de table ni mot-clé de clause, mais des fonctions",
+  !r.items.some((i) => i.kind === "table") && !labels(r).includes("FROM") && !labels(r).includes("WHERE") && labels(r).includes("COUNT"));
+r = suggest("sql", "SELECT ", SCHEMA, true, "SELECT  FROM Voyage");
+check("SELECT list scopé Voyage -> colonnes de Voyage, pas de Client ni de table",
+  labels(r).includes("VILLEARR") && !labels(r).includes("NOM") && !r.items.some((i) => i.kind === "table"));
+
 console.log(`${pass}/${pass + fail} OK - logique d'autocomplétion contextuelle`);
 process.exit(fail === 0 ? 0 : 1);
